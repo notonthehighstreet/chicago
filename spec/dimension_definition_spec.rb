@@ -19,9 +19,12 @@ describe Chicago::DimensionDefinition do
     dd.define_column :type => :varchar, :name => :username
   end
 
-  it "should have #varchar which defines a column" do
+  it "should support arbitrary column definitions as methods" do
     ColumnDefinition.should_receive(:new).with(@column_attributes)
     DimensionDefinition.new(:user).varchar :username
+
+    ColumnDefinition.should_receive(:new).with(:type => :money, :name => :fee)
+    DimensionDefinition.new(:user).money :fee
   end
 
   it "should return a list of defined columns" do

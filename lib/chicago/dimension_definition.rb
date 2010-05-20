@@ -23,8 +23,9 @@ module Chicago
       @column_definitions.clone
     end
 
-    def varchar(name)
-      define_column(:type => :varchar, :name => name)
+    def method_missing(type, *args)
+      name, rest = args
+      define_column(:type => type, :name => name)
     end
   end
 end
