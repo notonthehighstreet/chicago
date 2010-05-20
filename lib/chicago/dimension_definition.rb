@@ -23,6 +23,7 @@ module Chicago
       @column_definitions.clone
     end
 
+    # Defines a column with the type of the method name, named +name+.
     def method_missing(type, *args)
       name, rest = args
       define_column(:type => type, :name => name)
