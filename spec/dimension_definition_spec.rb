@@ -13,6 +13,10 @@ describe Chicago::DimensionDefinition do
     DimensionDefinition.new('user').name.should == :user
   end
 
+  it "should have a table name" do
+    DimensionDefinition.new(:user).table_name.should == :user_dimension
+  end
+
   it "should create a column definition" do
     ColumnDefinition.should_receive(:new).with(@column_attributes)
     dd = DimensionDefinition.new('user')

@@ -3,8 +3,13 @@ module Chicago
     # Returns the name of this dimension
     attr_reader :name
 
+    # Returns or sets the database table name for this dimension.
+    # By default, <name>_dimension.
+    attr_accessor :table_name
+    
     # Creates a new dimension, named +name+
     def initialize(name)
+      @table_name = "#{name}_dimension".to_sym
       @name = name.to_sym
       @column_definitions = []
     end
