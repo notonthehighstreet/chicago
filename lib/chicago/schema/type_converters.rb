@@ -15,11 +15,9 @@ module Chicago
         #
         # Currently onyl supports MySql-specific types
         def self.for_db(db)
-          case db.database_type
-          when :mysql then MysqlTypeConverter.new
-          else
-            self.new
-          end
+          return MysqlTypeConverter.new if db.database_type == :mysql
+
+          self.new
         end
 
         # Returns a db type given a column definition
@@ -66,19 +64,21 @@ module Chicago
           return :integer unless min && max
 
           case
-          when (min >= -128 && max <= 127) || (min >= 0 && max <= 255)
-            :tinyint
-          when (min >= -32_768 && max <= 32_767) || (min >= 0 && max <= 65_535)
-            :smallint
-          when (min >= -8_388_608 && max <= 8_388_607) || (min >= 0 && max <= 16_777_215)
-            :mediumint
-          when (min >= -2_147_483_648 && max <= 2_147_483_647) || (min >= 0 && max <= 4_294_967_295)
-            :integer
-          when (min >= -9_223_372_036_854_775_808 && max <= 9_223_372_036_854_775_807) || (min >= 0 && max <= 18_446_744_073_709_551_615)
-            :bigint
+          when in_numeric_range?(min, max, 256)                        then :tinyint
+          when in_numeric_range?(min, max, 65_536)                     then :smallint
+          when in_numeric_range?(min, max, 16_777_216)                 then :mediumint
+          when in_numeric_range?(min, max, 4_294_967_296)              then :integer
+          when in_numeric_range?(min, max, 18_446_744_073_709_551_616) then :bigint
           else
             raise ArgumentError.new("#{min} is too small or #{max} is too large for a single column")
           end
+        end
+
+        private
+
+        def in_numeric_range?(min, max, unsigned_limit)
+          signed_limit = unsigned_limit / 2
+          (min >= -signed_limit && max <= signed_limit - 1)  ||  (min >= 0 && max <= unsigned_limit - 1)
         end
       end
     end
