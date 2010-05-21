@@ -22,14 +22,34 @@ module Chicago
 
     class AlterDbTableCommand < DbTableCommand
       def execute
+        changes_necessary = false
         generator = Sequel::Schema::AlterTableGenerator.new(@db)
-        new_columns = @columns.reject {|c| @db[@table_name].columns.include?(c.name) }
+        schema = @db.schema(@table_name)
+        columns = schema.map {|c| c.first }
+
+        current_columns, new_columns = @columns.partition {|c| columns.include?(c.name) }
+
         unless new_columns.empty?
           new_columns.each do |column|
-            generator.add_column(column.name, column.type)
+            db_column_opts = {}
+            db_column_opts[:unsigned] = true if column.min && column.min >= 0
+
+            generator.add_column(column.name, @type_converter.db_type(column), db_column_opts)
           end
-          @db.alter_table(@table_name, generator)
+          changes_necessary = true
         end
+
+        current_columns.each do |column|
+          attrs = schema.find {|entry| entry.first == column.name }.last
+          new_type     = @type_converter.db_type(column)
+          current_type = @type_converter.parse_type_string(attrs[:db_type])
+          if new_type != current_type
+            generator.set_column_type(column.name, new_type)
+            changes_necessary = true
+          end
+        end
+        
+        @db.alter_table(@table_name, generator) if changes_necessary
       end
     end
 

@@ -37,4 +37,12 @@ describe Chicago::Schema::TypeConverters::MysqlTypeConverter do
 
     lambda { @tc.db_type(column) }.should raise_error(ArgumentError)
   end
+
+  it "should parse a db type string returned from a Sequel #schema call" do
+    @tc.parse_type_string("smallint(6)").should == :smallint
+    @tc.parse_type_string("int(11)").should == :integer
+    @tc.parse_type_string("bigint(11)").should == :bigint
+    @tc.parse_type_string("tinyint(3)").should == :tinyint
+    @tc.parse_type_string("tinyint(1)").should == :boolean
+  end
 end
