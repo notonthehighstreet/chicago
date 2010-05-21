@@ -42,13 +42,29 @@ module Chicago
             :integer
           end
         end
+
+        def parse_type_string(str)
+        end
       end
 
       # MySql-specific type conversion strategy
       class MysqlTypeConverter < DbTypeConverter
+        # Returns a db type symbol, such as :smallint or :varchar from
+        # a type string as produced by a Sequel #schema call.
+        def parse_type_string(str)
+          case str
+          when /^tinyint\(1\)/ then :boolean
+          when /^tinyint/      then :tinyint
+          when /^smallint/     then :smallint
+          when /^mediumint/    then :mediumint
+          when /^int/          then :integer
+          when /^bigint/       then :bigint
+          end
+        end
+
         def integer_type(min, max)
           return :integer unless min && max
-          
+
           case
           when (min >= -128 && max <= 127) || (min >= 0 && max <= 255)
             :tinyint
