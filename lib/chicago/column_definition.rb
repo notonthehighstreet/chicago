@@ -1,7 +1,9 @@
 module Chicago
+  # An error in the definition of dimensions or facts.
   class DefinitionError < RuntimeError
   end
 
+  # A column in a dimension or fact record.
   class ColumnDefinition
     # Returns the name of this column
     attr_reader :name
@@ -16,6 +18,8 @@ module Chicago
     attr_reader :max
 
     # Creates a new column definition.
+    #
+    # Requires both a :type and a :name option
     def initialize(opts)
       normalize_opts(opts)
       check_opts(opts)
@@ -27,7 +31,7 @@ module Chicago
       @opts        = opts
     end
 
-    # Column definitions are equal if their attributes are equal.
+    # Returns true if both definition's attributes are equal.
     def ==(other)
       other.kind_of?(self.class) && @opts == other.instance_variable_get(:@opts)
     end
