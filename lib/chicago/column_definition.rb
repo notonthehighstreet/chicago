@@ -17,12 +17,13 @@ module Chicago
 
     # Creates a new column definition.
     def initialize(opts)
+      normalize_opts(opts)
+
       @name        = opts[:name]
       @column_type = opts[:type]
       @min         = opts[:min]
       @max         = opts[:max]
       @opts        = opts
-      check_opts
     end
 
     # Column definitions are equal if their attributes are equal.
@@ -36,9 +37,15 @@ module Chicago
 
     private
 
-    def check_opts
-      raise DefinitionError.new("A column must have a name.") unless @name
-      raise DefinitionError.new("A column must have a type.") unless @column_type
+    def normalize_opts(opts)
+      raise DefinitionError.new("A column must have a name.") unless opts[:name]
+      raise DefinitionError.new("A column must have a type.") unless opts[:type]
+
+      if opts[:range]
+        opts[:min] = opts[:range].min
+        opts[:max] = opts[:range].max
+        opts.delete(:range)
+      end
     end
   end
 end

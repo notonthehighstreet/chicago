@@ -31,4 +31,10 @@ describe Chicago::ColumnDefinition do
   it "should have a #max method" do
     ColumnDefinition.new(:name => :username, :type => :varchar, :max => 10 ).max.should == 10
   end
+
+  it "should set min and max from an enumerable object's min and max" do
+    column = ColumnDefinition.new(:name => :username, :type => :varchar, :range => 1..5 )
+    column.min.should == 1
+    column.max.should == 5
+  end
 end
