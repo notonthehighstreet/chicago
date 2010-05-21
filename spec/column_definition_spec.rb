@@ -23,4 +23,12 @@ describe Chicago::ColumnDefinition do
     d2 = ColumnDefinition.new(:name => :username, :type => :integer )
     d1.should_not == d2
   end
+
+  it "should have a #min method" do
+    ColumnDefinition.new(:name => :username, :type => :varchar, :min => 0 ).min.should == 0
+  end
+
+  it "should have a #max method" do
+    ColumnDefinition.new(:name => :username, :type => :varchar, :max => 10 ).max.should == 10
+  end
 end
