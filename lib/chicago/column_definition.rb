@@ -3,29 +3,26 @@ module Chicago
   end
 
   class ColumnDefinition
-    # Creates a new column definition.
-    def initialize(opts)
-      @opts = opts
-      check_opts
-    end
-
     # Returns the name of this column
-    def name
-      @opts[:name]
-    end
+    attr_reader :name
 
     # Returns the type of this column.
-    def column_type
-      @opts[:type]
-    end
+    attr_reader :column_type
 
     # Returns the minimum value of this column, or nil.
-    def min
-      @opts[:min]
-    end
+    attr_reader :min
 
-    def max
-      @opts[:max]
+    # Returns the minimum value of this column, or nil.
+    attr_reader :max
+
+    # Creates a new column definition.
+    def initialize(opts)
+      @name        = opts[:name]
+      @column_type = opts[:type]
+      @min         = opts[:min]
+      @max         = opts[:max]
+      @opts        = opts
+      check_opts
     end
 
     # Column definitions are equal if their attributes are equal.
@@ -40,9 +37,8 @@ module Chicago
     private
 
     def check_opts
-      [:name, :type].each do |a| 
-        raise DefinitionError.new("A column must have a #{a}.") unless @opts[a]
-      end
+      raise DefinitionError.new("A column must have a name.") unless @name
+      raise DefinitionError.new("A column must have a type.") unless @column_type
     end
   end
 end
