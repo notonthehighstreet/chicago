@@ -16,6 +16,7 @@ module Chicago
         @db = db
         @table_name = table_name
         @columns = columns
+        @type_converter = TypeConverters::DbTypeConverter.for_db(@db)
       end
     end
 
@@ -36,7 +37,10 @@ module Chicago
       def execute
         generator = Sequel::Schema::Generator.new(@db)
         @columns.each do |column|
-          generator.column(column.name, column.type)
+          db_column_opts = {}
+          db_column_opts[:unsigned] = true if column.min && column.min >= 0
+
+          generator.column(column.name, @type_converter.db_type(column), db_column_opts)
         end
         @db.create_table(@table_name, :generator => generator)      
       end

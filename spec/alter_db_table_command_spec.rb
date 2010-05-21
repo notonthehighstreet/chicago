@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + "/spec_helper"
 describe Chicago::Schema::AlterDbTableCommand do
   before :each do
     TEST_DB.drop_table(:test_table) if TEST_DB.table_exists?(:test_table)
-    TEST_DB.create_table(:test_table) { primary_key :id }
+    TEST_DB.create_table(:test_table) { integer :id }
   end
 
   it "should make no changes if the schema is the same" do
