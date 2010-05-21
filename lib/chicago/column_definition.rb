@@ -18,6 +18,7 @@ module Chicago
     # Creates a new column definition.
     def initialize(opts)
       normalize_opts(opts)
+      check_opts(opts)
 
       @name        = opts[:name]
       @column_type = opts[:type]
@@ -38,14 +39,15 @@ module Chicago
     private
 
     def normalize_opts(opts)
-      raise DefinitionError.new("A column must have a name.") unless opts[:name]
-      raise DefinitionError.new("A column must have a type.") unless opts[:type]
-
       if opts[:range]
         opts[:min] = opts[:range].min
         opts[:max] = opts[:range].max
         opts.delete(:range)
       end
+    end
+
+    def check_opts(opts)
+      raise DefinitionError.new("A column must have a name and a type.") unless opts[:name] && opts[:type]
     end
   end
 end
