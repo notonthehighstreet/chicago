@@ -49,7 +49,14 @@ module Chicago
           end
         end
 
+        # Returns a db type symbol, such as :smallint or :varchar from
+        # a type string as produced by a Sequel #schema call.
         def parse_type_string(str)
+        end
+
+        # Returns true if the database column is unsigned.
+        def parse_type_unsigned(str)
+          str.include?("unsigned")
         end
       end
 
@@ -57,12 +64,9 @@ module Chicago
       class MysqlTypeConverter < DbTypeConverter
         def db_type(column)
           return :enum if column.elements && column.elements.size < 65_536
-
           super
         end
 
-        # Returns a db type symbol, such as :smallint or :varchar from
-        # a type string as produced by a Sequel #schema call.
         def parse_type_string(str)
           case str
           when /^tinyint\(1\)/ then :boolean
