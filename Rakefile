@@ -23,6 +23,10 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
+task :flog do
+  sh 'find lib -name "*.rb" | xargs flog'
+end
+
 load 'lib/tasks/stats.rake'
 
 task :default => :spec
