@@ -65,11 +65,8 @@ module Chicago
         def parse_type_string(str)
           case str
           when /^tinyint\(1\)/ then :boolean
-          when /^tinyint/      then :tinyint
-          when /^smallint/     then :smallint
-          when /^mediumint/    then :mediumint
           when /^int/          then :integer
-          when /^bigint/       then :bigint
+          when /^([^(]+)/      then $1.to_sym
           end
         end
 
