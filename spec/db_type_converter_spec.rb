@@ -44,4 +44,9 @@ describe Chicago::Schema::TypeConverters::DbTypeConverter do
     column = ColumnDefinition.new(:name => :id, :type => :string, :min => 2, :max => 2)
     @tc.db_type(column).should == :char
   end
+
+  it "should return :decimal from #db_type if column type is :money" do
+    column = ColumnDefinition.new(:name => :id, :type => :money)
+    @tc.db_type(column).should == :decimal
+  end
 end

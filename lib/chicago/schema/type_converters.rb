@@ -25,6 +25,7 @@ module Chicago
           case column.column_type
           when :integer then integer_type(column.min, column.max)
           when :string  then string_type(column.min, column.max)
+          when :money   then :decimal
           else
             column.column_type
           end
