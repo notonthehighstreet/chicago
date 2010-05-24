@@ -7,7 +7,7 @@ module Chicago
     class DbTableCommand
       # Returns a DbTableCommand subclass appropriate for modifying or creating tables.
       def self.for_table(db, table_name, columns)
-        subclass = db.table_exists?(table_name) ? AlterDbTableCommand : CreateDbTableCommand
+        subclass = db.table_exists?(table_name) ? AlterTableCommand : CreateTableCommand
         subclass.new(db, table_name, columns)
       end
 
@@ -20,7 +20,7 @@ module Chicago
       end
 
       # Execute the command. Overriden in subclasses.
-      def execute ; end
+      def create_or_modify_table ; end
       
       # Returns the associated Sequel Generator used to create DDL statements. Overriden in subclasses.
       def generator ; end
@@ -35,12 +35,12 @@ module Chicago
     # A command to create a new table.
     #
     # This shouldn't be created directly - use DbTableCommand.for_table
-    class CreateDbTableCommand < DbTableCommand #:nodoc:
+    class CreateTableCommand < DbTableCommand #:nodoc:
       def generator
         @generator ||= Sequel::Schema::Generator.new(@db)
       end
 
-      def execute
+      def create_or_modify_table
         @db.create_table(@table_name, :generator => generator)      
       end
 
@@ -57,12 +57,12 @@ module Chicago
     # A command to alter a prexisting table.
     #
     # This shouldn't be created directly - use DbTableCommand.for_table
-    class AlterDbTableCommand < DbTableCommand #:nodoc:
+    class AlterTableCommand < DbTableCommand #:nodoc:
       def generator
         @generator ||= Sequel::Schema::AlterTableGenerator.new(@db)
       end
 
-      def execute        
+      def create_or_modify_table
         @db.alter_table(@table_name, generator) unless generator.operations.empty?
       end
 
