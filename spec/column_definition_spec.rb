@@ -37,4 +37,20 @@ describe Chicago::ColumnDefinition do
     column.min.should == 1
     column.max.should == 5
   end
+
+  it "should allow null values by default" do
+    ColumnDefinition.new(:name => :username, :type => :varchar).null?().should be_true
+  end
+
+  it "should allow you to enforce non-null values" do
+    ColumnDefinition.new(:name => :username, :type => :varchar, :null => false).null?().should be_false
+  end
+
+  it "can define a set of valid elements" do
+    ColumnDefinition.new(:name => :username, :type => :varchar, :elements => ['A', 'B']).elements.should == ['A', 'B']
+  end
+
+  it "can have a default value" do
+    ColumnDefinition.new(:name => :username, :type => :varchar, :default => 'A').default.should == 'A'
+  end
 end

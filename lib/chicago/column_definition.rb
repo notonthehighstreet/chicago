@@ -5,7 +5,24 @@ module Chicago
 
   # A column in a dimension or fact record.
   class ColumnDefinition
-    # Returns the name of this column
+    # Creates a new column definition.
+    #
+    # Requires both a :type and a :name option
+    def initialize(opts)
+      opts = normalize_opts(opts)
+      check_opts(opts)
+
+      @name        = opts[:name]
+      @column_type = opts[:type]
+      @min         = opts[:min]
+      @max         = opts[:max]
+      @null        = opts[:null]
+      @elements    = opts[:elements]
+      @default     = opts[:default]
+      @opts        = opts
+    end
+
+    # Returns the name of this column.
     attr_reader :name
 
     # Returns the type of this column.
@@ -17,18 +34,29 @@ module Chicago
     # Returns the minimum value of this column, or nil.
     attr_reader :max
 
-    # Creates a new column definition.
-    #
-    # Requires both a :type and a :name option
-    def initialize(opts)
-      normalize_opts(opts)
-      check_opts(opts)
+    # Returns an Array of allowed elements, or nil.
+    attr_reader :elements
 
-      @name        = opts[:name]
-      @column_type = opts[:type]
-      @min         = opts[:min]
-      @max         = opts[:max]
-      @opts        = opts
+    # Returns the default value for this column, or nil.
+    attr_reader :default
+
+    # Returns true if null values are allowed.
+    def null?
+      @null
+    end
+
+    # Returns true if a numeric column is unsigned.
+    def unsigned?
+      @opts[:min] && @opts[:min] >= 0
+    end
+
+    # Returns a hash of column options for a Sequel column
+    def sequel_column_options
+      opts = {}
+      opts[:unsigned] = unsigned? if column_type == :integer
+      opts[:default] = default
+      opts[:null] = null?
+      opts
     end
 
     # Returns true if both definition's attributes are equal.
@@ -43,11 +71,13 @@ module Chicago
     private
 
     def normalize_opts(opts)
+      opts = {:null => true}.merge(opts)
       if opts[:range]
         opts[:min] = opts[:range].min
         opts[:max] = opts[:range].max
         opts.delete(:range)
       end
+      opts
     end
 
     def check_opts(opts)
