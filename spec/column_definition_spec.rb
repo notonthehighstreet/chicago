@@ -38,12 +38,16 @@ describe Chicago::ColumnDefinition do
     column.max.should == 5
   end
 
-  it "should allow null values by default" do
-    ColumnDefinition.new(:name => :username, :type => :string).null?().should be_true
+  it "should forbid null values by default" do
+    definition = ColumnDefinition.new(:name => :username, :type => :string)
+    definition.null?().should be_false
+    definition.sequel_column_options[:null].should be_false
   end
 
-  it "should allow you to enforce non-null values" do
-    ColumnDefinition.new(:name => :username, :type => :string, :null => false).null?().should be_false
+  it "should allow you to accept non-null values" do
+    definition = ColumnDefinition.new(:name => :username, :type => :string, :null => true)
+    definition.null?().should be_true
+    definition.sequel_column_options[:null].should be_true
   end
 
   it "can define a set of valid elements" do

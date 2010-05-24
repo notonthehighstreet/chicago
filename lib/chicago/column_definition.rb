@@ -80,7 +80,7 @@ module Chicago
     private
 
     def normalize_opts(opts)
-      opts = {:null => true}.merge(opts)
+      opts = {:null => false}.merge(opts)
       if opts[:range]
         opts[:min] = opts[:range].min
         opts[:max] = opts[:range].max
