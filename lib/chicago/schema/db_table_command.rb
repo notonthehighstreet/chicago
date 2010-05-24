@@ -64,9 +64,15 @@ module Chicago
 
       def create_or_modify_table
         @db.alter_table(@table_name, generator) unless generator.operations.empty?
+        @db.alter_table(@table_name, null_generator) unless null_generator.operations.empty?
       end
 
       protected
+
+      def null_generator
+        @db.schema(@table_name, :reload => true)
+        @null_generator ||= Sequel::Schema::AlterTableGenerator.new(@db)
+      end
 
       def build_generator
         current_columns, new_columns = @columns.partition {|c| @db[@table_name].columns.include?(c.name) }
@@ -87,7 +93,7 @@ module Chicago
           attrs = @db.schema(@table_name).assoc(column.name).last
 
           change_type    generator, attrs, column
-          change_null    generator, attrs, column         
+          change_null    null_generator, attrs, column         
           change_default generator, attrs, column          
         end
       end
