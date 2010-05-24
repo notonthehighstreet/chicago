@@ -45,4 +45,9 @@ describe Chicago::Schema::TypeConverters::MysqlTypeConverter do
     @tc.parse_type_string("tinyint(3)").should == :tinyint
     @tc.parse_type_string("tinyint(1)").should == :boolean
   end
+
+  it "should return :enum from #db_type if column definition has elements" do
+    column = ColumnDefinition.new(:name => :id, :type => :string, :elements => ["A", "B"])
+    @tc.db_type(column).should == :enum
+  end
 end

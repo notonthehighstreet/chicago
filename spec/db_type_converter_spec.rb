@@ -34,4 +34,14 @@ describe Chicago::Schema::TypeConverters::DbTypeConverter do
       @tc.db_type(column).should == expected_db_type
     end
   end
+
+  it "should translate string to :varchar" do
+    column = ColumnDefinition.new(:name => :id, :type => :string)
+    @tc.db_type(column).should == :varchar
+  end
+
+  it "should translate string to :char if column max and min are the same" do
+    column = ColumnDefinition.new(:name => :id, :type => :string, :min => 2, :max => 2)
+    @tc.db_type(column).should == :char
+  end
 end

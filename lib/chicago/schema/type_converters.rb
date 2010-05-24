@@ -22,11 +22,18 @@ module Chicago
 
         # Returns a db type given a column definition
         def db_type(column)
-          db_type = column.column_type
-          db_type = integer_type(column.min, column.max) if column.column_type == :integer
-          db_type
+          case column.column_type
+          when :integer then integer_type(column.min, column.max)
+          when :string  then string_type(column.min, column.max)
+          else
+            column.column_type
+          end
         end
 
+        def string_type(min, max)
+          min && max && min == max ? :char : :varchar 
+        end
+            
         # Returns a database integer column type, big enough to fit
         # values between min and max, or integer if a specific type
         # cannot be found.
@@ -47,6 +54,12 @@ module Chicago
 
       # MySql-specific type conversion strategy
       class MysqlTypeConverter < DbTypeConverter
+        def db_type(column)
+          return :enum if column.elements && column.elements.size < 65_536
+
+          super
+        end
+
         # Returns a db type symbol, such as :smallint or :varchar from
         # a type string as produced by a Sequel #schema call.
         def parse_type_string(str)
