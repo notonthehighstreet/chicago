@@ -13,7 +13,7 @@ module Chicago
         # If a database-specific strategy cannot be found, returns a
         # generic strategy.
         #
-        # Currently onyl supports MySql-specific types
+        # Currently only supports MySql-specific types
         def self.for_db(db)
           return MysqlTypeConverter.new if db.database_type == :mysql
 
