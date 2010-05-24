@@ -42,7 +42,8 @@ module Chicago
         # May raise an ArgumentError if min or max is too large for a
         # single database column.
         def integer_type(min, max)
-          if min && max && ((min >= -32_768 && max <= 32_767) || (min >= 0 && max <= 65_535))
+          signed_limit = (SMALL_INT_MAX + 1) / 2
+          if min && max && ((min >= -signed_limit && max <= signed_limit - 1) || (min >= 0 && max <= SMALL_INT_MAX))
             :smallint
           else
             :integer
@@ -85,11 +86,11 @@ module Chicago
           return :integer unless min && max
 
           case
-          when in_numeric_range?(min, max, 256)                        then :tinyint
-          when in_numeric_range?(min, max, 65_536)                     then :smallint
-          when in_numeric_range?(min, max, 16_777_216)                 then :mediumint
-          when in_numeric_range?(min, max, 4_294_967_296)              then :integer
-          when in_numeric_range?(min, max, 18_446_744_073_709_551_616) then :bigint
+          when in_numeric_range?(min, max, TINY_INT_MAX)   then :tinyint
+          when in_numeric_range?(min, max, SMALL_INT_MAX)  then :smallint
+          when in_numeric_range?(min, max, MEDIUM_INT_MAX) then :mediumint
+          when in_numeric_range?(min, max, INT_MAX)        then :integer
+          when in_numeric_range?(min, max, BIG_INT_MAX)    then :bigint
           else
             raise ArgumentError.new("#{min} is too small or #{max} is too large for a single column")
           end
@@ -98,8 +99,8 @@ module Chicago
         private
 
         def in_numeric_range?(min, max, unsigned_limit)
-          signed_limit = unsigned_limit / 2
-          (min >= -signed_limit && max <= signed_limit - 1)  ||  (min >= 0 && max <= unsigned_limit - 1)
+          signed_limit = (unsigned_limit + 1) / 2
+          (min >= -signed_limit && max <= signed_limit - 1)  ||  (min >= 0 && max <= unsigned_limit)
         end
       end
     end
