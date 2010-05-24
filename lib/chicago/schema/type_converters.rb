@@ -75,6 +75,12 @@ module Chicago
           end
         end
 
+        def parse_type_size(str)
+          str =~ /\(([^)]+)\)/
+          s = $1.split(",").map {|i| i.to_i }
+          s.size == 1 ? s.first : s
+        end
+
         def integer_type(min, max)
           return :integer unless min && max
 

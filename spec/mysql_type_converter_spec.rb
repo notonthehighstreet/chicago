@@ -50,4 +50,16 @@ describe Chicago::Schema::TypeConverters::MysqlTypeConverter do
     column = ColumnDefinition.new(:name => :id, :type => :string, :elements => ["A", "B"])
     @tc.db_type(column).should == :enum
   end
+
+  it "should return [12,2] as size from a decimal(12,2) db type" do
+    @tc.parse_type_size("decimal(12,2)").should == [12,2]
+  end
+
+  it "should return 50 as size from a varchar(50) db type" do
+    @tc.parse_type_size("varchar(50)").should == 50
+  end
+
+  it "should return :unsigned from parse_type_sign on 'int(10) unsigned'" do
+    @tc.parse_type_unsigned("int(10) unsigned").should be_true
+  end
 end

@@ -53,4 +53,12 @@ describe Chicago::ColumnDefinition do
   it "can have a default value" do
     ColumnDefinition.new(:name => :username, :type => :string, :default => 'A').default.should == 'A'
   end
+
+  it "should return a size option in sequel_column_options if max is present and type is string" do
+    ColumnDefinition.new(:name => :username, :type => :string, :max => 8).sequel_column_options[:size].should == 8
+  end
+
+  it "should return a default size of [12,2] for money types" do
+    ColumnDefinition.new(:name => :username, :type => :money).sequel_column_options[:size].should == [12,2]
+  end
 end

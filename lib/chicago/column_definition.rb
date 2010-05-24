@@ -54,7 +54,16 @@ module Chicago
     def sequel_column_options
       opts = {}
       opts[:unsigned] = unsigned? if column_type == :integer
-      opts[:default] = default
+#      opts[:default] = default
+
+      if @opts[:size]
+        opts[:size] = @opts[:size]
+      elsif max && column_type == :string
+        opts[:size] = max 
+      elsif column_type == :money
+        opts[:size] = [12,2]
+      end
+
       opts[:null] = null?
       opts
     end
