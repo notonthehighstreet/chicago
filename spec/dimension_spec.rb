@@ -29,4 +29,15 @@ describe Chicago::Dimension do
 
     dd.column_definitions.should == [column]
   end
+
+  it "should specify a main identifier column" do
+    Dimension.define(:user) { identified_by :username }.main_identifier.should == :username
+  end
+
+  it "should allow additional identifying columns" do
+    dimension = Dimension.define(:user) { identified_by :username, :and => [:email] }
+
+    dimension.main_identifier.should == :username
+    dimension.identifiers.should == [:username, :email]
+  end
 end
