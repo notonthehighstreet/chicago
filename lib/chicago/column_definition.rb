@@ -47,7 +47,7 @@ module Chicago
 
     # Returns true if a numeric column is unsigned.
     def unsigned?
-      @opts[:min] && @opts[:min] >= 0
+      @column_type = :integer && @opts[:min] && @opts[:min] >= 0
     end
 
     # Returns a hash of column options for a Sequel column
