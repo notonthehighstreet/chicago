@@ -49,16 +49,6 @@ module Chicago
             :integer
           end
         end
-
-        # Returns a db type symbol, such as :smallint or :varchar from
-        # a type string as produced by a Sequel #schema call.
-        def parse_type_string(str)
-        end
-
-        # Returns true if the database column is unsigned.
-        def parse_type_unsigned(str)
-          str.include?("unsigned")
-        end
       end
 
       # MySql-specific type conversion strategy
@@ -66,20 +56,6 @@ module Chicago
         def db_type(column)
           return :enum if column.elements && column.elements.size < 65_536
           super
-        end
-
-        def parse_type_string(str)
-          case str
-          when /^tinyint\(1\)/ then :boolean
-          when /^int/          then :integer
-          when /^([^(]+)/      then $1.to_sym
-          end
-        end
-
-        def parse_type_size(str)
-          str =~ /\(([^)]+)\)/
-          s = $1.split(",").map {|i| i.to_i }
-          s.size == 1 ? s.first : s
         end
 
         def integer_type(min, max)

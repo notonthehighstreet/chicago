@@ -108,24 +108,4 @@ describe Chicago::Schema::TypeConverters::MysqlTypeConverter do
       @tc.db_type(column).should == :varchar
     end
   end
-
-  it "should parse a db type string returned from a Sequel #schema call" do
-    @tc.parse_type_string("smallint(6)").should == :smallint
-    @tc.parse_type_string("int(11)").should == :integer
-    @tc.parse_type_string("bigint(11)").should == :bigint
-    @tc.parse_type_string("tinyint(3)").should == :tinyint
-    @tc.parse_type_string("tinyint(1)").should == :boolean
-  end
-
-  it "should return [12,2] as size from a decimal(12,2) db type" do
-    @tc.parse_type_size("decimal(12,2)").should == [12,2]
-  end
-
-  it "should return 50 as size from a varchar(50) db type" do
-    @tc.parse_type_size("varchar(50)").should == 50
-  end
-
-  it "should return :unsigned from parse_type_sign on 'int(10) unsigned'" do
-    @tc.parse_type_unsigned("int(10) unsigned").should be_true
-  end
 end
