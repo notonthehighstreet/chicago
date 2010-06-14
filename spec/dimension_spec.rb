@@ -41,3 +41,22 @@ describe Chicago::Dimension do
     dimension.identifiers.should == [:username, :email]
   end
 end
+
+describe "Chicago::Dimension#db_schema" do
+  before :each do 
+    @dimension = Dimension.define(:user)
+  end
+
+  it "should define a user_dimension table" do
+    @dimension.db_schema.keys.should include(:user_dimension)
+  end
+
+  it "should define primary key :id" do
+    @dimension.db_schema[:user_dimension][:primary_key].should == :id
+  end
+
+  it "should have an unsigned integer :id column" do
+    expected = {:name => :id, :column_type => :integer, :unsigned => true}
+    @dimension.db_schema[:user_dimension][:columns].should include(expected)
+  end
+end

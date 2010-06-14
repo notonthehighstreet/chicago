@@ -47,6 +47,17 @@ module Chicago
       @identifiers = [main_id] + opts[:and]
     end
 
+    # Returns a schema hash for use by Sequel::MigrationBuilder,
+    # defining all the RDBMS tables needed to store and build this 
+    # dimension.
+    def db_schema
+      { table_name => {
+          :primary_key => :id,
+          :columns => [{:name => :id, :column_type => :integer, :unsigned => true}]
+        }
+      }
+    end
+      
     protected
 
     def initialize(name)
