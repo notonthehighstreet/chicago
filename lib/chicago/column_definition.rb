@@ -8,18 +8,16 @@ module Chicago
     # Creates a new column definition.
     #
     # Requires both a :type and a :name option
-    def initialize(opts)
-      opts = normalize_opts(opts)
-      check_opts(opts)
+    def initialize(name, type, opts={})
+      @opts = normalize_opts(opts)
 
-      @name        = opts[:name]
-      @column_type = opts[:type]
-      @min         = opts[:min]
-      @max         = opts[:max]
-      @null        = opts[:null]
-      @elements    = opts[:elements]
-      @default     = opts[:default]
-      @opts        = opts
+      @name        = name
+      @column_type = type
+      @min         = @opts[:min]
+      @max         = @opts[:max]
+      @null        = @opts[:null]
+      @elements    = @opts[:elements]
+      @default     = @opts[:default]
     end
 
     # Returns the name of this column.
@@ -70,11 +68,10 @@ module Chicago
 
     # Returns true if both definition's attributes are equal.
     def ==(other)
-      other.kind_of?(self.class) && @opts == other.instance_variable_get(:@opts)
-    end
-
-    def hash
-      @opts.hash
+      other.kind_of?(self.class) && 
+        name == other.name && 
+        column_type == other.column_type && 
+        @opts == other.instance_variable_get(:@opts)
     end
 
     private
@@ -87,10 +84,6 @@ module Chicago
         opts.delete(:range)
       end
       opts
-    end
-
-    def check_opts(opts)
-      raise DefinitionError.new("A column must have a name and a type.") unless opts[:name] && opts[:type]
     end
   end
 end

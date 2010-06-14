@@ -19,7 +19,9 @@ module Chicago
       # Defines a new column.
       def column(definition)
         if definition.kind_of? Hash
-          @column_definitions << ColumnDefinition.new(definition)
+          name = definition.delete(:name)
+          type = definition.delete(:type)
+          @column_definitions << ColumnDefinition.new(name, type, definition)
         else
           @column_definitions << definition
         end
@@ -28,7 +30,7 @@ module Chicago
       # Defines a column with the type of the method name, named +name+.
       def method_missing(type, *args)
         name, rest = args
-        column(:type => type, :name => name)
+        @column_definitions << ColumnDefinition.new(name, type, rest || {})
       end
     end
   end
