@@ -2,6 +2,7 @@
 require 'sequel'
 require 'chicago/column_definition'
 require 'chicago/dimension'
+require 'chicago/fact'
 require 'chicago/schema/type_converters'
 require 'chicago/schema/column_group_builder'
 require 'chicago/schema'
