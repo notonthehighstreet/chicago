@@ -50,43 +50,42 @@ end
 
 describe "A Hash returned by Chicago::ColumnDefinition#db_schema" do
   before :each do
-    @db = mock(:database)
-    @db.should_receive(:database_type).and_return(:mysql)
+    @tc = Chicago::Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :generic))
   end
 
   it "should have a :name entry" do
-    ColumnDefinition.new(:username, :string, :max => 8).db_schema(@db)[:name].should == :username
+    ColumnDefinition.new(:username, :string, :max => 8).db_schema(@tc)[:name].should == :username
   end
 
   it "should have a :column_type entry" do
-    ColumnDefinition.new(:username, :string, :max => 8).db_schema(@db)[:column_type].should == :varchar
+    ColumnDefinition.new(:username, :string, :max => 8).db_schema(@tc)[:column_type].should == :varchar
   end
 
   it "should not have a :default entry by default" do
-    ColumnDefinition.new(:username, :string).db_schema(@db).keys.should_not include(:default)
+    ColumnDefinition.new(:username, :string).db_schema(@tc).keys.should_not include(:default)
   end
 
   it "should have a :default entry if specified" do
-    ColumnDefinition.new(:username, :string, :default => 'A').db_schema(@db)[:default].should == 'A'
+    ColumnDefinition.new(:username, :string, :default => 'A').db_schema(@tc)[:default].should == 'A'
   end
 
   it "should have an :unsigned entry if relevant" do
-    ColumnDefinition.new(:id, :integer, :min => 0).db_schema(@db)[:unsigned].should be_true
+    ColumnDefinition.new(:id, :integer, :min => 0).db_schema(@tc)[:unsigned].should be_true
   end
 
   it "should have an :entries entry if relevant" do
-    ColumnDefinition.new(:username, :string, :elements => ['A']).db_schema(@db)[:elements].should == ['A']
+    ColumnDefinition.new(:username, :string, :elements => ['A']).db_schema(@tc)[:elements].should == ['A']
   end
 
   it "should have an :entries entry if relevant" do
-    ColumnDefinition.new(:username, :string).db_schema(@db).keys.should_not include(:elements)
+    ColumnDefinition.new(:username, :string).db_schema(@tc).keys.should_not include(:elements)
   end
 
   it "should have a :size entry if max is present and type is string" do
-    ColumnDefinition.new(:username, :string, :max => 8).db_schema(@db)[:size].should == 8
+    ColumnDefinition.new(:username, :string, :max => 8).db_schema(@tc)[:size].should == 8
   end
 
   it "should have a default :size of [12,2] for money types" do
-    ColumnDefinition.new(:username, :money).db_schema(@db)[:size].should == [12,2]
+    ColumnDefinition.new(:username, :money).db_schema(@tc)[:size].should == [12,2]
   end
 end

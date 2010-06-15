@@ -31,6 +31,10 @@ module Chicago
           end
         end
 
+        def dimension_table_options
+          {}
+        end
+
         def string_type(min, max)
           min && max && min == max ? :char : :varchar 
         end
@@ -56,6 +60,10 @@ module Chicago
         def db_type(column)
           return :enum if column.elements && column.elements.size < 65_536
           super
+        end
+
+        def dimension_table_options
+          {:engine => "myisam"}
         end
 
         def integer_type(min, max)

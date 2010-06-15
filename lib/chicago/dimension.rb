@@ -50,10 +50,11 @@ module Chicago
     # Returns a schema hash for use by Sequel::MigrationBuilder,
     # defining all the RDBMS tables needed to store and build this 
     # dimension.
-    def db_schema(db)
+    def db_schema(type_converter)      
       { table_name => {
           :primary_key => :id,
-          :columns => [{:name => :id, :column_type => :integer, :unsigned => true}] + column_definitions.map {|c| c.db_schema(db) }
+          :table_options => type_converter.dimension_table_options,
+          :columns => [{:name => :id, :column_type => :integer, :unsigned => true}] + column_definitions.map {|c| c.db_schema(type_converter) }
         }
       }
     end

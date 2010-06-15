@@ -63,12 +63,10 @@ module Chicago
     end
 
     # Returns a hash of column options for a Sequel column
-    def db_schema(db)
-      tc = Schema::TypeConverters::DbTypeConverter.for_db(db)
-
+    def db_schema(type_converter)
       db_schema = {
         :name => name,
-        :column_type => tc.db_type(self),
+        :column_type => type_converter.db_type(self),
         :null => null?
       }
       db_schema[:default]  = default   if default

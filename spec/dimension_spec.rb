@@ -45,30 +45,37 @@ end
 describe "Chicago::Dimension#db_schema" do
   before :each do 
     @dimension = Dimension.define(:user)
-    @db = mock(:database)
+    @tc = Chicago::Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :generic))
   end
 
   it "should define a user_dimension table" do
-    @dimension.db_schema(@db).keys.should include(:user_dimension)
+    @dimension.db_schema(@tc).keys.should include(:user_dimension)
   end
 
   it "should have an unsigned integer :id column" do
     expected = {:name => :id, :column_type => :integer, :unsigned => true}
-    @dimension.db_schema(@db)[:user_dimension][:columns].should include(expected)
+    @dimension.db_schema(@tc)[:user_dimension][:columns].should include(expected)
   end
 
   it "should define :id as the primary key" do
-    @dimension.db_schema(@db)[:user_dimension][:primary_key].should == :id
+    @dimension.db_schema(@tc)[:user_dimension][:primary_key].should == :id
+  end
+
+  it "should include a hash of table options" do
+    @dimension.db_schema(@tc)[:user_dimension][:table_options].should == {}
+  end
+
+  it "should have a table type of MyISAM for mysql" do
+    @tc = Chicago::Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :mysql))
+    @dimension.db_schema(@tc)[:user_dimension][:table_options].should == {:engine => "myisam"}
   end
 
   it "should include the sequel schema for the defined columns" do
-    @db.should_receive(:database_type).and_return(:mysql)
-
     @dimension.columns do
       string :username, :max => 10
     end
 
     expected = {:name => :username, :column_type => :varchar, :size => 10, :null => false}
-    @dimension.db_schema(@db)[:user_dimension][:columns].should include(expected)
+    @dimension.db_schema(@tc)[:user_dimension][:columns].should include(expected)
   end
 end
