@@ -77,7 +77,7 @@ describe "A Hash returned by Chicago::ColumnDefinition#db_schema" do
     ColumnDefinition.new(:username, :string, :elements => ['A']).db_schema(@tc)[:elements].should == ['A']
   end
 
-  it "should have an :entries entry if relevant" do
+  it "should not have an :entries entry if relevant" do
     ColumnDefinition.new(:username, :string).db_schema(@tc).keys.should_not include(:elements)
   end
 
