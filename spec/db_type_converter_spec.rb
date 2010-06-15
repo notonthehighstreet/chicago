@@ -21,6 +21,11 @@ shared_examples_for "All DB type converters" do
       column = ColumnDefinition.new(:id, :money)
       @tc.db_type(column).should == :decimal
     end
+
+    it "should assume any other type is a database type and return it" do
+      column = ColumnDefinition.new(:id, :foo)
+      @tc.db_type(column).should == :foo
+    end
   end
 end
 

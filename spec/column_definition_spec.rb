@@ -88,4 +88,8 @@ describe "A Hash returned by Chicago::ColumnDefinition#db_schema" do
   it "should have a default :size of [12,2] for money types" do
     ColumnDefinition.new(:username, :money).db_schema(@tc)[:size].should == [12,2]
   end
+
+  it "should have a :size that is set explictly" do
+    ColumnDefinition.new(:username, :money, :size => 'huge').db_schema(@tc)[:size].should == 'huge'
+  end
 end

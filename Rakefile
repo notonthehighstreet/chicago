@@ -23,6 +23,7 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
+desc "Flog this baby!"
 task :flog do
   sh 'find lib -name "*.rb" | xargs flog'
 end

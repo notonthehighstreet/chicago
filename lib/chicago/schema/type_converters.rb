@@ -31,10 +31,15 @@ module Chicago
           end
         end
 
+        # Returns sequel table options for a dimension.
+        #
+        # None by default, but database-specific subclasses may
+        # override this.
         def dimension_table_options
           {}
         end
 
+        # Returns a database type for a string column.
         def string_type(min, max)
           min && max && min == max ? :char : :varchar 
         end
@@ -62,6 +67,9 @@ module Chicago
           super
         end
 
+        # Returns table options for a dimension table.
+        #
+        # Dimension tables are defined as MyISAM tables in MySQL.
         def dimension_table_options
           {:engine => "myisam"}
         end

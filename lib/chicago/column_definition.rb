@@ -6,14 +6,22 @@ module Chicago
   # to provide an abstract definition of the column for views
   # and other Data Warehouse code.
   #
-  # ColumnDefinition is low-level, and you shouldn't need to
-  # created one from user code - columns are generally defined
+  # ColumnDefinition is low-level: you shouldn't need to
+  # create one from user code. Columns are generally defined
   # using the DSL on Dimension or Fact.
   class ColumnDefinition
     # Creates a new column definition.
     # 
     # name: the name of the column.
     # type: the abstract type of the column. For example, :string.
+    #
+    # Options:
+    #
+    # min:      the minimum length/number of this column.
+    # max:      the maximum length/number of this column.
+    # null:     whether this column can be null. False by default.
+    # elements: the allowed values this column can take.
+    # default:  the default value for this column. 
     def initialize(name, type, opts={})
       @opts = normalize_opts(opts)
 
@@ -78,7 +86,6 @@ module Chicago
 
     private
     
-    # Returns true if a numeric column is unsigned.
     def unsigned?
       @unsigned ||= (column_type == :integer && min && min >= 0)
     end
