@@ -1,13 +1,19 @@
 module Chicago
-  # An error in the definition of dimensions or facts.
-  class DefinitionError < RuntimeError
-  end
-
   # A column in a dimension or fact record.
+  #
+  # The column definition is used to generate the options
+  # to create the column in the database schema, but also
+  # to provide an abstract definition of the column for views
+  # and other Data Warehouse code.
+  #
+  # ColumnDefinition is low-level, and you shouldn't need to
+  # created one from user code - columns are generally defined
+  # using the DSL on Dimension or Fact.
   class ColumnDefinition
     # Creates a new column definition.
-    #
-    # Requires both a :type and a :name option
+    # 
+    # name: the name of the column.
+    # type: the abstract type of the column. For example, :string.
     def initialize(name, type, opts={})
       @opts = normalize_opts(opts)
 
@@ -23,7 +29,8 @@ module Chicago
     # Returns the name of this column.
     attr_reader :name
 
-    # Returns the type of this column.
+    # Returns the type of this column. This is an abstract type,
+    # not a database type (for example :string, not :varchar).
     attr_reader :column_type
 
     # Returns the minimum value of this column, or nil.
@@ -43,29 +50,6 @@ module Chicago
       @null
     end
 
-    # Returns true if a numeric column is unsigned.
-    def unsigned?
-      @column_type = :integer && @opts[:min] && @opts[:min] >= 0
-    end
-
-    # Returns a hash of column options for a Sequel column
-    def sequel_column_options
-      opts = {}
-      opts[:unsigned] = unsigned? if column_type == :integer
-#      opts[:default] = default
-
-      if @opts[:size]
-        opts[:size] = @opts[:size]
-      elsif max && column_type == :string
-        opts[:size] = max 
-      elsif column_type == :money
-        opts[:size] = [12,2]
-      end
-
-      opts[:null] = null?
-      opts
-    end
-
     # Returns true if both definition's attributes are equal.
     def ==(other)
       other.kind_of?(self.class) && 
@@ -74,7 +58,42 @@ module Chicago
         @opts == other.instance_variable_get(:@opts)
     end
 
+    def hash #:nodoc:
+      name.hash
+    end
+
+    # Returns a hash of column options for a Sequel column
+    def db_schema(db)
+      tc = Schema::TypeConverters::DbTypeConverter.for_db(db)
+
+      db_schema = {
+        :name => name,
+        :column_type => tc.db_type(self),
+        :null => null?
+      }
+      db_schema[:default]  = default   if default
+      db_schema[:elements] = elements  if elements
+      db_schema[:size]     = size      if size
+      db_schema[:unsigned] = unsigned? if column_type == :integer
+      db_schema
+    end
+
     private
+    
+    # Returns true if a numeric column is unsigned.
+    def unsigned?
+      @unsigned ||= (column_type == :integer && min && min >= 0)
+    end
+
+    def size
+      @size ||= if @opts[:size]
+                  @opts[:size]
+                elsif max && column_type == :string
+                  max
+                elsif column_type == :money
+                  [12,2]
+                end
+    end
 
     def normalize_opts(opts)
       opts = {:null => false}.merge(opts)

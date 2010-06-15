@@ -5,20 +5,16 @@ describe Chicago::ColumnDefinition do
     ColumnDefinition.new(:username, :string).name.should == :username
   end
 
-  it "should have a type" do
+  it "should have a column type" do
     ColumnDefinition.new(:username, :string).column_type.should == :string
   end
 
   it "should be equal to another column definition with the same attributes" do
-    d1 = ColumnDefinition.new(:username, :string)
-    d2 = ColumnDefinition.new(:username, :string)
-    d1.should == d2
+    ColumnDefinition.new(:username, :string).should == ColumnDefinition.new(:username, :string)
   end
 
   it "should not be equal to another column definition with the different attributes" do
-    d1 = ColumnDefinition.new(:username, :string)
-    d2 = ColumnDefinition.new(:username, :integer)
-    d1.should_not == d2
+    ColumnDefinition.new(:username, :string).should_not == ColumnDefinition.new(:username, :integer)
   end
 
   it "should have a #min method" do
@@ -36,15 +32,11 @@ describe Chicago::ColumnDefinition do
   end
 
   it "should forbid null values by default" do
-    definition = ColumnDefinition.new(:username, :string)
-    definition.null?().should be_false
-    definition.sequel_column_options[:null].should be_false
+    ColumnDefinition.new(:username, :string).should_not be_null
   end
 
   it "should allow you to accept non-null values" do
-    definition = ColumnDefinition.new(:username, :string, :null => true)
-    definition.null?().should be_true
-    definition.sequel_column_options[:null].should be_true
+    ColumnDefinition.new(:username, :string, :null => true).should be_null
   end
 
   it "can define a set of valid elements" do
@@ -54,12 +46,47 @@ describe Chicago::ColumnDefinition do
   it "can have a default value" do
     ColumnDefinition.new(:username, :string, :default => 'A').default.should == 'A'
   end
+end
 
-  it "should return a size option in sequel_column_options if max is present and type is string" do
-    ColumnDefinition.new(:username, :string, :max => 8).sequel_column_options[:size].should == 8
+describe "A Hash returned by Chicago::ColumnDefinition#db_schema" do
+  before :each do
+    @db = mock(:database)
+    @db.should_receive(:database_type).and_return(:mysql)
   end
 
-  it "should return a default size of [12,2] for money types" do
-    ColumnDefinition.new(:username, :money).sequel_column_options[:size].should == [12,2]
+  it "should have a :name entry" do
+    ColumnDefinition.new(:username, :string, :max => 8).db_schema(@db)[:name].should == :username
+  end
+
+  it "should have a :column_type entry" do
+    ColumnDefinition.new(:username, :string, :max => 8).db_schema(@db)[:column_type].should == :varchar
+  end
+
+  it "should not have a :default entry by default" do
+    ColumnDefinition.new(:username, :string).db_schema(@db).keys.should_not include(:default)
+  end
+
+  it "should have a :default entry if specified" do
+    ColumnDefinition.new(:username, :string, :default => 'A').db_schema(@db)[:default].should == 'A'
+  end
+
+  it "should have an :unsigned entry if relevant" do
+    ColumnDefinition.new(:id, :integer, :min => 0).db_schema(@db)[:unsigned].should be_true
+  end
+
+  it "should have an :entries entry if relevant" do
+    ColumnDefinition.new(:username, :string, :elements => ['A']).db_schema(@db)[:elements].should == ['A']
+  end
+
+  it "should have an :entries entry if relevant" do
+    ColumnDefinition.new(:username, :string).db_schema(@db).keys.should_not include(:elements)
+  end
+
+  it "should have a :size entry if max is present and type is string" do
+    ColumnDefinition.new(:username, :string, :max => 8).db_schema(@db)[:size].should == 8
+  end
+
+  it "should have a default :size of [12,2] for money types" do
+    ColumnDefinition.new(:username, :money).db_schema(@db)[:size].should == [12,2]
   end
 end
