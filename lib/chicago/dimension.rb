@@ -3,6 +3,15 @@ module Chicago
     # Returns an Array of possible identifying columns for this dimension.
     attr_reader :identifiers
 
+    # Returns an Array of column definitions.
+    attr_reader :column_definitions
+
+    # Define a set of columns for this dimension or fact. See
+    # ColumnGroupBuilder for details.
+    def columns(&block)
+      @column_definitions += Schema::ColumnGroupBuilder.new(&block).column_definitions
+    end
+
     # Returns the user-friendly identifier for this record.
     def main_identifier
       @identifiers.first
@@ -38,6 +47,8 @@ module Chicago
 
     def initialize(name)
       super
+      @identifiers = []
+      @column_definitions = []
       @table_name = "#{name}_dimension".to_sym
     end
   end

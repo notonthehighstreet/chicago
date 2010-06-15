@@ -9,17 +9,26 @@ describe Chicago::Fact do
     Fact.define(:sales).table_name.should == :sales_facts
   end
 
-  it "should define a group of columns" do
-    column = stub(:column)
-    mock_builder = mock(:builder)
-    Schema::ColumnGroupBuilder.should_receive(:new).and_return(mock_builder)
-    mock_builder.should_receive(:column_definitions).and_return([column])
-
+  it "should set a primary key" do
     fact = Fact.define(:sales) do
-      columns { string :username }
+      primary_key :product, :customer, :date
     end
+    fact.primary_key.should == [:product, :customer, :date]
+  end
 
-    fact.column_definitions.should == [column]
+  it "should set the dimensions for the fact" do
+    fact = Fact.define(:sales) do
+      dimensions :product, :customer
+    end
+    fact.dimension_names.should == [:product, :customer]
+  end
+
+  it "should set the degenerate dimensions for the fact" do
+    fact = Fact.define(:sales) do
+      degenerate_dimensions do
+        integer :order_number
+      end
+    end
   end
 end
 
@@ -42,12 +51,8 @@ describe "Chicago::Fact#db_schema" do
     @fact.db_schema(@tc)[:sales_facts][:table_options].should == {:engine => "myisam"}
   end
 
-  it "should include the sequel schema for the defined columns" do
-    @fact.columns do
-      integer :total, :min => 0
-    end
-
-    expected = {:name => :total, :column_type => :integer, :null => false, :unsigned => true}
-    @fact.db_schema(@tc)[:sales_facts][:columns].should include(expected)
+  it "should output the primary key" do
+    @fact.primary_key :foo, :bar
+    @fact.db_schema(@tc)[:sales_facts][:primary_key].should == [:foo, :bar]
   end
 end
