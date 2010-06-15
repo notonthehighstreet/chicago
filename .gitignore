@@ -1,4 +1,5 @@
 coverage/
+rdoc/
 spec/db_connections.yml
 \#*
 .\#*
