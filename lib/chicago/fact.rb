@@ -29,7 +29,10 @@ module Chicago
 
     # Sets the dimensions with which a fact row is associated.
     def dimensions(*dimensions)
-      @dimension_names += dimensions
+      dimensions.each do |dimension|
+        @dimension_keys << ColumnDefinition.new("#{dimension}_dimension_id".to_sym, :integer, :null => false, :min => 0)
+        @dimension_names << dimension
+      end
     end
 
     # Defines the degenerate dimensions for this fact.
@@ -45,8 +48,19 @@ module Chicago
       @degenerate_dimensions += Schema::ColumnGroupBuilder.new(&block).column_definitions
     end
 
+    # Defines the measures for this fact.
+    #
+    # Measures are usually numeric values that will be aggregated.
+    #
+    # Within the block, use the standard column definition
+    # DSL, as for defining columns on a Dimension.
     def measures(&block)
       @measures += Schema::ColumnGroupBuilder.new(&block).column_definitions
+    end
+
+    # Returns the all the column definitions for this fact.
+    def column_definitions
+      @dimension_keys + @degenerate_dimensions + @measures
     end
 
     protected
@@ -57,6 +71,7 @@ module Chicago
       @dimension_names = []
       @degenerate_dimensions = []
       @measures = []
+      @dimension_keys = []
     end
   end
 end

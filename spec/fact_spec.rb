@@ -22,13 +22,32 @@ describe Chicago::Fact do
     end
     fact.dimension_names.should == [:product, :customer]
   end
+end
 
-  it "should set the degenerate dimensions for the fact" do
+describe "Chicago::Fact#column_definitions" do
+  it "should include the fact's dimension keys" do
     fact = Fact.define(:sales) do
-      degenerate_dimensions do
-        integer :order_number
-      end
+      dimensions :product
     end
+    fact.column_definitions.should include(ColumnDefinition.new(:product_dimension_id, :integer, :null => false, :min => 0))
+  end
+
+  it "should include the fact's degenerate_dimensions" do
+    fact = Fact.define(:sales)
+    fact.degenerate_dimensions do
+      integer :order_number
+    end
+
+    fact.column_definitions.should include(ColumnDefinition.new(:order_number, :integer))
+  end
+
+  it "should include the fact's measures" do
+    fact = Fact.define(:sales)
+    fact.measures do
+      integer :total
+    end
+
+    fact.column_definitions.should include(ColumnDefinition.new(:total, :integer))
   end
 end
 
