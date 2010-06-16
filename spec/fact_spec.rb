@@ -16,6 +16,14 @@ describe Chicago::Fact do
     fact.primary_key.should == [:product, :customer, :date]
   end
 
+  it "should return the dimension key id if the primary key includes a dimension" do
+    fact = Fact.define(:sales) do
+      primary_key :product, :customer, :date
+      dimensions :product
+    end
+    fact.primary_key.should == [:product_dimension_id, :customer, :date]
+  end
+
   it "should set the dimensions for the fact" do
     fact = Fact.define(:sales) do
       dimensions :product, :customer

@@ -14,23 +14,25 @@ module Chicago
     end
 
     # Sets the primary key if given dimensions names, or returns the
-    # primary key with no arguments.
+    # primary key columns if called with no arguments.
     #
     # In general, only dimensions (real or degenerate) should be used
     # as part of the primary key. This isn't enforced at the moment,
     # but may be in the future.
     def primary_key(*dimensions)
       if dimensions.empty?
-        @primary_key if defined? @primary_key
+        @primary_key.call if defined? @primary_key
       else
-        @primary_key = dimensions
+        @primary_key = lambda do
+          dimensions.map {|sym| @dimension_names.include?(sym) ? dimension_key(sym) : sym }
+        end
       end
     end
 
     # Sets the dimensions with which a fact row is associated.
     def dimensions(*dimensions)
       dimensions.each do |dimension|
-        @dimension_keys << ColumnDefinition.new("#{dimension}_dimension_id".to_sym, :integer, :null => false, :min => 0)
+        @dimension_keys << ColumnDefinition.new(dimension_key(dimension), :integer, :null => false, :min => 0)
         @dimension_names << dimension
       end
     end
@@ -72,6 +74,12 @@ module Chicago
       @degenerate_dimensions = []
       @measures = []
       @dimension_keys = []
+    end
+
+    private
+
+    def dimension_key(sym)
+      "#{sym}_dimension_id".to_sym
     end
   end
 end
