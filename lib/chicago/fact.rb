@@ -7,7 +7,7 @@ module Chicago
     def db_schema(type_converter)      
       { table_name => {
           :primary_key => primary_key,
-          :table_options => type_converter.dimension_table_options,
+          :table_options => type_converter.table_options,
           :columns => []
         }
       }
