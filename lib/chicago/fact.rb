@@ -49,6 +49,12 @@ module Chicago
       @measures += Schema::ColumnGroupBuilder.new(&block).column_definitions
     end
 
+    # A Factless Fact table has no measures - it used only to express a
+    # relationship between a set of dimensions.
+    def factless?
+      @measures.empty?
+    end
+
     protected
 
     def initialize(name)
