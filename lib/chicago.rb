@@ -1,7 +1,7 @@
 # Requires go here
 require 'sequel'
 require 'sequel/migration_builder'
-require 'chicago/column_definition'
+require 'chicago/column'
 require 'chicago/star_schema_table'
 require 'chicago/dimension'
 require 'chicago/migration_file_writer'
