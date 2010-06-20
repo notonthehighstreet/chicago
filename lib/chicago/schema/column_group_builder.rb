@@ -8,7 +8,7 @@ module Chicago
 
     # A builder for DSL-style column methods to create column definitions.
     class ColumnGroupBuilder
-      # Returns an Array of ColumnDefinitions.
+      # Returns an Array of Columns.
       attr_reader :column_definitions
       
       def initialize(&block)
@@ -21,7 +21,7 @@ module Chicago
         if definition.kind_of? Hash
           name = definition.delete(:name)
           type = definition.delete(:type)
-          @column_definitions << ColumnDefinition.new(name, type, definition)
+          @column_definitions << Column.new(name, type, definition)
         else
           @column_definitions << definition
         end
@@ -30,7 +30,7 @@ module Chicago
       # Defines a column with the type of the method name, named +name+.
       def method_missing(type, *args)
         name, rest = args
-        @column_definitions << ColumnDefinition.new(name, type, rest || {})
+        @column_definitions << Column.new(name, type, rest || {})
       end
     end
   end

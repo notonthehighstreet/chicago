@@ -3,27 +3,27 @@ require File.dirname(__FILE__) + "/spec_helper"
 shared_examples_for "All DB type converters" do
   context "#db_type" do
     it "should return :varchar for a string column" do
-      column = ColumnDefinition.new(:id, :string)
+      column = Column.new(:id, :string)
       @tc.db_type(column).should == :varchar
     end
 
     it "should return :char for a string column that has equal max and min attributes" do
-      column = ColumnDefinition.new(:id, :string, :min => 2, :max => 2)
+      column = Column.new(:id, :string, :min => 2, :max => 2)
       @tc.db_type(column).should == :char
     end
 
     it "should return :integer for an column with a max but no min attribute set" do
-      column = ColumnDefinition.new(:id, :integer, :max => 127)
+      column = Column.new(:id, :integer, :max => 127)
       @tc.db_type(column).should == :integer
     end
 
     it "should return :decimal for a money column type" do
-      column = ColumnDefinition.new(:id, :money)
+      column = Column.new(:id, :money)
       @tc.db_type(column).should == :decimal
     end
 
     it "should assume any other type is a database type and return it" do
-      column = ColumnDefinition.new(:id, :foo)
+      column = Column.new(:id, :foo)
       @tc.db_type(column).should == :foo
     end
   end
@@ -61,7 +61,7 @@ describe "Generic DbTypeConverter" do
   }.each do |expected_db_type, range|
 
     it "should create a #{expected_db_type} if the maximum column value < #{range.max} and min is >= #{range.min}" do
-      column = ColumnDefinition.new(:id, :integer, :max => range.max, :min => range.min)
+      column = Column.new(:id, :integer, :max => range.max, :min => range.min)
       @tc.db_type(column).should == expected_db_type
     end
   end
@@ -89,13 +89,13 @@ describe Chicago::Schema::TypeConverters::MysqlTypeConverter do
     }.each do |expected_db_type, range|
       
       it "should return #{expected_db_type} if the maximum column value < #{range.max} and min is >= #{range.min}" do
-        column = ColumnDefinition.new(:id, :integer, :max => range.max, :min => range.min)
+        column = Column.new(:id, :integer, :max => range.max, :min => range.min)
         @tc.db_type(column).should == expected_db_type
       end
     end
 
     it "should raise an ArgumentError if either of the min/max values are out of bounds" do
-      column = ColumnDefinition.new(:id, 
+      column = Column.new(:id, 
                                     :integer, 
                                     :min => 0, 
                                     :max => 18_446_744_073_709_551_616)
@@ -104,12 +104,12 @@ describe Chicago::Schema::TypeConverters::MysqlTypeConverter do
     end
 
     it "should return :enum if the column definition has elements" do
-      column = ColumnDefinition.new(:id, :string, :elements => ["A", "B"])
+      column = Column.new(:id, :string, :elements => ["A", "B"])
       @tc.db_type(column).should == :enum
     end
 
     it "should return :varchar if the column definition has a large number of elements" do
-      column = ColumnDefinition.new(:id, :string, :elements => stub(:size => 70_000))
+      column = Column.new(:id, :string, :elements => stub(:size => 70_000))
       @tc.db_type(column).should == :varchar
     end
   end
