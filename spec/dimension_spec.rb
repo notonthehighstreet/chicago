@@ -96,3 +96,34 @@ describe "Chicago::Dimension#db_schema" do
     @dimension.db_schema(@tc)[:user_dimension][:columns].should include(expected)
   end
 end
+
+describe "Conforming dimensions" do
+  it "should be able to conform to another dimension" do
+    Dimension.define(:date)
+    lambda { Dimension.define(:month, :conforms_to => :date) }.should_not raise_error
+  end
+
+  it "should raise an error if you attempt to conform to a non-existent dimension" do
+    Dimension.clear_definitions
+    lambda { Dimension.define(:month, :conforms_to => :date) }.should raise_error
+  end
+
+  it "should copy column definitions from its parent dimension" do
+    date_dimension = Dimension.define(:date) do
+      columns do
+        date   :date
+        string :month
+      end
+    end
+    definition = date_dimension.column_definitions.find {|d| d.name == :month }
+    Dimension.define(:month, :conforms_to => :date) { columns :month }.
+      column_definitions.first.should == definition
+  end
+
+  it "should raise an error if any extra columns are included (it doesn't conform)" do
+    Dimension.define(:date) { columns { string :month } }
+    lambda do 
+      Dimension.define(:month, :conforms_to => :date) { columns :month, :year }
+    end.should raise_error
+  end
+end

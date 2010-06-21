@@ -33,6 +33,7 @@ module Chicago
       @null        = @opts[:null]
       @elements    = @opts[:elements]
       @default     = @opts[:default]
+      @descriptive = !! @opts[:descriptive]
     end
 
     # Returns the name of this column.
@@ -57,6 +58,12 @@ module Chicago
     # Returns true if null values are allowed.
     def null?
       @null
+    end
+
+    # Returns true if this column is just informational, and is not
+    # intended to be used as a filter.
+    def descriptive?
+      @descriptive
     end
 
     # Returns true if both definition's attributes are equal.

@@ -13,8 +13,8 @@ module Chicago
       #
       # This should be called on subclasses - i.e. Dimension.define or
       # Fact.define, not this class.
-      def define(name, &block)
-        definition = self.new(name)
+      def define(name, opts={}, &block)
+        definition = self.new(name, opts)
         definition.instance_eval(&block) if block_given?
         @definitions ||= {}
         @definitions[definition.name] = definition
@@ -41,7 +41,7 @@ module Chicago
 
     protected
 
-    def initialize(name)
+    def initialize(name, opts={})
       @name = name.to_sym
     end
   end

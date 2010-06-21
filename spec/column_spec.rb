@@ -46,6 +46,14 @@ describe Chicago::Column do
   it "can have a default value" do
     Column.new(:username, :string, :default => 'A').default.should == 'A'
   end
+
+  it "should have a descriptive? method, false by default" do
+    Column.new(:username, :string).should_not be_descriptive
+  end
+
+  it "should be definable as descriptive" do
+    Column.new(:username, :string, :descriptive => true).should be_descriptive
+  end
 end
 
 describe "A Hash returned by Chicago::Column#db_schema" do

@@ -74,7 +74,7 @@ module Chicago
 
     protected
 
-    def initialize(name)
+    def initialize(name, opts={})
       super
       @table_name = "#{name}_facts".to_sym
       @dimension_names = []
