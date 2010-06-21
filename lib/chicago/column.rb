@@ -9,7 +9,7 @@ module Chicago
   # ColumnDefinition is low-level: you shouldn't need to
   # create one from user code. Columns are generally defined
   # using the DSL on Dimension or Fact.
-  class ColumnDefinition
+  class Column
     # Creates a new column definition.
     # 
     # name: the name of the column.
@@ -19,6 +19,7 @@ module Chicago
     #
     # min:      the minimum length/number of this column.
     # max:      the maximum length/number of this column.
+    # range:    any object with a min & max method - overrides min/max (above).
     # null:     whether this column can be null. False by default.
     # elements: the allowed values this column can take.
     # default:  the default value for this column. 

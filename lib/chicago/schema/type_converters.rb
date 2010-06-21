@@ -31,11 +31,11 @@ module Chicago
           end
         end
 
-        # Returns sequel table options for a dimension.
+        # Returns sequel table options for a dimension or fact table.
         #
         # None by default, but database-specific subclasses may
         # override this.
-        def dimension_table_options
+        def table_options
           {}
         end
 
@@ -67,10 +67,10 @@ module Chicago
           super
         end
 
-        # Returns table options for a dimension table.
+        # Returns table options for a dimension or fact table.
         #
         # Dimension tables are defined as MyISAM tables in MySQL.
-        def dimension_table_options
+        def table_options
           {:engine => "myisam"}
         end
 

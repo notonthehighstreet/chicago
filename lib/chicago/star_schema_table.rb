@@ -7,15 +7,23 @@ module Chicago
     # Returns or sets the database table name for this dimension.
     # By default, <name>_dimension.
     attr_accessor :table_name
-        
-    # Creates a new dimension or fact named +name+
-    #
-    # This should be called on subclasses - i.e. Dimension.define or
-    # Fact.define, not this class.
-    def self.define(name, &block)
-      definition = self.new(name)
-      definition.instance_eval(&block) if block_given?
-      definition
+
+    class << self
+      # Creates a new dimension or fact named +name+
+      #
+      # This should be called on subclasses - i.e. Dimension.define or
+      # Fact.define, not this class.
+      def define(name, &block)
+        definition = self.new(name)
+        definition.instance_eval(&block) if block_given?
+        @definitions ||= []
+        @definitions << definition
+        definition
+      end
+      
+      def definitions
+        @definitions
+      end
     end
 
     # Returns a schema hash for use by Sequel::MigrationBuilder,

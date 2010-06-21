@@ -37,7 +37,7 @@ module Chicago
     def db_schema(type_converter)      
       { table_name => {
           :primary_key => :id,
-          :table_options => type_converter.dimension_table_options,
+          :table_options => type_converter.table_options,
           :columns => [{:name => :id, :column_type => :integer, :unsigned => true}] + column_definitions.map {|c| c.db_schema(type_converter) }
         }
       }

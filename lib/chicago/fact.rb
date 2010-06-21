@@ -7,7 +7,7 @@ module Chicago
     def db_schema(type_converter)      
       { table_name => {
           :primary_key => primary_key,
-          :table_options => type_converter.dimension_table_options,
+          :table_options => type_converter.table_options,
           :columns => []
         }
       }
@@ -63,6 +63,12 @@ module Chicago
     # Returns the all the column definitions for this fact.
     def column_definitions
       @dimension_keys + @degenerate_dimensions + @measures
+    end
+
+    # A Factless Fact table has no measures - it used only to express a
+    # relationship between a set of dimensions.
+    def factless?
+      @measures.empty?
     end
 
     protected

@@ -57,6 +57,14 @@ describe "Chicago::Fact#column_definitions" do
 
     fact.column_definitions.should include(ColumnDefinition.new(:total, :integer))
   end
+
+  it "should be factless if there are no measures" do
+    Fact.define(:sales).should be_factless
+  end
+
+  it "should not be factless if the dimension has measures" do
+    Fact.define(:sales) { measures { integer :total } }.should_not be_factless
+  end
 end
 
 describe "Chicago::Fact#db_schema" do
