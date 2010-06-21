@@ -13,6 +13,27 @@ describe Chicago::Dimension do
     Dimension.define(:user).table_name.should == :user_dimension
   end
 
+  it "should know every defined dimension" do
+    Dimension.clear_definitions
+    Dimension.define(:user)
+    Dimension.define(:product)
+    Dimension.definitions.size.should == 2
+    Dimension.definitions.map {|d| d.name }.should include(:user)
+    Dimension.definitions.map {|d| d.name }.should include(:product)
+  end
+
+  it "should not include fact definitions in its definitions" do
+    Dimension.clear_definitions
+    Fact.define(:sales)
+    Dimension.definitions.should be_empty
+  end
+
+  it "should be able to clear previously defined dimensions with #clear_definitions" do
+    Dimension.define(:user)
+    Dimension.clear_definitions
+    Dimension.definitions.should be_empty
+  end
+
   it "should define a group of columns" do
     column = stub(:column)
     mock_builder = mock(:builder)

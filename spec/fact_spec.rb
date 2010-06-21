@@ -30,6 +30,27 @@ describe Chicago::Fact do
     end
     fact.dimension_names.should == [:product, :customer]
   end
+
+  it "should know every defined fact" do
+    Fact.clear_definitions
+    Fact.define(:sales)
+    Fact.define(:signups)
+    Fact.definitions.size.should == 2
+    Fact.definitions.map {|d| d.name }.should include(:sales)
+    Fact.definitions.map {|d| d.name }.should include(:signups)
+  end
+
+  it "should not include fact definitions in its definitions" do
+    Fact.clear_definitions
+    Dimension.define(:user)
+    Fact.definitions.should be_empty
+  end
+
+  it "should be able to clear previously defined dimensions with #clear_definitions" do
+    Fact.define(:sales)
+    Fact.clear_definitions
+    Fact.definitions.should be_empty
+  end
 end
 
 describe "Chicago::Fact#column_definitions" do
@@ -37,7 +58,7 @@ describe "Chicago::Fact#column_definitions" do
     fact = Fact.define(:sales) do
       dimensions :product
     end
-    fact.column_definitions.should include(ColumnDefinition.new(:product_dimension_id, :integer, :null => false, :min => 0))
+    fact.column_definitions.should include(Column.new(:product_dimension_id, :integer, :null => false, :min => 0))
   end
 
   it "should include the fact's degenerate_dimensions" do
@@ -46,7 +67,7 @@ describe "Chicago::Fact#column_definitions" do
       integer :order_number
     end
 
-    fact.column_definitions.should include(ColumnDefinition.new(:order_number, :integer))
+    fact.column_definitions.should include(Column.new(:order_number, :integer))
   end
 
   it "should include the fact's measures" do
@@ -55,7 +76,7 @@ describe "Chicago::Fact#column_definitions" do
       integer :total
     end
 
-    fact.column_definitions.should include(ColumnDefinition.new(:total, :integer))
+    fact.column_definitions.should include(Column.new(:total, :integer))
   end
 
   it "should be factless if there are no measures" do

@@ -32,7 +32,7 @@ module Chicago
     # Sets the dimensions with which a fact row is associated.
     def dimensions(*dimensions)
       dimensions.each do |dimension|
-        @dimension_keys << ColumnDefinition.new(dimension_key(dimension), :integer, :null => false, :min => 0)
+        @dimension_keys << Column.new(dimension_key(dimension), :integer, :null => false, :min => 0)
         @dimension_names << dimension
       end
     end
