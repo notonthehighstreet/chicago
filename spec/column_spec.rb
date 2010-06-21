@@ -21,6 +21,10 @@ describe Chicago::Column do
     Column.new(:username, :string, :min => 0 ).min.should == 0
   end
 
+  it "should have a min of 0 by default for money columns" do
+    Column.new(:username, :money).min.should == 0
+  end
+
   it "should have a #max method" do
     Column.new(:username, :string, :max => 10 ).max.should == 10
   end
@@ -37,6 +41,12 @@ describe Chicago::Column do
 
   it "should allow you to accept non-null values" do
     Column.new(:username, :string, :null => true).should be_null
+  end
+
+  it "should allow null values by default for date, datetime or timestamp columns" do
+    Column.new(:username, :timestamp).should be_null
+    Column.new(:username, :date).should be_null
+    Column.new(:username, :datetime).should be_null
   end
 
   it "can define a set of valid elements" do

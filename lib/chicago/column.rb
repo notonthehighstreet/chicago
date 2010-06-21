@@ -24,7 +24,7 @@ module Chicago
     # elements: the allowed values this column can take.
     # default:  the default value for this column. 
     def initialize(name, type, opts={})
-      @opts = normalize_opts(opts)
+      @opts = normalize_opts(type, opts)
 
       @name        = name
       @column_type = type
@@ -108,14 +108,22 @@ module Chicago
                 end
     end
 
-    def normalize_opts(opts)
-      opts = {:null => false}.merge(opts)
+    def normalize_opts(type, opts)
+      opts = {:null => default_null(type), :min => default_min(type)}.merge(opts)
       if opts[:range]
         opts[:min] = opts[:range].min
         opts[:max] = opts[:range].max
         opts.delete(:range)
       end
       opts
+    end
+
+    def default_null(type)
+      [:date, :timestamp, :datetime].include?(type)
+    end
+
+    def default_min(type)
+      0 if type == :money
     end
   end
 end
