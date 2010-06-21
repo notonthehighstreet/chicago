@@ -31,6 +31,13 @@ describe Chicago::Fact do
     fact.dimension_names.should == [:product, :customer]
   end
 
+  it "should allow dimensional roleplaying via a hash of name => dimension" do
+    fact = Fact.define(:sales) do
+      dimensions :product, :customer => :user
+    end
+    fact.dimension_names.should == [:product, :customer]
+  end
+
   it "should know every defined fact" do
     Fact.clear_definitions
     Fact.define(:sales)

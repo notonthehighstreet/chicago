@@ -31,6 +31,7 @@ module Chicago
 
     # Sets the dimensions with which a fact row is associated.
     def dimensions(*dimensions)
+      dimensions += dimensions.pop.keys if dimensions.last.kind_of? Hash
       dimensions.each do |dimension|
         @dimension_keys << Column.new(dimension_key(dimension), :integer, :null => false, :min => 0)
         @dimension_names << dimension
