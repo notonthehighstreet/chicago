@@ -35,4 +35,9 @@ describe Chicago::Schema::ColumnGroupBuilder do
     builder = Schema::ColumnGroupBuilder.new { string :username }
     builder.column_definitions.should == [Column.new(:username, :string)]
   end
+
+  it "should take a hash of defaults options" do
+    builder = Schema::ColumnGroupBuilder.new(:null => true) { string :username }
+    builder.column_definitions.should == [Column.new(:username, :string, :null => true)]
+  end
 end

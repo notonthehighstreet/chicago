@@ -11,7 +11,8 @@ module Chicago
       # Returns an Array of Columns.
       attr_reader :column_definitions
       
-      def initialize(&block)
+      def initialize(defaults = {}, &block)
+        @defaults = defaults
         @column_definitions = []
         instance_eval(&block) if block_given?
       end
@@ -30,7 +31,7 @@ module Chicago
       # Defines a column with the type of the method name, named +name+.
       def method_missing(type, *args)
         name, rest = args
-        @column_definitions << Column.new(name, type, rest || {})
+        @column_definitions << Column.new(name, type, @defaults.merge(rest || {}))
       end
     end
   end
