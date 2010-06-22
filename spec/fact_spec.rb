@@ -77,13 +77,13 @@ describe "Chicago::Fact#column_definitions" do
     fact.column_definitions.should include(Column.new(:order_number, :integer))
   end
 
-  it "should include the fact's measures" do
+  it "should include the fact's measures, which should allow null by default." do
     fact = Fact.define(:sales)
     fact.measures do
       integer :total
     end
 
-    fact.column_definitions.should include(Column.new(:total, :integer))
+    fact.column_definitions.should include(Column.new(:total, :integer, :null => true))
   end
 
   it "should be factless if there are no measures" do
@@ -142,6 +142,6 @@ describe "Chicago::Fact#db_schema" do
       integer :quantity
     end
 
-    @fact.db_schema(@tc)[:sales_facts][:columns].should include({:name => :quantity, :column_type => :integer, :null => false, :unsigned => false})
+    @fact.db_schema(@tc)[:sales_facts][:columns].should include({:name => :quantity, :column_type => :integer, :null => true, :unsigned => false})
   end
 end

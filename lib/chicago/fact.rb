@@ -58,7 +58,7 @@ module Chicago
     # Within the block, use the standard column definition
     # DSL, as for defining columns on a Dimension.
     def measures(&block)
-      @measures += Schema::ColumnGroupBuilder.new(&block).column_definitions
+      @measures += Schema::ColumnGroupBuilder.new(:null => true, &block).column_definitions
     end
 
     # Returns the all the column definitions for this fact.
