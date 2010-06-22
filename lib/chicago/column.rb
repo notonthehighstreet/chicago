@@ -74,10 +74,6 @@ module Chicago
         @opts == other.instance_variable_get(:@opts)
     end
 
-    def hash #:nodoc:
-      name.hash
-    end
-
     # Returns a hash of column options for a Sequel column
     def db_schema(type_converter)
       db_schema = {
@@ -88,14 +84,25 @@ module Chicago
       db_schema[:default]  = default   if default
       db_schema[:elements] = elements  if elements
       db_schema[:size]     = size      if size
-      db_schema[:unsigned] = !! unsigned? if column_type == :integer
+      db_schema[:unsigned] = !! unsigned? if numeric?
       db_schema
+    end
+
+    # Returns true if this column stores a numeric value.
+    def numeric?
+      @numeric ||= [:integer, :money, :percent, :decimal, :float].include?(column_type)
+    end
+
+    def hash #:nodoc:
+      name.hash
     end
 
     private
     
     def unsigned?
-      @unsigned ||= (column_type == :integer && min && min >= 0)
+      return @unsigned if defined? @unsigned      
+      default_unsigned = column_type == :percent || column_type == :money
+      @unsigned = min ? min >= 0 : default_unsigned
     end
 
     def size
@@ -105,6 +112,8 @@ module Chicago
                   max
                 elsif column_type == :money
                   [12,2]
+                elsif column_type == :percent
+                  [6,3]
                 end
     end
 

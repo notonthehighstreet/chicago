@@ -26,6 +26,7 @@ module Chicago
           when :integer then integer_type(column.min, column.max)
           when :string  then string_type(column.min, column.max)
           when :money   then :decimal
+          when :percent then :decimal
           else
             column.column_type
           end
