@@ -118,4 +118,30 @@ describe "Chicago::Fact#db_schema" do
     @fact.primary_key :foo, :bar
     @fact.db_schema(@tc)[:sales_facts][:primary_key].should == [:foo, :bar]
   end
+
+  it "should output the dimension foreign key columns" do
+    @fact.dimensions :customer, :product
+
+    [{:name => :customer_dimension_id, :column_type => :integer, :unsigned => true, :null => false},
+     {:name => :product_dimension_id, :column_type => :integer, :unsigned => true, :null => false}
+    ].each do |column|
+      @fact.db_schema(@tc)[:sales_facts][:columns].should include(column)
+    end
+  end
+
+  it "should output the degenerate dimension columns" do
+    @fact.degenerate_dimensions do
+      string :reference
+    end
+
+    @fact.db_schema(@tc)[:sales_facts][:columns].should include({:name => :reference, :column_type => :varchar, :null => false})
+  end
+
+  it "should output the measure columns" do
+    @fact.measures do
+      integer :quantity
+    end
+
+    @fact.db_schema(@tc)[:sales_facts][:columns].should include({:name => :quantity, :column_type => :integer, :null => false, :unsigned => false})
+  end
 end

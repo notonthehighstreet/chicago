@@ -8,7 +8,7 @@ module Chicago
       { table_name => {
           :primary_key => primary_key,
           :table_options => type_converter.table_options,
-          :columns => []
+          :columns => column_definitions.map {|c| c.db_schema(type_converter) }
         }
       }
     end
