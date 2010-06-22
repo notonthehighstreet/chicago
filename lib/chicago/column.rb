@@ -88,7 +88,7 @@ module Chicago
       db_schema[:default]  = default   if default
       db_schema[:elements] = elements  if elements
       db_schema[:size]     = size      if size
-      db_schema[:unsigned] = unsigned? if column_type == :integer
+      db_schema[:unsigned] = !! unsigned? if column_type == :integer
       db_schema
     end
 
