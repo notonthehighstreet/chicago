@@ -142,4 +142,9 @@ describe "A Hash returned by Chicago::Column#db_schema" do
   it "should have a :size that is set explictly" do
     Column.new(:username, :money, :size => 'huge').db_schema(@tc)[:size].should == 'huge'
   end
+
+  it "should explicitly set the default to nil for timestamp columns" do
+    Column.new(:username, :timestamp).db_schema(@tc).has_key?(:default).should be_true
+    Column.new(:username, :timestamp).db_schema(@tc)[:default].should be_nil
+  end
 end

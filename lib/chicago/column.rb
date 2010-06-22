@@ -81,7 +81,7 @@ module Chicago
         :column_type => type_converter.db_type(self),
         :null => null?
       }
-      db_schema[:default]  = default   if default
+      db_schema[:default]  = default   if default || column_type == :timestamp
       db_schema[:elements] = elements  if elements
       db_schema[:size]     = size      if size
       db_schema[:unsigned] = !! unsigned? if numeric?
