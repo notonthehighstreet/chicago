@@ -78,24 +78,51 @@ module Chicago
     end
 
     # Returns the schema for this dimension.
+    # 
+    # This includes the base table, and a key mapping table if
+    # a column named :original_id is present.
     def db_schema(type_converter)      
-      { table_name => {
-          :primary_key => :id,
-          :table_options => type_converter.table_options,
-          :columns => [{:name => :id, :column_type => :integer, :unsigned => true}] + column_definitions.map {|c| c.db_schema(type_converter) }
-        }
-      }
+      @tables = {}
+      @tables[table_name] = base_table(type_converter)
+      @tables[key_table_name] = key_table(original_key, type_converter) if original_key
+      @tables
     end
       
     protected
-
     
+    # Use Dimension.define rather than constructing a Dimension manually.
     def initialize(name, opts={})
       super
       @conforms_to = opts[:conforms_to]
       @identifiers = []
       @column_definitions = []
       @table_name = "#{name}_dimension".to_sym
+    end
+
+    private
+
+    def base_table(type_converter)
+      {
+        :primary_key => :id,
+        :table_options => type_converter.table_options,
+        :columns => [{:name => :id, :column_type => :integer, :unsigned => true}] + column_definitions.map {|c| c.db_schema(type_converter) }
+      }
+    end
+
+    def key_table(original_id, type_converter)
+      {
+        :primary_key => [:original_id, :dimension_id],
+        :columns => [original_id.db_schema(type_converter),
+                     {:name => :dimension_id, :column_type => :integer, :unsigned => true, :null => false}]
+      }
+    end
+
+    def original_key
+      @original_key ||= @column_definitions.find {|c| c.name == :original_id }
+    end
+
+    def key_table_name
+      "#{table_name}_keys".to_sym
     end
   end
 end

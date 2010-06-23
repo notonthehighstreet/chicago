@@ -95,6 +95,22 @@ describe "Chicago::Dimension#db_schema" do
     expected = {:name => :username, :column_type => :varchar, :size => 10, :null => false}
     @dimension.db_schema(@tc)[:user_dimension][:columns].should include(expected)
   end
+
+  # This just supports internal convention at the moment
+  it "should create a key mapping table if an original_id column is present" do
+    @dimension.columns do
+      integer :original_id, :min => 0
+      string :username, :max => 10
+    end
+
+    key_table = @dimension.db_schema(@tc)[:user_dimension_keys]
+    key_table.should_not be_nil
+    key_table[:primary_key].should == [:original_id, :dimension_id]
+
+    expected = [{:name => :original_id, :column_type => :integer, :null => false, :unsigned => true},
+                {:name => :dimension_id, :column_type => :integer, :null => false, :unsigned => true}]
+    key_table[:columns].should == expected
+  end
 end
 
 describe "Conforming dimensions" do
