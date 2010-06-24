@@ -3,3 +3,4 @@ rdoc/
 spec/db_connections.yml
 \#*
 .\#*
+pkg

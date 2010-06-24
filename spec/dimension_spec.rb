@@ -13,6 +13,27 @@ describe Chicago::Dimension do
     Dimension.define(:user).table_name.should == :user_dimension
   end
 
+  it "should know every defined dimension" do
+    Dimension.clear_definitions
+    Dimension.define(:user)
+    Dimension.define(:product)
+    Dimension.definitions.size.should == 2
+    Dimension.definitions.map {|d| d.name }.should include(:user)
+    Dimension.definitions.map {|d| d.name }.should include(:product)
+  end
+
+  it "should not include fact definitions in its definitions" do
+    Dimension.clear_definitions
+    Fact.define(:sales)
+    Dimension.definitions.should be_empty
+  end
+
+  it "should be able to clear previously defined dimensions with #clear_definitions" do
+    Dimension.define(:user)
+    Dimension.clear_definitions
+    Dimension.definitions.should be_empty
+  end
+
   it "should define a group of columns" do
     column = stub(:column)
     mock_builder = mock(:builder)
@@ -73,5 +94,52 @@ describe "Chicago::Dimension#db_schema" do
 
     expected = {:name => :username, :column_type => :varchar, :size => 10, :null => false}
     @dimension.db_schema(@tc)[:user_dimension][:columns].should include(expected)
+  end
+
+  # This just supports internal convention at the moment
+  it "should create a key mapping table if an original_id column is present" do
+    @dimension.columns do
+      integer :original_id, :min => 0
+      string :username, :max => 10
+    end
+
+    key_table = @dimension.db_schema(@tc)[:user_dimension_keys]
+    key_table.should_not be_nil
+    key_table[:primary_key].should == [:original_id, :dimension_id]
+
+    expected = [{:name => :original_id, :column_type => :integer, :null => false, :unsigned => true},
+                {:name => :dimension_id, :column_type => :integer, :null => false, :unsigned => true}]
+    key_table[:columns].should == expected
+  end
+end
+
+describe "Conforming dimensions" do
+  it "should be able to conform to another dimension" do
+    Dimension.define(:date)
+    lambda { Dimension.define(:month, :conforms_to => :date) }.should_not raise_error
+  end
+
+  it "should raise an error if you attempt to conform to a non-existent dimension" do
+    Dimension.clear_definitions
+    lambda { Dimension.define(:month, :conforms_to => :date) }.should raise_error
+  end
+
+  it "should copy column definitions from its parent dimension" do
+    date_dimension = Dimension.define(:date) do
+      columns do
+        date   :date
+        string :month
+      end
+    end
+    definition = date_dimension.column_definitions.find {|d| d.name == :month }
+    Dimension.define(:month, :conforms_to => :date) { columns :month }.
+      column_definitions.first.should == definition
+  end
+
+  it "should raise an error if any extra columns are included (it doesn't conform)" do
+    Dimension.define(:date) { columns { string :month } }
+    lambda do 
+      Dimension.define(:month, :conforms_to => :date) { columns :month, :year }
+    end.should raise_error
   end
 end

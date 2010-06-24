@@ -22,6 +22,11 @@ shared_examples_for "All DB type converters" do
       @tc.db_type(column).should == :decimal
     end
 
+    it "should return :decimal for a percent column type" do
+      column = Column.new(:id, :percent)
+      @tc.db_type(column).should == :decimal
+    end
+
     it "should assume any other type is a database type and return it" do
       column = Column.new(:id, :foo)
       @tc.db_type(column).should == :foo

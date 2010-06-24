@@ -8,28 +8,34 @@ module Chicago
       { table_name => {
           :primary_key => primary_key,
           :table_options => type_converter.table_options,
-          :columns => []
+          :columns => column_definitions.map {|c| c.db_schema(type_converter) }
         }
       }
     end
 
     # Sets the primary key if given dimensions names, or returns the
-    # primary key with no arguments.
+    # primary key columns if called with no arguments.
     #
     # In general, only dimensions (real or degenerate) should be used
     # as part of the primary key. This isn't enforced at the moment,
     # but may be in the future.
     def primary_key(*dimensions)
       if dimensions.empty?
-        @primary_key if defined? @primary_key
+        @primary_key.call if defined? @primary_key
       else
-        @primary_key = dimensions
+        @primary_key = lambda do
+          dimensions.map {|sym| @dimension_names.include?(sym) ? dimension_key(sym) : sym }
+        end
       end
     end
 
     # Sets the dimensions with which a fact row is associated.
     def dimensions(*dimensions)
-      @dimension_names += dimensions
+      dimensions += dimensions.pop.keys if dimensions.last.kind_of? Hash
+      dimensions.each do |dimension|
+        @dimension_keys << Column.new(dimension_key(dimension), :integer, :null => false, :min => 0)
+        @dimension_names << dimension
+      end
     end
 
     # Defines the degenerate dimensions for this fact.
@@ -45,8 +51,19 @@ module Chicago
       @degenerate_dimensions += Schema::ColumnGroupBuilder.new(&block).column_definitions
     end
 
+    # Defines the measures for this fact.
+    #
+    # Measures are usually numeric values that will be aggregated.
+    #
+    # Within the block, use the standard column definition
+    # DSL, as for defining columns on a Dimension.
     def measures(&block)
-      @measures += Schema::ColumnGroupBuilder.new(&block).column_definitions
+      @measures += Schema::ColumnGroupBuilder.new(:null => true, &block).column_definitions
+    end
+
+    # Returns the all the column definitions for this fact.
+    def column_definitions
+      @dimension_keys + @degenerate_dimensions + @measures
     end
 
     # A Factless Fact table has no measures - it used only to express a
@@ -57,12 +74,19 @@ module Chicago
 
     protected
 
-    def initialize(name)
+    def initialize(name, opts={})
       super
       @table_name = "#{name}_facts".to_sym
       @dimension_names = []
       @degenerate_dimensions = []
       @measures = []
+      @dimension_keys = []
+    end
+
+    private
+
+    def dimension_key(sym)
+      "#{sym}_dimension_id".to_sym
     end
   end
 end

@@ -13,16 +13,22 @@ module Chicago
       #
       # This should be called on subclasses - i.e. Dimension.define or
       # Fact.define, not this class.
-      def define(name, &block)
-        definition = self.new(name)
+      def define(name, opts={}, &block)
+        definition = self.new(name, opts)
         definition.instance_eval(&block) if block_given?
-        @definitions ||= []
-        @definitions << definition
-        definition
+        @definitions ||= {}
+        @definitions[definition.name] = definition
       end
-      
+
+      # Removes all previously defined Facts or Dimensions from the list
+      # of known definitions.
+      def clear_definitions
+        @definitions = {}
+      end
+
+      # Returns a list of all defined Facts or Dimensions.
       def definitions
-        @definitions
+        (@definitions || {}).values
       end
     end
 
@@ -35,7 +41,7 @@ module Chicago
 
     protected
 
-    def initialize(name)
+    def initialize(name, opts={})
       @name = name.to_sym
     end
   end
