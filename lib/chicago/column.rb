@@ -6,9 +6,8 @@ module Chicago
   # to provide an abstract definition of the column for views
   # and other Data Warehouse code.
   #
-  # ColumnDefinition is low-level: you shouldn't need to
-  # create one from user code. Columns are generally defined
-  # using the DSL on Dimension or Fact.
+  # You shouldn't need to create a Column manually - they
+  # are generally defined using the DSL on Dimension or Fact.
   class Column
     # Creates a new column definition.
     # 
