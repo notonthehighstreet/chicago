@@ -100,10 +100,6 @@ module Chicago
       idx
     end
 
-    def index_name(name)
-      "#{name}_idx".to_sym
-    end
-
     def dimension_key(sym)
       "#{sym}_dimension_id".to_sym
     end

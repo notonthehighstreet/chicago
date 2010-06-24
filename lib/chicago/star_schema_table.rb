@@ -44,5 +44,9 @@ module Chicago
     def initialize(name, opts={})
       @name = name.to_sym
     end
+
+    def index_name(name)
+      "#{name}_idx".to_sym
+    end
   end
 end

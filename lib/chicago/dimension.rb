@@ -105,6 +105,7 @@ module Chicago
       {
         :primary_key => :id,
         :table_options => type_converter.table_options,
+        :indexes => indexes,
         :columns => [{:name => :id, :column_type => :integer, :unsigned => true}] + column_definitions.map {|c| c.db_schema(type_converter) }
       }
     end
@@ -123,6 +124,13 @@ module Chicago
 
     def key_table_name
       "#{table_name}_keys".to_sym
+    end
+
+    def indexes
+      @column_definitions.reject {|c| c.descriptive? }.inject({}) do |idx, column|
+        idx[index_name(column.name)] = {:columns => column.name}
+        idx
+      end
     end
   end
 end

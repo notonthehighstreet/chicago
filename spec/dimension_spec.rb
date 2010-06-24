@@ -96,6 +96,17 @@ describe "Chicago::Dimension#db_schema" do
     @dimension.db_schema(@tc)[:user_dimension][:columns].should include(expected)
   end
 
+  it "should output indexes for every column that isn't descriptive" do
+    @dimension.columns do
+      string :foo, :descriptive => true
+      string :bar
+      string :baz
+    end
+
+    expected = {:bar_idx => {:columns => :bar}, :baz_idx => {:columns => :baz}}
+    @dimension.db_schema(@tc)[:user_dimension][:indexes].should == expected
+  end
+
   # This just supports internal convention at the moment
   it "should create a key mapping table if an original_id column is present" do
     @dimension.columns do
