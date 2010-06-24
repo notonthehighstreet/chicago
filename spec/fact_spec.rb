@@ -24,6 +24,14 @@ describe Chicago::Fact do
     fact.primary_key.should == [:product_dimension_id, :customer, :date]
   end
 
+  it "should set a primary key with one column" do
+    fact = Fact.define(:sales)
+    fact.primary_key :product
+    fact.dimensions :product
+
+    fact.primary_key.should == :product_dimension_id
+  end
+
   it "should set the dimensions for the fact" do
     fact = Fact.define(:sales) do
       dimensions :product, :customer
@@ -143,5 +151,16 @@ describe "Chicago::Fact#db_schema" do
     end
 
     @fact.db_schema(@tc)[:sales_facts][:columns].should include({:name => :quantity, :column_type => :integer, :null => true, :unsigned => false})
+  end
+
+  it "should define non-unique indexes for every dimension, except the first part of the primary key" do
+    @fact.dimensions :foo, :bar
+    @fact.primary_key :foo
+    @fact.degenerate_dimensions { integer :baz }
+
+    @fact.db_schema(@tc)[:sales_facts][:indexes].should == {
+      :bar_idx => { :columns => :bar_dimension_id },
+      :baz_idx => { :columns => :baz }
+    }
   end
 end

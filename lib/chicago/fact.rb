@@ -8,6 +8,7 @@ module Chicago
       { table_name => {
           :primary_key => primary_key,
           :table_options => type_converter.table_options,
+          :indexes => indexes,
           :columns => column_definitions.map {|c| c.db_schema(type_converter) }
         }
       }
@@ -24,7 +25,8 @@ module Chicago
         @primary_key.call if defined? @primary_key
       else
         @primary_key = lambda do
-          dimensions.map {|sym| @dimension_names.include?(sym) ? dimension_key(sym) : sym }
+          keys = dimensions.map {|sym| @dimension_names.include?(sym) ? dimension_key(sym) : sym }
+          keys.size == 1 ? keys.first : keys
         end
       end
     end
@@ -84,6 +86,23 @@ module Chicago
     end
 
     private
+
+    def indexes
+      idx = {}
+      @dimension_names.each {|name| idx[index_name(name)] = {:columns => dimension_key(name)} }
+      @degenerate_dimensions.each {|d| idx[index_name(d.name)] = {:columns => d.name} }
+
+      if primary_key
+        first_pk_column = primary_key.kind_of?(Array) ? primary_key.first : primary_key
+        idx.delete(index_name(first_pk_column.to_s.sub(/_dimension_id/,'').to_sym))
+      end
+
+      idx
+    end
+
+    def index_name(name)
+      "#{name}_idx".to_sym
+    end
 
     def dimension_key(sym)
       "#{sym}_dimension_id".to_sym
