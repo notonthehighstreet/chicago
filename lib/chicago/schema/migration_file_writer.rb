@@ -1,3 +1,5 @@
+require 'sequel/migration_builder'
+
 module Chicago
   module Schema
     # Writes Sequel migrations for the star schema
