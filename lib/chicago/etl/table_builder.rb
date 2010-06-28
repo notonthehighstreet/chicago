@@ -17,6 +17,7 @@ module Chicago
           primary_key :id, :unsigned => true
           timestamp   :started_at
           timestamp   :finished_at, :null => true, :default => nil
+          enum        :state, :null => false, :elements => %w{Started Finished Error}, :default => "Started"
         end
       end
 
