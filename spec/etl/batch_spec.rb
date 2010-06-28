@@ -23,4 +23,10 @@ describe Chicago::ETL::Batch do
   it "should return the batch directory path from #dir" do
     ETL::Batch.create.dir.should == Chicago.project_root + "/tmp/batches/1"
   end
+
+  it "should set the finished_at timestamp when #finish is called" do
+    batch = ETL::Batch.create
+    batch.finish
+    batch.finished_at.should_not be_nil
+  end
 end
