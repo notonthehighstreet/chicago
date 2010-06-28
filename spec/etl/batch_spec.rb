@@ -1,5 +1,4 @@
 require File.dirname(__FILE__) + "/../spec_helper"
-require 'fileutils'
 
 describe Chicago::ETL::Batch do
   before :each do
@@ -54,5 +53,11 @@ describe Chicago::ETL::Batch do
     batch = ETL::Batch.start
     batch.error
     ETL::Batch.start.should == batch
+  end
+
+  it "should create a log in tmp/batches/1/log" do
+    ETL::Batch.start
+    File.read(Chicago.project_root + "/tmp/batches/1/log").
+      should include("Started ETL batch 1.")
   end
 end

@@ -1,4 +1,5 @@
 require 'FileUtils'
+require 'logger'
 
 module Chicago
   module ETL
@@ -15,10 +16,14 @@ module Chicago
       # an error state.
       def self.start
         if last_batch.nil? || last_batch.finished?
-          create
+          batch = create
+          batch.log.info "Started ETL batch #{batch.id}."
         else
-          last_batch
+          batch = last_batch
+          batch.log.info "Resumed ETL batch #{batch.id}."
         end
+
+        batch
       end
       
       # Returns the last batch run, or nil if this is the first batch.
@@ -49,6 +54,11 @@ module Chicago
       # Returns true if in the error state
       def in_error?
         state == "Error"
+      end
+
+      # Returns the logger for this batch
+      def log
+        @log ||= Logger.new(File.join(dir, "log"))
       end
 
       def after_create # :nodoc:
