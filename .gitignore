@@ -1,6 +1,7 @@
 coverage/
 rdoc/
 spec/db_connections.yml
+spec/tmp
 \#*
 .\#*
 pkg
