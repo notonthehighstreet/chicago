@@ -26,5 +26,6 @@ module Chicago
   module ETL
     autoload :TableBuilder, "chicago/etl/table_builder.rb"
     autoload :Batch, "chicago/etl/batch.rb"
+    autoload :TaskInvocation, "chicago/etl/task_invocation.rb"
   end
 end

@@ -12,6 +12,8 @@ module Chicago
     class Batch < Sequel::Model
       set_dataset :etl_batches
 
+      one_to_many :tasks
+
       # Starts a new batch, or resumes a previous batch that ended in
       # an error state.
       def self.start
