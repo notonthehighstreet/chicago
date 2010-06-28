@@ -29,7 +29,7 @@ task :flog do
   sh 'find lib -name "*.rb" | xargs flog'
 end
 
-load 'lib/tasks/stats.rake'
+load 'tasks/stats.rake'
 
 task :default => :spec
 
