@@ -1,4 +1,5 @@
 module Chicago
+  module Schema
   # A column in a dimension or fact record.
   #
   # The column definition is used to generate the options
@@ -134,4 +135,5 @@ module Chicago
       0 if type == :money
     end
   end
+end
 end

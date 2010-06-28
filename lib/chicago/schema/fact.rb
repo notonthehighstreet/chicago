@@ -1,4 +1,6 @@
 module Chicago
+  module Schema
+
   class Fact < StarSchemaTable
     # Returns the dimension names with which this fact table is associated.
     attr_reader :dimension_names
@@ -50,7 +52,7 @@ module Chicago
     # Within the block, use the standard column definition
     # DSL, as for defining columns on a Dimension.
     def degenerate_dimensions(&block)
-      @degenerate_dimensions += Schema::ColumnGroupBuilder.new(&block).column_definitions
+      @degenerate_dimensions += ColumnGroupBuilder.new(&block).column_definitions
     end
 
     # Defines the measures for this fact.
@@ -60,7 +62,7 @@ module Chicago
     # Within the block, use the standard column definition
     # DSL, as for defining columns on a Dimension.
     def measures(&block)
-      @measures += Schema::ColumnGroupBuilder.new(:null => true, &block).column_definitions
+      @measures += ColumnGroupBuilder.new(:null => true, &block).column_definitions
     end
 
     # Returns the all the column definitions for this fact.
@@ -104,4 +106,5 @@ module Chicago
       "#{sym}_dimension_id".to_sym
     end
   end
+end
 end

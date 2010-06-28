@@ -1,4 +1,6 @@
 module Chicago
+  module Schema
+
   class Dimension < StarSchemaTable
     # Returns an Array of possible identifying columns for this dimension.
     attr_reader :identifiers
@@ -52,7 +54,7 @@ module Chicago
         raise "Extra non-conforming columns detected" if definitions.size != names.size
         @column_definitions += definitions
       else
-        @column_definitions += Schema::ColumnGroupBuilder.new(&block).column_definitions
+        @column_definitions += ColumnGroupBuilder.new(&block).column_definitions
       end
     end
 
@@ -133,4 +135,5 @@ module Chicago
       end
     end
   end
+end
 end

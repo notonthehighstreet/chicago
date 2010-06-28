@@ -1,37 +1,37 @@
-require File.dirname(__FILE__) + "/spec_helper"
+require File.dirname(__FILE__) + "/../spec_helper"
 
-describe Chicago::Dimension do
+describe Chicago::Schema::Dimension do
   it "should be constructed with a dimension name" do
-    Dimension.define(:user).name.should == :user
+    Schema::Dimension.define(:user).name.should == :user
   end
 
   it "should return a symbol from #name" do
-    Dimension.define('user').name.should == :user
+    Schema::Dimension.define('user').name.should == :user
   end
 
   it "should have a table name" do
-    Dimension.define(:user).table_name.should == :user_dimension
+    Schema::Dimension.define(:user).table_name.should == :user_dimension
   end
 
   it "should know every defined dimension" do
-    Dimension.clear_definitions
-    Dimension.define(:user)
-    Dimension.define(:product)
-    Dimension.definitions.size.should == 2
-    Dimension.definitions.map {|d| d.name }.should include(:user)
-    Dimension.definitions.map {|d| d.name }.should include(:product)
+    Schema::Dimension.clear_definitions
+    Schema::Dimension.define(:user)
+    Schema::Dimension.define(:product)
+    Schema::Dimension.definitions.size.should == 2
+    Schema::Dimension.definitions.map {|d| d.name }.should include(:user)
+    Schema::Dimension.definitions.map {|d| d.name }.should include(:product)
   end
 
   it "should not include fact definitions in its definitions" do
-    Dimension.clear_definitions
-    Fact.define(:sales)
-    Dimension.definitions.should be_empty
+    Schema::Dimension.clear_definitions
+    Schema::Fact.define(:sales)
+    Schema::Dimension.definitions.should be_empty
   end
 
   it "should be able to clear previously defined dimensions with #clear_definitions" do
-    Dimension.define(:user)
-    Dimension.clear_definitions
-    Dimension.definitions.should be_empty
+    Schema::Dimension.define(:user)
+    Schema::Dimension.clear_definitions
+    Schema::Dimension.definitions.should be_empty
   end
 
   it "should define a group of columns" do
@@ -40,7 +40,7 @@ describe Chicago::Dimension do
     Schema::ColumnGroupBuilder.should_receive(:new).and_return(mock_builder)
     mock_builder.should_receive(:column_definitions).and_return([column])
 
-    dd = Dimension.define(:user) do
+    dd = Schema::Dimension.define(:user) do
       columns { string :username }
     end
 
@@ -48,11 +48,11 @@ describe Chicago::Dimension do
   end
 
   it "should specify a main identifier column" do
-    Dimension.define(:user) { identified_by :username }.main_identifier.should == :username
+    Schema::Dimension.define(:user) { identified_by :username }.main_identifier.should == :username
   end
 
   it "should allow additional identifying columns" do
-    dimension = Dimension.define(:user) { identified_by :username, :and => [:email] }
+    dimension = Schema::Dimension.define(:user) { identified_by :username, :and => [:email] }
 
     dimension.main_identifier.should == :username
     dimension.identifiers.should == [:username, :email]
@@ -61,8 +61,8 @@ end
 
 describe "Chicago::Dimension#db_schema" do
   before :each do 
-    @dimension = Dimension.define(:user)
-    @tc = Chicago::Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :generic))
+    @dimension = Schema::Dimension.define(:user)
+    @tc = Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :generic))
   end
 
   it "should define a user_dimension table" do
@@ -83,7 +83,7 @@ describe "Chicago::Dimension#db_schema" do
   end
 
   it "should have a table type of MyISAM for mysql" do
-    @tc = Chicago::Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :mysql))
+    @tc = Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :mysql))
     @dimension.db_schema(@tc)[:user_dimension][:table_options].should == {:engine => "myisam"}
   end
 
@@ -126,31 +126,31 @@ end
 
 describe "Conforming dimensions" do
   it "should be able to conform to another dimension" do
-    Dimension.define(:date)
-    lambda { Dimension.define(:month, :conforms_to => :date) }.should_not raise_error
+    Schema::Dimension.define(:date)
+    lambda { Schema::Dimension.define(:month, :conforms_to => :date) }.should_not raise_error
   end
 
   it "should raise an error if you attempt to conform to a non-existent dimension" do
-    Dimension.clear_definitions
-    lambda { Dimension.define(:month, :conforms_to => :date) }.should raise_error
+    Schema::Dimension.clear_definitions
+    lambda { Schema::Dimension.define(:month, :conforms_to => :date) }.should raise_error
   end
 
   it "should copy column definitions from its parent dimension" do
-    date_dimension = Dimension.define(:date) do
+    date_dimension = Schema::Dimension.define(:date) do
       columns do
         date   :date
         string :month
       end
     end
     definition = date_dimension.column_definitions.find {|d| d.name == :month }
-    Dimension.define(:month, :conforms_to => :date) { columns :month }.
+    Schema::Dimension.define(:month, :conforms_to => :date) { columns :month }.
       column_definitions.first.should == definition
   end
 
   it "should raise an error if any extra columns are included (it doesn't conform)" do
-    Dimension.define(:date) { columns { string :month } }
+    Schema::Dimension.define(:date) { columns { string :month } }
     lambda do 
-      Dimension.define(:month, :conforms_to => :date) { columns :month, :year }
+      Schema::Dimension.define(:month, :conforms_to => :date) { columns :month, :year }
     end.should raise_error
   end
 end

@@ -1,4 +1,5 @@
 module Chicago
+  module Schema
   # Writes Sequel migrations for the star schema
   class MigrationFileWriter
     # Creates a new migration file writer, given a Sequel::Database
@@ -7,7 +8,7 @@ module Chicago
     def initialize(db, migration_directory)
       @db = db
       @migration_directory = migration_directory
-      @type_converter = Schema::TypeConverters::DbTypeConverter.for_db(@db)
+      @type_converter = TypeConverters::DbTypeConverter.for_db(@db)
     end
 
     # Writes the migration file necessary for all defined facts and dimensions.
@@ -31,4 +32,5 @@ module Chicago
       definitions.inject({}) {|hsh, d| hsh.merge d.db_schema(@type_converter) }
     end
   end
+end
 end

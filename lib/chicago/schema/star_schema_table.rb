@@ -1,4 +1,6 @@
 module Chicago
+  module Schema
+
   # Base class for both Dimensions and Facts.
   class StarSchemaTable
     # Returns the name of this dimension
@@ -49,4 +51,5 @@ module Chicago
       "#{name}_idx".to_sym
     end
   end
+end
 end
