@@ -16,7 +16,6 @@ module Chicago
         # Currently only supports MySql-specific types
         def self.for_db(db)
           return MysqlTypeConverter.new if db.database_type == :mysql
-
           self.new
         end
 
