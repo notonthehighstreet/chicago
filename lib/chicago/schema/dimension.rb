@@ -102,15 +102,6 @@ module Chicago
 
       private
 
-      def base_table(type_converter)
-        {
-          :primary_key => :id,
-          :table_options => type_converter.table_options,
-          :indexes => indexes,
-          :columns => [{:name => :id, :column_type => :integer, :unsigned => true}] + column_definitions.map {|c| c.db_schema(type_converter) }
-        }
-      end
-
       def key_table(original_id, type_converter)
         {
           :primary_key => [:original_id, :dimension_id],

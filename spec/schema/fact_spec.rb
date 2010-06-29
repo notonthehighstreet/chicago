@@ -9,29 +9,6 @@ describe Chicago::Schema::Fact do
     Schema::Fact.define(:sales).table_name.should == :sales_facts
   end
 
-  it "should set a primary key" do
-    fact = Schema::Fact.define(:sales) do
-      primary_key :product, :customer, :date
-    end
-    fact.primary_key.should == [:product, :customer, :date]
-  end
-
-  it "should return the dimension key id if the primary key includes a dimension" do
-    fact = Schema::Fact.define(:sales) do
-      primary_key :product, :customer, :date
-      dimensions :product
-    end
-    fact.primary_key.should == [:product_dimension_id, :customer, :date]
-  end
-
-  it "should set a primary key with one column" do
-    fact = Schema::Fact.define(:sales)
-    fact.primary_key :product
-    fact.dimensions :product
-
-    fact.primary_key.should == :product_dimension_id
-  end
-
   it "should set the dimensions for the fact" do
     fact = Schema::Fact.define(:sales) do
       dimensions :product, :customer
@@ -113,6 +90,15 @@ describe "Chicago::Fact#db_schema" do
     @fact.db_schema(@tc).keys.should include(:sales_facts)
   end
 
+  it "should have an unsigned integer :id column" do
+    expected = {:name => :id, :column_type => :integer, :unsigned => true}
+    @fact.db_schema(@tc)[:sales_facts][:columns].should include(expected)
+  end
+
+  it "should define :id as the primary key" do
+    @fact.db_schema(@tc)[:sales_facts][:primary_key].should == :id
+  end
+
   it "should include a hash of table options" do
     @fact.db_schema(@tc)[:sales_facts][:table_options].should == {}
   end
@@ -120,11 +106,6 @@ describe "Chicago::Fact#db_schema" do
   it "should have a table type of MyISAM for mysql" do
     @tc = Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :mysql))
     @fact.db_schema(@tc)[:sales_facts][:table_options].should == {:engine => "myisam"}
-  end
-
-  it "should output the primary key" do
-    @fact.primary_key :foo, :bar
-    @fact.db_schema(@tc)[:sales_facts][:primary_key].should == [:foo, :bar]
   end
 
   it "should output the dimension foreign key columns" do
@@ -153,9 +134,8 @@ describe "Chicago::Fact#db_schema" do
     @fact.db_schema(@tc)[:sales_facts][:columns].should include({:name => :quantity, :column_type => :integer, :null => true, :unsigned => false})
   end
 
-  it "should define non-unique indexes for every dimension, except the first part of the primary key" do
-    @fact.dimensions :foo, :bar
-    @fact.primary_key :foo
+  it "should define non-unique indexes for every dimension" do
+    @fact.dimensions :bar
     @fact.degenerate_dimensions { integer :baz }
 
     @fact.db_schema(@tc)[:sales_facts][:indexes].should == {
