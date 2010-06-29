@@ -12,6 +12,18 @@ describe Chicago::ETL::TaskInvocation do
     TEST_DB[:etl_task_invocations].truncate
     TEST_DB[:etl_batches].truncate
   end
+  
+  after :each do
+    tmpdir = File.expand_path(File.join(File.dirname(__FILE__), "..", "tmp"))
+    FileUtils.rm_r(tmpdir) if File.exists?(tmpdir)
+  end
+  
+  it "should be associated with an ETL Batch" do
+    batch = create_batch
+    batch.should_not be_nil
+    t = ETL::TaskInvocation.create(:batch => batch)
+    t.reload.batch.should == batch
+  end
 
   it "should be unqiue by name across an ETL Batch" do
     attrs = {:batch_id => 1, :name => "foo"}
@@ -59,5 +71,17 @@ describe Chicago::ETL::TaskInvocation do
     task.attempts.should == 1
     lambda { task.perform { raise "Boom" } }.should raise_error
     task.attempts.should == 2
+  end
+
+  it "should set the associated batch into an error state" do
+    batch = create_batch
+    task = ETL::TaskInvocation.create(:batch => batch)
+    task.perform { raise "Boom" } rescue nil
+    task.batch.should be_in_error
+  end
+
+  def create_batch
+    Chicago.project_root = File.expand_path(File.join(File.dirname(__FILE__), ".."))
+    ETL::Batch.create
   end
 end

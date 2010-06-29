@@ -3,7 +3,7 @@ module Chicago
 
     class TaskInvocation < Sequel::Model
       set_dataset :etl_task_invocations
-      many_to_one :etl_batch
+      many_to_one :batch
 
       # Executes a block of code.
       #
@@ -16,6 +16,7 @@ module Chicago
           yield
         rescue Exception => e
           update(:state => "Error")
+          batch.error if batch
           raise e
         end
         update(:state => "Finished", :finished_at => Time.now)

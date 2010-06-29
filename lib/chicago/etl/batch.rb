@@ -12,7 +12,7 @@ module Chicago
     class Batch < Sequel::Model
       set_dataset :etl_batches
 
-      one_to_many :tasks
+      one_to_many :task_invocations
 
       # Starts a new batch, or resumes a previous batch that ended in
       # an error state.
