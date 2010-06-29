@@ -30,7 +30,7 @@ module Chicago
           enum        :state, :null => false, :elements => %w{Created Started Finished Error}, :default => "Created"
           smallint    :attempts, :null => false, :unsigned => true
 
-          index [:batch_id, :name], :unique => true
+          index [:batch_id, :stage, :name], :unique => true
         end
       end
 

@@ -25,8 +25,8 @@ describe Chicago::ETL::TaskInvocation do
     t.reload.batch.should == batch
   end
 
-  it "should be unqiue by name across an ETL Batch" do
-    attrs = {:batch_id => 1, :name => "foo"}
+  it "should be unqiue by name across an ETL Batch and stage" do
+    attrs = {:batch_id => 1, :stage => "Extract", :name => "foo"}
     ETL::TaskInvocation.create(attrs)
     lambda { ETL::TaskInvocation.create(attrs) }.should raise_error(Sequel::DatabaseError)
   end
