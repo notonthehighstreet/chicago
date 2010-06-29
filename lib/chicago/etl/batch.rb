@@ -32,6 +32,13 @@ module Chicago
       def self.last_batch
         order(:started_at).last
       end
+      
+      # Perform a named task if it hasn't already run successfully in
+      # this batch.
+      def perform_task(stage, task_name, &block)
+        task = find_or_create_task_invocation(stage, task_name)
+        task.perform(&block) unless task.finished?
+      end
 
       # Returns the directory files & batch logs will be written to.
       def dir
@@ -65,6 +72,13 @@ module Chicago
 
       def after_create # :nodoc:
         FileUtils.mkdir_p dir
+      end
+
+      private
+
+      def find_or_create_task_invocation(stage, name)
+        attrs = {:stage => stage, :name => name}
+        task_invocations_dataset.filter(attrs).first || add_task_invocation(attrs)
       end
     end
   end

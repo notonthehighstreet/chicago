@@ -60,4 +60,12 @@ describe Chicago::ETL::Batch do
     File.read(Chicago.project_root + "/tmp/batches/1/log").
       should include("Started ETL batch 1.")
   end
+
+  it "should perform a task only once" do
+    batch = ETL::Batch.start
+    i = 0
+    2.times { batch.perform_task("Transform", "Test") { i += 1} }
+    i.should == 1
+    batch.task_invocations_dataset.filter(:stage => "Transform", :name => "Test").count.should == 1
+  end
 end
