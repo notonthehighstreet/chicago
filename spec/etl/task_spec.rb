@@ -37,7 +37,7 @@ describe Chicago::ETL::TaskInvocation do
 
   it "should perform an action in a block, and set it's state to Error if an exception is raised" do
     task = ETL::TaskInvocation.create
-    lambda { task.perform { raise "Boom" } }.should raise_error
+    lambda { task.perform { raise "Boom" } }.should raise_error(RuntimeError, "Boom")
     task.state.should == "Error"
   end
 
@@ -67,9 +67,9 @@ describe Chicago::ETL::TaskInvocation do
 
   it "should increment the number of attempts each time the task is performed" do
     task = ETL::TaskInvocation.create
-    lambda { task.perform { raise "Boom" } }.should raise_error
+    task.perform { raise "Boom" } rescue nil
     task.attempts.should == 1
-    lambda { task.perform { raise "Boom" } }.should raise_error
+    task.perform { raise "Boom" } rescue nil
     task.attempts.should == 2
   end
 
