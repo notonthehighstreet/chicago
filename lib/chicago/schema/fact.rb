@@ -6,13 +6,7 @@ module Chicago
 
       # Returns the schema for this fact.
       def db_schema(type_converter)      
-        { table_name => {
-            :primary_key => primary_key,
-            :table_options => type_converter.table_options,
-            :indexes => indexes,
-            :columns => column_definitions.map {|c| c.db_schema(type_converter) }
-          }
-        }
+        {table_name => base_table(type_converter)}
       end
 
       # Sets the primary key if given dimensions names, or returns the

@@ -46,8 +46,19 @@ module Chicago
         @name = name.to_sym
       end
 
+      # Returns the standard index name for a column / dimension name.
       def index_name(name)
         "#{name}_idx".to_sym
+      end
+
+      # Returns a hash defining the main table for the dimension or fact.
+      def base_table(type_converter)
+        {
+          :primary_key => :id,
+          :table_options => type_converter.table_options,
+          :indexes => indexes,
+          :columns => [{:name => :id, :column_type => :integer, :unsigned => true}] + column_definitions.map {|c| c.db_schema(type_converter) }
+        }
       end
     end
   end
