@@ -1,5 +1,6 @@
 # Requires go here
 require 'sequel'
+require 'chicago/definable'
 require 'chicago/schema/constants'
 require 'chicago/schema/column'
 require 'chicago/schema/star_schema_table'
@@ -24,8 +25,9 @@ module Chicago
   end
 
   module ETL
-    autoload :TableBuilder, "chicago/etl/table_builder.rb"
-    autoload :Batch, "chicago/etl/batch.rb"
+    autoload :TableBuilder,   "chicago/etl/table_builder.rb"
+    autoload :Batch,          "chicago/etl/batch.rb"
     autoload :TaskInvocation, "chicago/etl/task_invocation.rb"
+    autoload :TableSource,    "chicago/etl/table_source.rb"
   end
 end

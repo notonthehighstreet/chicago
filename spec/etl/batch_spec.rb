@@ -10,7 +10,7 @@ describe Chicago::ETL::Batch do
     FileUtils.rm_r(tmpdir) if File.exists?(tmpdir)
   end
 
-  it "should return a new batch when start is called and there are no outstanding batches in error" do
+  it "should return a new batch when instance is called and there are no outstanding batches in error" do
     ETL::Batch.instance.should be_new
   end
 
