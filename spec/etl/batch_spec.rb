@@ -11,58 +11,58 @@ describe Chicago::ETL::Batch do
   end
 
   it "should return a new batch when start is called and there are no outstanding batches in error" do
-    ETL::Batch.start.should be_kind_of(ETL::Batch)
+    ETL::Batch.instance.should be_new
   end
 
   it "should set the start timestamp of the batch to now when created" do
-    ETL::Batch.start.started_at.to_i.should == Time.now.to_i
+    ETL::Batch.instance.start.started_at.to_i.should == Time.now.to_i
   end
 
   it "should have a state of 'Started' when started" do
-    ETL::Batch.start.state.should == "Started"
+    ETL::Batch.instance.start.state.should == "Started"
   end
 
   it "should create a directory tmp/batches/1 under the project root when created" do
-    ETL::Batch.start
+    ETL::Batch.instance.start
     File.should be_directory(Chicago.project_root + "/tmp/batches/1")
   end
 
   it "should return the batch directory path from #dir" do
-    ETL::Batch.start.dir.should == Chicago.project_root + "/tmp/batches/1"
+    ETL::Batch.instance.start.dir.should == Chicago.project_root + "/tmp/batches/1"
   end
 
   it "should set the finished_at timestamp when #finish is called" do
-    batch = ETL::Batch.start
+    batch = ETL::Batch.instance.start
     batch.finish
     batch.finished_at.should_not be_nil
     batch.state.should == "Finished"
   end
 
   it "should return true from #error? if in the error state" do
-    batch = ETL::Batch.start
+    batch = ETL::Batch.instance.start
     batch.error
     batch.should be_in_error
   end
 
   it "should not return a new batch if the last batch was not finished" do
-    batch = ETL::Batch.start
-    ETL::Batch.start.should == batch
+    batch = ETL::Batch.instance.start
+    ETL::Batch.instance == batch
   end
 
   it "should not return a new batch if the last batch ended in error" do
-    batch = ETL::Batch.start
+    batch = ETL::Batch.instance.start
     batch.error
-    ETL::Batch.start.should == batch
+    ETL::Batch.instance.should == batch
   end
 
   it "should create a log in tmp/batches/1/log" do
-    ETL::Batch.start
+    ETL::Batch.instance.start
     File.read(Chicago.project_root + "/tmp/batches/1/log").
       should include("Started ETL batch 1.")
   end
 
   it "should perform a task only once" do
-    batch = ETL::Batch.start
+    batch = ETL::Batch.instance.start
     i = 0
     2.times { batch.perform_task("Transform", "Test") { i += 1} }
     i.should == 1

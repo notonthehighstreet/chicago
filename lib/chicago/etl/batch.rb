@@ -14,25 +14,23 @@ module Chicago
 
       one_to_many :task_invocations
 
-      # Starts a new batch, or resumes a previous batch that ended in
-      # an error state.
-      def self.start
-        if last_batch.nil? || last_batch.finished?
-          batch = create
-          batch.log.info "Started ETL batch #{batch.id}."
-        else
-          batch = last_batch
-          batch.log.info "Resumed ETL batch #{batch.id}."
+      class << self
+        # Returns the Batch that should be used for the ETL process.
+        #
+        # A new batch is returned, unless the previous batch did not
+        # finish successfully.
+        #
+        # This should be used in preference to new or create.
+        def instance
+          (last_batch.nil? || last_batch.finished?) ? new : last_batch
         end
+      
+        # Returns the last batch run, or nil if this is the first batch.
+        def last_batch
+          order(:started_at).last
+        end
+      end
 
-        batch
-      end
-      
-      # Returns the last batch run, or nil if this is the first batch.
-      def self.last_batch
-        order(:started_at).last
-      end
-      
       # Perform a named task if it hasn't already run successfully in
       # this batch.
       def perform_task(stage, task_name, &block)
@@ -43,6 +41,17 @@ module Chicago
       # Returns the directory files & batch logs will be written to.
       def dir
         @dir ||= File.join(Chicago.project_root, "tmp", "batches", id.to_s)
+      end
+
+      # Starts this batch.
+      def start
+        save if new?
+        if state == "Started"
+          log.info "Started ETL batch #{id}."
+        else
+          log.info "Resumed ETL batch #{id}."
+        end
+        self
       end
 
       # Finishes this batch, and sets the finished_at timestamp.
