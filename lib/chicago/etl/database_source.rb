@@ -8,8 +8,8 @@ module Chicago
       # Returns the name of this source.
       attr_reader :name
       
-      # Returns the staging area table name.
-      attr_reader :table_name
+      # Returns/Sets the staging area table name.
+      attr_accessor :table_name
 
       # Returns the names of the columns that will be extracted.
       attr_reader :column_names
@@ -18,7 +18,7 @@ module Chicago
       def columns(*names)
         @column_names += names
       end
-
+      
       protected
 
       def initialize(name, opts)
