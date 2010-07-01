@@ -2,7 +2,7 @@ module Chicago
   module ETL
     # A definition of the columns to extract from a table in a source
     # database.
-    class TableSource
+    class DatabaseSource
       extend Definable
 
       # Returns the name of this source.

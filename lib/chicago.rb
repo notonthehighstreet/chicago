@@ -28,6 +28,6 @@ module Chicago
     autoload :TableBuilder,   "chicago/etl/table_builder.rb"
     autoload :Batch,          "chicago/etl/batch.rb"
     autoload :TaskInvocation, "chicago/etl/task_invocation.rb"
-    autoload :TableSource,    "chicago/etl/table_source.rb"
+    autoload :DatabaseSource, "chicago/etl/database_source.rb"
   end
 end
