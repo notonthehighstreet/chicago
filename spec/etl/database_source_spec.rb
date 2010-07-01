@@ -6,13 +6,17 @@ describe Chicago::ETL::DatabaseSource do
   end
 
   it "should have a table name for the table in the staging area" do
-    ETL::DatabaseSource.define(:users).table_name.should == :original_users
+    ETL::DatabaseSource.define(:users).staging_table_name.should == :original_users
   end
 
-  it "should have a mutable table name" do
+  it "should have a table name for the table in the source database" do
+    ETL::DatabaseSource.define(:users).source_table_name.should == :users
+  end
+
+  it "should have a mutable source table name" do
     ETL::DatabaseSource.define(:users) do
-      self.table_name = :foo_bar
-    end.table_name.should == :foo_bar
+      self.source_table_name = :foo_bar
+    end.source_table_name.should == :foo_bar
   end
 
   it "should define the columns to be extracted" do
