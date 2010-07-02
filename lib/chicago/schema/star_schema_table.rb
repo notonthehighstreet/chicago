@@ -32,7 +32,7 @@ module Chicago
       # Returns a hash defining the main table for the dimension or fact.
       def base_table(type_converter)
         {
-          :primary_key => :id,
+          :primary_key => [:id],
           :table_options => type_converter.table_options,
           :indexes => indexes,
           :columns => [{:name => :id, :column_type => :integer, :unsigned => true}] + column_definitions.map {|c| c.db_schema(type_converter) }

@@ -96,7 +96,7 @@ describe "Chicago::Fact#db_schema" do
   end
 
   it "should define :id as the primary key" do
-    @fact.db_schema(@tc)[:sales_facts][:primary_key].should == :id
+    @fact.db_schema(@tc)[:sales_facts][:primary_key].should == [:id]
   end
 
   it "should include a hash of table options" do

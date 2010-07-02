@@ -92,7 +92,7 @@ describe "Chicago::Dimension#db_schema" do
   end
 
   it "should define :id as the primary key" do
-    @dimension.db_schema(@tc)[:user_dimension][:primary_key].should == :id
+    @dimension.db_schema(@tc)[:user_dimension][:primary_key].should == [:id]
   end
 
   it "should include a hash of table options" do
