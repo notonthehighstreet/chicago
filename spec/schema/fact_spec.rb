@@ -6,7 +6,7 @@ describe Chicago::Schema::Fact do
   end
 
   it "should have a table name" do
-    Schema::Fact.define(:sales).table_name.should == :sales_facts
+    Schema::Fact.define(:sales).table_name.should == :facts_sales
   end
 
   it "should set the dimensions for the fact" do
@@ -87,25 +87,25 @@ describe "Chicago::Fact#db_schema" do
   end
 
   it "should define a sales_facts table" do
-    @fact.db_schema(@tc).keys.should include(:sales_facts)
+    @fact.db_schema(@tc).keys.should include(:facts_sales)
   end
 
   it "should have an unsigned integer :id column" do
     expected = {:name => :id, :column_type => :integer, :unsigned => true}
-    @fact.db_schema(@tc)[:sales_facts][:columns].should include(expected)
+    @fact.db_schema(@tc)[:facts_sales][:columns].should include(expected)
   end
 
   it "should define :id as the primary key" do
-    @fact.db_schema(@tc)[:sales_facts][:primary_key].should == [:id]
+    @fact.db_schema(@tc)[:facts_sales][:primary_key].should == [:id]
   end
 
   it "should include a hash of table options" do
-    @fact.db_schema(@tc)[:sales_facts][:table_options].should == {}
+    @fact.db_schema(@tc)[:facts_sales][:table_options].should == {}
   end
 
   it "should have a table type of MyISAM for mysql" do
     @tc = Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :mysql))
-    @fact.db_schema(@tc)[:sales_facts][:table_options].should == {:engine => "myisam"}
+    @fact.db_schema(@tc)[:facts_sales][:table_options].should == {:engine => "myisam"}
   end
 
   it "should output the dimension foreign key columns" do
@@ -114,7 +114,7 @@ describe "Chicago::Fact#db_schema" do
     [{:name => :customer_dimension_id, :column_type => :integer, :unsigned => true, :null => false},
      {:name => :product_dimension_id, :column_type => :integer, :unsigned => true, :null => false}
     ].each do |column|
-      @fact.db_schema(@tc)[:sales_facts][:columns].should include(column)
+      @fact.db_schema(@tc)[:facts_sales][:columns].should include(column)
     end
   end
 
@@ -123,7 +123,7 @@ describe "Chicago::Fact#db_schema" do
       string :reference
     end
 
-    @fact.db_schema(@tc)[:sales_facts][:columns].should include({:name => :reference, :column_type => :varchar, :null => false})
+    @fact.db_schema(@tc)[:facts_sales][:columns].should include({:name => :reference, :column_type => :varchar, :null => false})
   end
 
   it "should output the measure columns" do
@@ -131,14 +131,14 @@ describe "Chicago::Fact#db_schema" do
       integer :quantity
     end
 
-    @fact.db_schema(@tc)[:sales_facts][:columns].should include({:name => :quantity, :column_type => :integer, :null => true, :unsigned => false})
+    @fact.db_schema(@tc)[:facts_sales][:columns].should include({:name => :quantity, :column_type => :integer, :null => true, :unsigned => false})
   end
 
   it "should define non-unique indexes for every dimension" do
     @fact.dimensions :bar
     @fact.degenerate_dimensions { integer :baz }
 
-    @fact.db_schema(@tc)[:sales_facts][:indexes].should == {
+    @fact.db_schema(@tc)[:facts_sales][:indexes].should == {
       :bar_idx => { :columns => :bar_dimension_id },
       :baz_idx => { :columns => :baz }
     }

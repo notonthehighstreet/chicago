@@ -1,11 +1,24 @@
 module Chicago
   module Schema
     class Dimension < StarSchemaTable
+      # The name style of the dimension database tables.
+      TABLE_NAME_FORMAT = "dimension_%s"
+
+      # The name style of the key mapping database tables.
+      KEY_TABLE_NAME_FORMAT = "keys_dimension_%s"
+
       # Returns an Array of possible identifying columns for this dimension.
       attr_reader :identifiers
 
       # Returns an Array of column definitions.
       attr_reader :column_definitions
+
+      # Return the staging area table name that provides mappings between
+      # original ids and dimension ids.
+      #
+      # This will only be created if an :original_id column is defined
+      # on the dimension.
+      attr_reader :key_table_name
 
       # Defines a dimension.
       #
@@ -121,7 +134,8 @@ module Chicago
         @conforms_to = opts[:conforms_to]
         @identifiers = []
         @column_definitions = []
-        @table_name = "#{name}_dimension".to_sym
+        @table_name = sprintf(TABLE_NAME_FORMAT, name).to_sym
+        @key_table_name = sprintf(KEY_TABLE_NAME_FORMAT, name).to_sym
         @null_records = []
       end
 
@@ -137,10 +151,6 @@ module Chicago
 
       def original_key
         @original_key ||= @column_definitions.find {|c| c.name == :original_id }
-      end
-
-      def key_table_name
-        "#{table_name}_keys".to_sym
       end
 
       def indexes

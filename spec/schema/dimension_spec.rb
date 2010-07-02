@@ -10,7 +10,7 @@ describe Chicago::Schema::Dimension do
   end
 
   it "should have a table name" do
-    Schema::Dimension.define(:user).table_name.should == :user_dimension
+    Schema::Dimension.define(:user).table_name.should == :dimension_user
   end
 
   it "should know every defined dimension" do
@@ -62,7 +62,7 @@ describe Chicago::Schema::Dimension do
     attributes = {:id => 1, :name => "Unknown User", :full_name => "Unknown User"}
 
     mock_db = mock(:db)
-    mock_db.should_receive(:[]).with(:user_dimension).and_return(mock_db)
+    mock_db.should_receive(:[]).with(:dimension_user).and_return(mock_db)
     mock_db.should_receive(:insert_replace).and_return(mock_db)
     mock_db.should_receive(:insert_multiple).with([attributes])
 
@@ -83,25 +83,25 @@ describe "Chicago::Dimension#db_schema" do
   end
 
   it "should define a user_dimension table" do
-    @dimension.db_schema(@tc).keys.should include(:user_dimension)
+    @dimension.db_schema(@tc).keys.should include(:dimension_user)
   end
 
   it "should have an unsigned integer :id column" do
     expected = {:name => :id, :column_type => :integer, :unsigned => true}
-    @dimension.db_schema(@tc)[:user_dimension][:columns].should include(expected)
+    @dimension.db_schema(@tc)[:dimension_user][:columns].should include(expected)
   end
 
   it "should define :id as the primary key" do
-    @dimension.db_schema(@tc)[:user_dimension][:primary_key].should == [:id]
+    @dimension.db_schema(@tc)[:dimension_user][:primary_key].should == [:id]
   end
 
   it "should include a hash of table options" do
-    @dimension.db_schema(@tc)[:user_dimension][:table_options].should == {}
+    @dimension.db_schema(@tc)[:dimension_user][:table_options].should == {}
   end
 
   it "should have a table type of MyISAM for mysql" do
     @tc = Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :mysql))
-    @dimension.db_schema(@tc)[:user_dimension][:table_options].should == {:engine => "myisam"}
+    @dimension.db_schema(@tc)[:dimension_user][:table_options].should == {:engine => "myisam"}
   end
 
   it "should include the sequel schema for the defined columns" do
@@ -110,7 +110,7 @@ describe "Chicago::Dimension#db_schema" do
     end
 
     expected = {:name => :username, :column_type => :varchar, :size => 10, :null => false}
-    @dimension.db_schema(@tc)[:user_dimension][:columns].should include(expected)
+    @dimension.db_schema(@tc)[:dimension_user][:columns].should include(expected)
   end
 
   it "should output indexes for every column that isn't descriptive" do
@@ -121,7 +121,7 @@ describe "Chicago::Dimension#db_schema" do
     end
 
     expected = {:bar_idx => {:columns => :bar}, :baz_idx => {:columns => :baz}}
-    @dimension.db_schema(@tc)[:user_dimension][:indexes].should == expected
+    @dimension.db_schema(@tc)[:dimension_user][:indexes].should == expected
   end
 
   # This just supports internal convention at the moment
@@ -131,7 +131,7 @@ describe "Chicago::Dimension#db_schema" do
       string :username, :max => 10
     end
 
-    key_table = @dimension.db_schema(@tc)[:user_dimension_keys]
+    key_table = @dimension.db_schema(@tc)[:keys_dimension_user]
     key_table.should_not be_nil
     key_table[:primary_key].should == [:original_id, :dimension_id]
 

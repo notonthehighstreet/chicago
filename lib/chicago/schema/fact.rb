@@ -1,6 +1,8 @@
 module Chicago
   module Schema
     class Fact < StarSchemaTable
+      TABLE_NAME_FORMAT = "facts_%s"
+
       # Returns the dimension names with which this fact table is associated.
       attr_reader :dimension_names
 
@@ -73,7 +75,7 @@ module Chicago
 
       def initialize(name, opts={})
         super
-        @table_name = "#{name}_facts".to_sym
+        @table_name = sprintf(TABLE_NAME_FORMAT, name).to_sym
         @dimension_names = []
         @degenerate_dimensions = []
         @measures = []
