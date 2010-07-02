@@ -2,6 +2,8 @@
 require 'sequel'
 require 'chicago/schema/constants'
 
+autoload :CodeStatistics, 'chicago/vendor/code_statistics.rb'
+
 module Chicago
   # Sets the root directory for the project.
   def self.project_root=(dir)
@@ -16,6 +18,7 @@ module Chicago
   ### Autoloads
 
   autoload :Definable, 'chicago/definable'
+  autoload :RakeTasks, 'chicago/rake_tasks'
 
   module Schema
     autoload :Column,              'chicago/schema/column'
