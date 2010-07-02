@@ -6,10 +6,10 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Roland Swingler"]
-  s.date = %q{2010-06-22}
+  s.date = %q{2010-07-02}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = ["README"]
-  s.files = ["LICENSE", "Rakefile", "README", "spec", "lib/chicago", "lib/chicago/column.rb", "lib/chicago/dimension.rb", "lib/chicago/fact.rb", "lib/chicago/migration_file_writer.rb", "lib/chicago/schema", "lib/chicago/schema/#db_table_command.rb#", "lib/chicago/schema/column_group_builder.rb", "lib/chicago/schema/type_converters.rb", "lib/chicago/schema.rb", "lib/chicago/star_schema_table.rb", "lib/chicago.rb", "lib/dump.rb", "lib/tasks", "lib/tasks/stats.rake"]
+  s.files = ["LICENSE", "Rakefile", "README", "spec", "lib/chicago", "lib/chicago/definable.rb", "lib/chicago/etl", "lib/chicago/etl/#etl_table_migration.rb#", "lib/chicago/etl/batch.rb", "lib/chicago/etl/database_source.rb", "lib/chicago/etl/table_builder.rb", "lib/chicago/etl/task.rb", "lib/chicago/etl/task_invocation.rb", "lib/chicago/rake_tasks.rb", "lib/chicago/schema", "lib/chicago/schema/#db_table_command.rb#", "lib/chicago/schema/column.rb", "lib/chicago/schema/column_group_builder.rb", "lib/chicago/schema/constants.rb", "lib/chicago/schema/dimension.rb", "lib/chicago/schema/fact.rb", "lib/chicago/schema/migration_file_writer.rb", "lib/chicago/schema/star_schema_table.rb", "lib/chicago/schema/type_converters.rb", "lib/chicago.rb"]
   s.homepage = %q{http://knaveofdiamonds.com}
   s.rdoc_options = ["--main", "README"]
   s.require_paths = ["lib"]
@@ -21,14 +21,14 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<sequel_migration_builder>, ["~> 0.0.4"])
+      s.add_runtime_dependency(%q<sequel_migration_builder>, ["~> 0.1.0"])
       s.add_development_dependency(%q<rspec>, [">= 0"])
     else
-      s.add_dependency(%q<sequel_migration_builder>, ["~> 0.0.4"])
+      s.add_dependency(%q<sequel_migration_builder>, ["~> 0.1.0"])
       s.add_dependency(%q<rspec>, [">= 0"])
     end
   else
-    s.add_dependency(%q<sequel_migration_builder>, ["~> 0.0.4"])
+    s.add_dependency(%q<sequel_migration_builder>, ["~> 0.1.0"])
     s.add_dependency(%q<rspec>, [">= 0"])
   end
 end
