@@ -4,7 +4,7 @@ module Chicago
   # Rake tasks for a Chicago project.
   class RakeTasks < Rake::TaskLib
     def initialize(db)
-      @migration_dir = "db/migrate"
+      @migration_dir = "migrations"
       @db = db
       @test_dir = "test"
       define
@@ -19,7 +19,14 @@ module Chicago
         CodeStatistics.new(*stats_dirs).to_s
       end
 
-      namespace :schema do
+      namespace :db do
+        desc "Write Null dimension records"
+        task :prepare do
+          # TODO: replace this with proper logging.
+          warn "Loading NULL records."
+          Schema::Dimension.definitions.each {|dimension| dimension.create_null_records(@db) }
+        end
+
         desc "Writes a migration file to change the database based on defined Facts & Dimensions"
         task :write_migrations do
           Schema::MigrationFileWriter.new(@db, @migration_dir).write_migration_file
