@@ -88,7 +88,31 @@ module Chicago
         @tables[key_table_name] = key_table(original_key, type_converter) if original_key
         @tables
       end
+
+      # Defines a null record for this dimension.
+      #
+      # Null records should be used in preference to NULL in the
+      # dimension keys in the Fact tables. This allows you to
+      # disambiguate between Not Applicaple and Missing values.
+      #
+      # Usually you will only need to include a couple of descriptive
+      # attributes and use NULLs/column defaults for the rest.
+      #
+      # Null records should have their ids specified. An Error will be
+      # raised if the attributes hash does not include an :id key.
+      def null_record(attributes)
+        raise "Null records must have a predefined ID" unless attributes.has_key?(:id)
+        @null_records << attributes
+      end
       
+      # Creates the null records in the Database.
+      #
+      # This will overwrite any records that share the id with the
+      # null record, so be careful.
+      def create_null_records(db)
+        db[table_name].insert_replace.insert_multiple(@null_records) unless @null_records.empty?
+      end
+
       protected
       
       # Use Dimension.define rather than constructing a Dimension manually.
@@ -98,6 +122,7 @@ module Chicago
         @identifiers = []
         @column_definitions = []
         @table_name = "#{name}_dimension".to_sym
+        @null_records = []
       end
 
       private

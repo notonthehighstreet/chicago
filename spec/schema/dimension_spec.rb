@@ -57,6 +57,23 @@ describe Chicago::Schema::Dimension do
     dimension.main_identifier.should == :username
     dimension.identifiers.should == [:username, :email]
   end
+
+  it "should define null records" do
+    attributes = {:id => 1, :name => "Unknown User", :full_name => "Unknown User"}
+
+    mock_db = mock(:db)
+    mock_db.should_receive(:[]).with(:user_dimension).and_return(mock_db)
+    mock_db.should_receive(:insert_replace).and_return(mock_db)
+    mock_db.should_receive(:insert_multiple).with([attributes])
+
+    dimension = Schema::Dimension.define(:user)
+    dimension.null_record attributes
+    dimension.create_null_records(mock_db)
+  end
+
+  it "should raise an error if a null record is defined without an id" do
+    lambda { Schema::Dimension.define(:user).null_record({}) }.should raise_error(RuntimeError)
+  end
 end
 
 describe "Chicago::Dimension#db_schema" do

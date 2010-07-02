@@ -1,5 +1,7 @@
 # Requires go here
 require 'sequel'
+# TODO: move this back to the Sequel MySQL adapter
+require 'chicago/core_ext/sequel/dataset'
 require 'chicago/schema/constants'
 
 autoload :CodeStatistics, 'chicago/vendor/code_statistics.rb'
