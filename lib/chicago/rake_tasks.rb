@@ -21,7 +21,7 @@ module Chicago
 
       namespace :db do
         desc "Write Null dimension records"
-        task :prepare do
+        task :create_null_records do
           # TODO: replace this with proper logging.
           warn "Loading NULL records."
           Schema::Dimension.definitions.each {|dimension| dimension.create_null_records(@db) }
