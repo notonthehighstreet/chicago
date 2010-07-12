@@ -60,7 +60,8 @@ module Chicago
 
       # Starts this batch.
       def start
-        save if new?
+        self.extracted_to = Date.today
+        save
         if state == "Started"
           log.info "Started ETL batch #{id}."
         else
@@ -101,7 +102,7 @@ module Chicago
       private
 
       def find_or_create_task_invocation(stage, name)
-        attrs = {:stage => stage.downcase.to_s, :name => name.to_s}
+        attrs = {:stage => stage.to_s.downcase, :name => name.to_s}
         task_invocations_dataset.filter(attrs).first || add_task_invocation(attrs)
       end
     end

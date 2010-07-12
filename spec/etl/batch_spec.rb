@@ -22,6 +22,11 @@ describe Chicago::ETL::Batch do
     ETL::Batch.instance.start.state.should == "Started"
   end
 
+  it "should have a default extracted_to datetime of midnight (this morning)" do
+    now = Time.now
+    ETL::Batch.instance.start.extracted_to.should == Time.local(now.year, now.month, now.day, 0,0,0)
+  end
+
   it "should create a directory tmp/batches/1 under the project root when created" do
     ETL::Batch.instance.start
     File.should be_directory(Chicago.project_root + "/tmp/batches/1")

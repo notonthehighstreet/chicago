@@ -17,6 +17,7 @@ module Chicago
           primary_key :id, :type => :integer, :unsigned => true
           timestamp   :started_at, :null => false, :default => :current_timestamp.sql_function
           timestamp   :finished_at, :null => true, :default => nil
+          timestamp   :extracted_to, :null => true, :default => nil
           enum        :state, :null => false, :elements => %w{Started Finished Error}, :default => "Started"
         end
 
