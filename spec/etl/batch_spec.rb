@@ -68,4 +68,9 @@ describe Chicago::ETL::Batch do
     i.should == 1
     batch.task_invocations_dataset.filter(:stage => "Transform", :name => "Test").count.should == 1
   end
+
+  it "should not complain when given a symbol as the stage name" do
+    batch = ETL::Batch.instance.start
+    lambda { batch.perform_task(:transform, "Test") {} }.should_not raise_error(Sequel::DatabaseError)
+  end
 end

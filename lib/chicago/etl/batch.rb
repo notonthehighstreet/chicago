@@ -31,6 +31,21 @@ module Chicago
         end
       end
 
+      # Deprecated.
+      def load(task_name, &block)
+        perform_task(:load, task_name, &block)
+      end
+
+      # Deprecated.
+      def transform(task_name, &block)
+        perform_task(:extract, task_name, &block)
+      end
+
+      # Deprecated.
+      def extract(task_name, &block)
+        perform_task(:extract, task_name, &block)
+      end
+
       # Perform a named task if it hasn't already run successfully in
       # this batch.
       def perform_task(stage, task_name, &block)
@@ -86,7 +101,7 @@ module Chicago
       private
 
       def find_or_create_task_invocation(stage, name)
-        attrs = {:stage => stage, :name => name}
+        attrs = {:stage => stage.downcase.to_s, :name => name.to_s}
         task_invocations_dataset.filter(attrs).first || add_task_invocation(attrs)
       end
     end
