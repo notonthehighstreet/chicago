@@ -27,6 +27,11 @@ module Chicago
           Schema::Dimension.definitions.each {|dimension| dimension.create_null_records(@db) }
         end
 
+        desc "Creates the etl tables"
+        task :create_etl_tables do
+          Chicago::ETL::TableBuilder.build(DB)
+        end
+
         desc "Writes a migration file to change the database based on defined Facts & Dimensions"
         task :write_migrations do
           Schema::MigrationFileWriter.new(@db, @migration_dir).write_migration_file
