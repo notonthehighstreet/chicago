@@ -139,6 +139,14 @@ module Chicago
         @null_records = []
       end
 
+      def base_table(*args)
+        table_hash = super
+        # TODO: decide if this is the right way to deal with meta-data
+        # style columns.
+        table_hash[:columns] << {:name => :etl_batch_id, :column_type => :integer, :unsigned => true}
+        table_hash
+      end
+
       private
 
       def key_table(original_id, type_converter)

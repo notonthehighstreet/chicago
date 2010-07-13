@@ -139,6 +139,11 @@ describe "Chicago::Dimension#db_schema" do
                 {:name => :dimension_id, :column_type => :integer, :null => false, :unsigned => true}]
     key_table[:columns].should == expected
   end
+
+  it "should have an unsigned integer :etl_batch_id column" do
+    expected = {:name => :etl_batch_id, :column_type => :integer, :unsigned => true}
+    @dimension.db_schema(@tc)[:dimension_user][:columns].should include(expected)
+  end
 end
 
 describe "Conforming dimensions" do
