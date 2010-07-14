@@ -3,7 +3,7 @@ require 'sequel'
 # TODO: move this back to the Sequel MySQL adapter
 require 'chicago/core_ext/sequel/dataset'
 require 'chicago/schema/constants'
-require 'chicago/month'
+require 'chicago/data/month'
 
 autoload :CodeStatistics, 'chicago/vendor/code_statistics.rb'
 
