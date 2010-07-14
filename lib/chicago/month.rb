@@ -1,5 +1,17 @@
 module Chicago
   module Data
+    # A month of the year.
+    #
+    # Months cannot be initialized. Instead call the month name:
+    #
+    #     Chicago::Data::Month.march # => returns a month
+    #
+    # or parse a string or a month number:
+    #
+    #     Chicago::Data::Month.parse("apr")       # => returns April
+    #     Chicago::Data::Month.parse("september") # => returns September
+    #     Chicago::Data::Month.parse(1)           # => returns January
+    #
     class Month
       include Comparable
 
@@ -24,16 +36,17 @@ module Chicago
         Date.new(year, to_i, 1)
       end
 
-      # Returns the number of this month from 1 to 12
+      # Returns the number of this month from 1 to 12.
       def to_i
         @number
       end
 
-      # Returns the full name of this month
+      # Returns the full name of this month.
       def to_s
         name
       end
 
+      # All twelve months.
       ALL = [Month.new("January", 1),
              Month.new("February", 2),
              Month.new("March", 3),
@@ -45,7 +58,7 @@ module Chicago
              Month.new("September", 9),
              Month.new("October", 10),
              Month.new("November", 11),
-             Month.new("December", 12)]
+             Month.new("December", 12)].freeze
 
       class << self
         [:january, :february, :march, :april, :may, :june, :july, :august, :september, :october, :november, :december].each_with_index do |month, i|
