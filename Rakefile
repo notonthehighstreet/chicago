@@ -40,7 +40,7 @@ task :default => :spec
 #
 spec = Gem::Specification.new do |s|
   s.name              = "chicago"
-  s.version           = "0.0.1"
+  s.version           = "0.0.2"
   s.summary           = "Chicago"
   s.author            = "Roland Swingler"
   s.email             = "roland.swingler@gmail.com"
