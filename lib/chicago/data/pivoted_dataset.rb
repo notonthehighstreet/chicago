@@ -17,7 +17,7 @@ module Chicago
     # | 2010 | 3   | 5   | 7   | etc...
     #   etc...
     #
-    # There may need to be multiple pulled up columns.
+    # There may need to be multiple transposed columns.
     #
     # It is assumed that pivoted columns will be on the right hand
     # side of the set of drilldowns - in the example above, Year could
@@ -78,6 +78,9 @@ module Chicago
       end
 
       # Returns all pivot columns, unsorted.
+      #
+      # If multiple columns have been transposed, returns an Array of
+      # Arrays with the columns.
       def pivot_columns
         if @pivots.size == 1
           @pivot_columns ||= rows.map {|row| row[@pivots.last] }.uniq
@@ -105,12 +108,16 @@ module Chicago
         identifing_components = nil
         pivoted_values = {}
 
+        # Build up rows from the dataset.
         rows.each do |row| 
           value = row.delete(value_key)
           pivot_keys = @pivots.map {|pivot| row.delete(pivot) }
           if identifing_components != row
+            # We've started a new row to return, so yield the previous
+            # complete one.
             yield identifing_components.merge(pivoted_values) unless identifing_components.nil?
             identifing_components = row
+            # i.e. {:year => 2009, :month => 2, :day => 1, :v => 1} => {2009 => {2 => {1 => 1}}}
             pivoted_values = pivot_keys.reverse.inject(value) {|v, pivot_key| {pivot_key => v} }
           else
             last_hash = pivoted_values
@@ -119,7 +126,7 @@ module Chicago
             last_hash[pivot_keys.last] = value
           end
         end
-
+        # Yield the final row because the above iteration won't.
         yield identifing_components.merge(pivoted_values) unless identifing_components.nil?
       end
 
