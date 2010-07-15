@@ -23,6 +23,10 @@ module Chicago
   autoload :Definable, 'chicago/definable'
   autoload :RakeTasks, 'chicago/rake_tasks'
 
+  module Data
+    autoload :PivotedData,         'chicago/data/pivoted_data'
+  end
+
   module Schema
     autoload :Column,              'chicago/schema/column'
     autoload :StarSchemaTable,     'chicago/schema/star_schema_table'
