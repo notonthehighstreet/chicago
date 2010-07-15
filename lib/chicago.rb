@@ -24,7 +24,7 @@ module Chicago
   autoload :RakeTasks, 'chicago/rake_tasks'
 
   module Data
-    autoload :PivotedData,         'chicago/data/pivoted_data'
+    autoload :PivotedDataset,         'chicago/data/pivoted_dataset'
   end
 
   module Schema
