@@ -80,9 +80,9 @@ module Chicago
       # Returns all pivot columns, unsorted.
       def pivot_columns
         if @pivots.size == 1
-          rows.map {|row| row[@pivots.last] }.uniq
+          @pivot_columns ||= rows.map {|row| row[@pivots.last] }.uniq
         else
-          rows.map {|row| 
+          @pivot_columns ||= rows.map {|row| 
             @pivots.map {|pivot| row[pivot] }
           }.transpose.map {|a| a.uniq }
         end
