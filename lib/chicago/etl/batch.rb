@@ -59,8 +59,8 @@ module Chicago
       end
 
       # Starts this batch.
-      def start
-        self.extracted_to = Date.today
+      def start(extract_to=nil)
+        self.extracted_to = extract_to || Date.today
         save
         if state == "Started"
           log.info "Started ETL batch #{id}."

@@ -27,6 +27,11 @@ describe Chicago::ETL::Batch do
     ETL::Batch.instance.start.extracted_to.should == Time.local(now.year, now.month, now.day, 0,0,0)
   end
 
+  it "should be able to specify an extract to date" do
+    now = Date.today - 1
+    ETL::Batch.instance.start(now).extracted_to.should == Time.local(now.year, now.month, now.day, 0,0,0)
+  end
+
   it "should create a directory tmp/batches/1 under the project root when created" do
     ETL::Batch.instance.start
     File.should be_directory(Chicago.project_root + "/tmp/batches/1")
