@@ -11,23 +11,6 @@ module Chicago
         {table_name => base_table(type_converter)}
       end
 
-      # Sets the primary key if given dimensions names, or returns the
-      # primary key columns if called with no arguments.
-      #
-      # In general, only dimensions (real or degenerate) should be used
-      # as part of the primary key. This isn't enforced at the moment,
-      # but may be in the future.
-      def primary_key(*dimensions)
-        if dimensions.empty?
-          @primary_key.call if defined? @primary_key
-        else
-          @primary_key = lambda do
-            keys = dimensions.map {|sym| @dimension_names.include?(sym) ? dimension_key(sym) : sym }
-            keys.size == 1 ? keys.first : keys
-          end
-        end
-      end
-
       # Sets the dimensions with which a fact row is associated.
       def dimensions(*dimensions)
         dimensions += dimensions.pop.keys if dimensions.last.kind_of? Hash
@@ -88,12 +71,6 @@ module Chicago
         idx = {}
         @dimension_names.each {|name| idx[index_name(name)] = {:columns => dimension_key(name)} }
         @degenerate_dimensions.each {|d| idx[index_name(d.name)] = {:columns => d.name} }
-
-        if primary_key
-          first_pk_column = primary_key.kind_of?(Array) ? primary_key.first : primary_key
-          idx.delete(index_name(first_pk_column.to_s.sub(/_dimension_id/,'').to_sym))
-        end
-
         idx
       end
 
