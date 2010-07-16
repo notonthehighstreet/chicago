@@ -9,6 +9,11 @@ describe Chicago::Schema::Dimension do
     Schema::Dimension.define('user').name.should == :user
   end
 
+  it "should return the named dimension from #[]" do
+    dimension = Schema::Dimension.define(:user)
+    Schema::Dimension[:user].should == dimension
+  end
+
   it "should have a table name" do
     Schema::Dimension.define(:user).table_name.should == :dimension_user
   end

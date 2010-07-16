@@ -28,5 +28,10 @@ module Chicago
     def definitions
       (@definitions || {}).values
     end
+
+    # Returns the defined object with the given name.
+    def [](name)
+      @definitions[name]
+    end
   end
 end
