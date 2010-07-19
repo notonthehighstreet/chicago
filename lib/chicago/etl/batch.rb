@@ -96,7 +96,7 @@ module Chicago
       end
 
       def after_create # :nodoc:
-        FileUtils.mkdir_p dir
+        FileUtils.mkdir_p(dir, :mode => 0777)
       end
 
       private
