@@ -54,12 +54,13 @@ module Chicago
       # Options:
       #   :value_key - default is :value, the value cell.
       #   :cache_sql_result - see above.
-      def initialize(dataset, pivots, opts={})
+      def initialize(dataset, pivots, opts={}, &block)
         @dataset = dataset
         @pivots = [pivots].flatten
         @value_key = opts[:value_key] || :value
         @rows = nil
         @cache_sql_result = opts[:cache_sql_result].nil?() ? true : opts[:cache_sql_result]
+        @transform_block = block
       end
 
       # Returns an array of rows.
@@ -109,7 +110,8 @@ module Chicago
         pivoted_values = {}
 
         # Build up rows from the dataset.
-        rows.each do |row| 
+        rows.each do |row|
+          @transform_block.call(row) if @transform_block
           value = row.delete(value_key)
           pivot_keys = @pivots.map {|pivot| row.delete(pivot) }
           if identifing_components != row
