@@ -2,6 +2,7 @@
 require 'sequel'
 # TODO: move this back to the Sequel MySQL adapter
 require 'chicago/core_ext/sequel/dataset'
+require 'chicago/core_ext/array'
 require 'chicago/schema/constants'
 require 'chicago/data/month'
 
@@ -43,4 +44,8 @@ module Chicago
     autoload :TaskInvocation, 'chicago/etl/task_invocation.rb'
     autoload :DatabaseSource, 'chicago/etl/database_source.rb'
   end
+end
+
+class Array
+  include Chicago::ArrayExtensions
 end

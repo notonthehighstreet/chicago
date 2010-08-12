@@ -47,6 +47,10 @@ module Chicago
       # occur in contiguous blocks. The value of a cell should have the
       # key :value, unless otherwise specified.
       #
+      # dataset - the dataset to pivot
+      # pivots  - an array of pivoted column names as symbols. Should be
+      # at least 1 pivot.
+      #
       # Options:
       #   :value_key - default is :value, the value cell.
       #   :cache_sql_result - see above.
@@ -77,18 +81,14 @@ module Chicago
         @dataset.columns - [value_key] - @pivots
       end
 
-      # Returns all pivot columns, unsorted.
+      # Returns all pivot columns, sorted.
       #
       # If multiple columns have been transposed, returns an Array of
-      # Arrays with the columns.
+      # Arrays with the columns, for example:
+      #
+      #     [[2009, 2010], ["Feb", "Jan", "Mar",...]]
       def pivot_columns
-        if @pivots.size == 1
-          @pivot_columns ||= rows.map {|row| row[@pivots.last] }.uniq
-        else
-          @pivot_columns ||= rows.map {|row| 
-            @pivots.map {|pivot| row[pivot] }
-          }.transpose.map {|a| a.uniq }
-        end
+        @pivot_columns ||= column_values(*@pivots).transpose.map {|a| a.uniq.sort }.condense
       end
 
       # Iterates over the dataset, yielding rows when the complete set
@@ -131,6 +131,16 @@ module Chicago
       end
 
       private
+
+      # Returns an array of arrays of column values.
+      #
+      # For example:
+      #
+      #    column_values(:year, :month) 
+      #    # => [[2009, "Jan"], [2010, "Mar"], [2010, "Apr"] ...]
+      def column_values(*column_names)
+        rows.map {|row| column_names.map {|column_name| row[column_name] } }
+      end
 
       def rows
         if cache_sql_result

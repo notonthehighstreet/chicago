@@ -35,13 +35,13 @@ describe Chicago::Data::PivotedDataset do
                     }]
   end
 
-  it "should return the pivot column headings" do
-    Chicago::Data::PivotedDataset.new(@dataset, :month).pivot_columns.sort.should == [1,2,3,4]
+  it "should return the pivot column headings sorted" do
+    Chicago::Data::PivotedDataset.new(@dataset, :month).pivot_columns.should == [1,2,3,4]
   end
 
-  it "should return nested pivot column headings" do
+  it "should return nested pivot column headings, each set of headings sorted" do
     Chicago::Data::PivotedDataset.new(@dataset, [:year, :month]).pivot_columns.should == \
-      [[2009, 2010], [1,3,4,2]]
+      [[2009, 2010], [1,2,3,4]]
   end
 
   it "should return the other column headings" do
