@@ -111,7 +111,7 @@ module Chicago
 
         # Build up rows from the dataset.
         rows.each do |row|
-          @transform_block.call(row) if @transform_block
+          row = apply_transform_block(row)
           value = row.delete(value_key)
           pivot_keys = @pivots.map {|pivot| row.delete(pivot) }
           if identifing_components != row
@@ -141,7 +141,18 @@ module Chicago
       #    column_values(:year, :month) 
       #    # => [[2009, "Jan"], [2010, "Mar"], [2010, "Apr"] ...]
       def column_values(*column_names)
-        rows.map {|row| column_names.map {|column_name| row[column_name] } }
+        rows.map do |row| 
+          row = apply_transform_block(row)
+          column_names.map {|column_name| row[column_name] } 
+        end
+      end
+
+      def apply_transform_block(row)
+        if @transform_block
+          row = row.clone
+          @transform_block.call(row)
+        end
+        row
       end
 
       def rows
