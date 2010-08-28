@@ -23,6 +23,7 @@ module Chicago
 
   autoload :Definable, 'chicago/definable'
   autoload :RakeTasks, 'chicago/rake_tasks'
+  autoload :Query,     'chicago/query'
 
   module Data
     autoload :PivotedDataset,         'chicago/data/pivoted_dataset'

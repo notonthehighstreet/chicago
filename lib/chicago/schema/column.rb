@@ -23,6 +23,9 @@ module Chicago
       # null:     whether this column can be null. False by default.
       # elements: the allowed values this column can take.
       # default:  the default value for this column. 
+      # descriptive: whether this column is purely descriptive and
+      # won't be used for grouping/filtering.
+      # semi_additive: whether a measure column is semi_additive.
       def initialize(name, type, opts={})
         @opts = normalize_opts(type, opts)
 
@@ -34,6 +37,7 @@ module Chicago
         @elements    = @opts[:elements]
         @default     = @opts[:default]
         @descriptive = !! @opts[:descriptive]
+        @semi_additive = !!@opts[:semi_additive]
       end
 
       # Returns the name of this column.
@@ -54,6 +58,11 @@ module Chicago
 
       # Returns the default value for this column, or nil.
       attr_reader :default
+
+      # Returns true if this measure column can be averaged, but not summed.
+      def semi_additive?
+        @semi_additive
+      end
 
       # Returns true if null values are allowed.
       def null?

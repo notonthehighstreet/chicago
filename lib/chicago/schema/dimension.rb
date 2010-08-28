@@ -126,6 +126,10 @@ module Chicago
         db[table_name].insert_replace.insert_multiple(@null_records) unless @null_records.empty?
       end
 
+      def original_key
+        @original_key ||= @column_definitions.find {|c| c.name == :original_id }
+      end
+
       protected
       
       # Use Dimension.define rather than constructing a Dimension manually.
@@ -155,10 +159,6 @@ module Chicago
           :columns => [original_id.db_schema(type_converter),
                        {:name => :dimension_id, :column_type => :integer, :unsigned => true, :null => false}]
         }
-      end
-
-      def original_key
-        @original_key ||= @column_definitions.find {|c| c.name == :original_id }
       end
 
       def indexes

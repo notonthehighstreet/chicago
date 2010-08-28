@@ -6,6 +6,9 @@ module Chicago
       # Returns the dimension names with which this fact table is associated.
       attr_reader :dimension_names
 
+      # All measure columns for this fact.
+      attr_reader :measures
+
       # Returns the schema for this fact.
       def db_schema(type_converter)      
         {table_name => base_table(type_converter)}
@@ -59,6 +62,13 @@ module Chicago
         @unique_key = columns
       end
 
+      # Returns the dimension key for a dimension name
+      #
+      # TODO: move - in the wrong place
+      def dimension_key(sym)
+        "#{sym}_dimension_id".to_sym
+      end
+
       protected
 
       def initialize(name, opts={})
@@ -91,10 +101,6 @@ module Chicago
         end
 
         idx
-      end
-
-      def dimension_key(sym)
-        "#{sym}_dimension_id".to_sym
       end
     end
   end
