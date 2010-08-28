@@ -54,6 +54,11 @@ module Chicago
         @measures.empty?
       end
 
+      # Defines as unique index for the given dimension columns.
+      def unique_key(*columns)
+        @unique_key = columns
+      end
+
       protected
 
       def initialize(name, opts={})
@@ -69,8 +74,22 @@ module Chicago
 
       def indexes
         idx = {}
-        @dimension_names.each {|name| idx[index_name(name)] = {:columns => dimension_key(name)} }
-        @degenerate_dimensions.each {|d| idx[index_name(d.name)] = {:columns => d.name} }
+        if @unique_key
+          dimension_names = @dimension_names.reject {|name| @unique_key.first == name }
+          degenerate_dimensions = @degenerate_dimensions.reject {|name| @unique_key.first == name }
+
+          key = @unique_key.map {|name| @dimension_names.include?(name) ? dimension_key(name) : name }
+          idx[:unique_idx] = {:columns => key, :unique => true}
+        end
+
+        (dimension_names || @dimension_names).each do |name| 
+          idx[index_name(name)] = {:columns => dimension_key(name)}
+        end
+
+        (degenerate_dimensions || @degenerate_dimensions).each do |d| 
+          idx[index_name(d.name)] = {:columns => d.name}
+        end
+
         idx
       end
 
