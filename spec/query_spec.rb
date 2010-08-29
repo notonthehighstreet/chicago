@@ -1,13 +1,25 @@
 require File.dirname(__FILE__) + "/spec_helper"
 
 describe Chicago::Query do
+  def be_one_of(*args)
+    simple_matcher("one of #{args.inspect}") {|given| args.include?(given) }
+  end
+
   before :all do
     Chicago::Schema::Dimension.define(:product) do
       columns do
         integer :original_id
         string :name
         string :manufacturer
+        string :manufacturer_address
         string :type
+        string :sku
+        string :internal_code
+      end
+
+      hierarchies do
+        manufacturer.implies manufacturer_address
+        sku <=> internal_code
       end
 
       identified_by :name
@@ -136,5 +148,17 @@ describe Chicago::Query do
                                        :order_ref.qualify(:facts_sales)]
     q.dataset.opts[:join].size.should == 1    
     q.dataset.opts[:group].should == [:original_id.qualify(:dimension_product), :order_ref.qualify(:facts_sales)]
+  end
+
+  it "shouldn't bother grouping on columns that are implied" do
+    q = Chicago::Query.new(TEST_DB, :sales)
+    q.columns 'product.manufacturer', 'product.manufacturer_address'
+    q.dataset.opts[:group].should == [:manufacturer.qualify(:dimension_product)]
+  end
+
+  it "should group on at least one column out of 2 that imply each other" do
+    q = Chicago::Query.new(TEST_DB, :sales)
+    q.columns 'product.sku', 'product.internal_code'
+    q.dataset.opts[:group].should be_one_of([:sku.qualify(:dimension_product)], [:internal_code.qualify(:dimension_product)])
   end
 end

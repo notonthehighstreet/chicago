@@ -10,6 +10,7 @@ module Chicago
       @joins = Set.new
       @groups = []
       @group_removals = []
+      @implications_used = Set.new
     end
 
     def columns(*cols)
@@ -24,7 +25,7 @@ module Chicago
         [name, dimension]
       end
 
-      select_columns = column_parts.map do |name, dimension|
+      select_columns = column_parts.map do |(name, dimension)|
         measure = @fact.measures.find {|m| m.name == name }
 
         if measure && measure.semi_additive?
@@ -34,17 +35,26 @@ module Chicago
         elsif dimension
           d = Schema::Dimension[dimension]
           n = name.qualify(d.table_name)
+
+          # imps = d.implications(name).reject {|x| @implications_used.include?(x) }
+          # unless imps.empty?
+          #   @implications_used << name
+          #   @group_removals << lambda { @groups = @groups.reject {|c| 
+          #       c.table == d.table_name && 
+          #       imps.include?(c.column) } }
+          # end
+
           if d.identifiers.include?(name) && d.original_key
-            @groups << d.original_key.name.qualify(d.table_name)
-            @group_removals << lambda { @groups = @groups.reject {|c| c.table == d.table_name && c.column != d.original_key.name } }
+            @group_removals << lambda { @groups = @groups.reject {|(c_name, star_table)| star_table == d && c_name != d.original_key.name } }
+            @groups << [d.original_key.name, d]
             n.as(dimension)
           else
-            @groups << n
+            @groups << [name, d]
             n
           end
         else
           n = name.qualify(@fact.table_name)
-          @groups << n
+          @groups << [name, @fact]
           n
         end
       end
@@ -67,9 +77,22 @@ module Chicago
       end
 
       @group_removals.each {|r| r.call }
+      @groups = fixup_groups(@groups)
       unless @groups.empty?
-        @dataset = @dataset.group(*@groups)
+        cols = @groups.map {|(name, star_table)| name.qualify(star_table.table_name) }
+        @dataset = @dataset.group(*cols)
       end
+    end
+
+    def fixup_groups(groups)
+      return_groups = []
+      until groups.empty?
+        return_groups << groups.shift
+        g_name, star_table = return_groups.last
+        imps = star_table.implications(g_name)
+        groups.reject! {|(n, s)| s == star_table && imps.include?(n) }
+      end
+      return_groups
     end
   end
 end
