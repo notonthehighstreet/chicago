@@ -10,7 +10,6 @@ module Chicago
       @joins = Set.new
       @groups = []
       @group_removals = []
-      @implications_used = Set.new
     end
 
     def columns(*cols)
@@ -25,37 +24,27 @@ module Chicago
         [name, dimension]
       end
 
-      select_columns = column_parts.map do |(name, dimension)|
+      select_columns = column_parts.map do |(name, dimension_name)|
         measure = @fact.measures.find {|m| m.name == name }
 
         if measure && measure.semi_additive?
-          :avg[name.qualify(@fact.table_name)].as("avg_#{name}".to_sym)
+          semi_additive_measure_default(name, @fact)
         elsif measure
-          :sum[name.qualify(@fact.table_name)].as("sum_#{name}".to_sym)
-        elsif dimension
-          d = Schema::Dimension[dimension]
-          n = name.qualify(d.table_name)
+          additive_measure_default(name, @fact)
+        elsif dimension_name
+          dimension = Schema::Dimension[dimension_name]
 
-          # imps = d.implications(name).reject {|x| @implications_used.include?(x) }
-          # unless imps.empty?
-          #   @implications_used << name
-          #   @group_removals << lambda { @groups = @groups.reject {|c| 
-          #       c.table == d.table_name && 
-          #       imps.include?(c.column) } }
-          # end
-
-          if d.identifiers.include?(name) && d.original_key
-            @group_removals << lambda { @groups = @groups.reject {|(c_name, star_table)| star_table == d && c_name != d.original_key.name } }
-            @groups << [d.original_key.name, d]
-            n.as(dimension)
+          if dimension.identifiers.include?(name) && dimension.original_key
+            @group_removals << lambda { @groups = @groups.reject {|(c_name, star_table)| star_table == dimension && c_name != dimension.original_key.name } }
+            @groups << [dimension.original_key.name, dimension]
           else
-            @groups << [name, d]
-            n
+            @groups << [name, dimension]
           end
+
+          dimension_default(name, dimension)
         else
-          n = name.qualify(@fact.table_name)
           @groups << [name, @fact]
-          n
+          degenerate_dimension_default(name, @fact)
         end
       end
 
@@ -65,6 +54,26 @@ module Chicago
     end
 
     private
+
+    def additive_measure_default(name, fact)
+      :sum[name.qualify(fact.table_name)].as("sum_#{name}".to_sym)
+    end
+
+    def semi_additive_measure_default(name, fact)
+      :avg[name.qualify(fact.table_name)].as("avg_#{name}".to_sym)
+    end
+
+    def degenerate_dimension_default(name, fact)
+      name.qualify(@fact.table_name)
+    end
+
+    def dimension_default(name, dimension)
+      if dimension.identifiers.include?(name) && dimension.original_key
+        name.qualify(dimension.table_name).as(dimension.name)
+      else
+        name.qualify(dimension.table_name)
+      end
+    end
 
     def add_joins_and_groups(dimensions)
       to_join = dimensions - @joins
