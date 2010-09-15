@@ -38,7 +38,7 @@ module Chicago
         
         values = scanner[0].split(",")
         value = values.size == 1 ? values.first : values
-        @filters << {field.qualify(dimension) => value}
+        @filters << {field.qualify("dimension_#{dimension}".to_sym) => value}
         scanner.skip(/;/)
       end
     end
