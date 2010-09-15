@@ -23,6 +23,7 @@ module Chicago
 
   autoload :Definable, 'chicago/definable'
   autoload :RakeTasks, 'chicago/rake_tasks'
+  autoload :Query,     'chicago/query'
 
   module Data
     autoload :PivotedDataset,         'chicago/data/pivoted_dataset'
@@ -36,6 +37,9 @@ module Chicago
     autoload :MigrationFileWriter, 'chicago/schema/migration_file_writer'
     autoload :ColumnGroupBuilder,  'chicago/schema/column_group_builder'
     autoload :TypeConverters,      'chicago/schema/type_converters'
+    autoload :HierarchicalElement, 'chicago/schema/hierarchical_element'
+    autoload :HierarchyBuilder,    'chicago/schema/hierarchical_element'
+    autoload :Hierarchies,         'chicago/schema/hierarchical_element'
   end
 
   module ETL

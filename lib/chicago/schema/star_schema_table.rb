@@ -8,7 +8,7 @@ module Chicago
       attr_reader :name
 
       # Returns or sets the database table name for this dimension.
-      # By default, <name>_dimension or <name>_facts.
+      # By default, dimension_<name> or facts_<name>.
       attr_accessor :table_name
 
       # Returns a schema hash for use by Sequel::MigrationBuilder,
@@ -18,10 +18,37 @@ module Chicago
       # Overriden by subclasses.
       def db_schema(type_converter) ; end
 
+      # Defines hierarchies and semantic links between columns, using
+      # a HierarchyBuilder.
+      #
+      # For example:
+      #
+      #     Dimension.define :date do
+      #       ...
+      #       hierarchies do
+      #         month_number <=> month_name
+      #         year.implies decade
+      #
+      #         year > quarter > month > day
+      #       end
+      #     end
+      def hierarchies(&block)
+        @hierarchy = HierarchyBuilder.new(&block).__hierarchies
+      end
+
+      # Column implications of the fact or dimension.
+      #
+      # If one column implies another, it means that the implied
+      # column will have a fixed value.
+      def implications(name)
+        @hierarchy.implications(name).map(&:name)
+      end
+
       protected
 
       def initialize(name, opts={})
         @name = name.to_sym
+        @hierarchy = Hierarchies.new
       end
 
       # Returns the standard index name for a column / dimension name.
