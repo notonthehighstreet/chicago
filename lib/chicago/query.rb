@@ -12,8 +12,8 @@ module Chicago
       @group_removals = []
     end
 
-    def columns(*cols)
-      column_parts = cols.map do |name|
+    def column_parts(cols)
+      cols.map do |name|
         name, dimension = name.to_s.split('.').reverse.map(&:to_sym)
 
         if @fact.dimension_names.include?(name)
@@ -23,8 +23,10 @@ module Chicago
 
         [name, dimension]
       end
+    end
 
-      select_columns = column_parts.map do |(name, dimension_name)|
+    def columns(*cols)
+      select_columns = column_parts(cols).map do |(name, dimension_name)|
         measure = @fact.measures.find {|m| m.name == name }
 
         if measure && measure.semi_additive?
@@ -49,7 +51,7 @@ module Chicago
       end
 
       @dataset = @dataset.select_more(*select_columns)
-      add_joins_and_groups Set.new(column_parts.map(&:last).compact.map {|d| Schema::Dimension[d] })
+      add_joins_and_groups Set.new(column_parts(cols).map(&:last).compact.map {|d| Schema::Dimension[d] })
       self
     end
 
