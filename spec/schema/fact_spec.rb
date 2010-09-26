@@ -147,10 +147,10 @@ describe "Chicago::Fact#db_schema" do
   it "should allow definition of a unqiue key" do
     @fact.dimensions :bar
     @fact.degenerate_dimensions { integer :baz }
-    @fact.unique_key :bar, :baz
+    @fact.natural_key :bar, :baz
 
     @fact.db_schema(@tc)[:facts_sales][:indexes].should == {
-      :unique_idx => { :columns => [:bar_dimension_id, :baz], :unique => true },
+      :bar_idx => { :columns => [:bar_dimension_id, :baz], :unique => true },
       :baz_idx => { :columns => :baz }
     }
   end
