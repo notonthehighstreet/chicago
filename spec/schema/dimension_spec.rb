@@ -129,6 +129,21 @@ describe "Chicago::Dimension#db_schema" do
     @dimension.db_schema(@tc)[:dimension_user][:indexes].should == expected
   end
 
+  it "should output a natural_key unique index for the natural key" do
+    @dimension.columns do
+      string :foo, :descriptive => true
+      string :bar
+      string :baz
+    end
+    @dimension.natural_key :bar, :baz
+
+    expected = {
+      :bar_idx => {:columns => [:bar, :baz], :unique => true}, 
+      :baz_idx => {:columns => :baz}
+    }
+    @dimension.db_schema(@tc)[:dimension_user][:indexes].should == expected
+  end
+
   # This just supports internal convention at the moment
   it "should create a key mapping table if an original_id column is present" do
     @dimension.columns do

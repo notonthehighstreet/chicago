@@ -18,6 +18,10 @@ module Chicago
       # Overriden by subclasses.
       def db_schema(type_converter) ; end
 
+      def natural_key(*columns)
+        @natural_key = columns
+      end
+
       # Defines hierarchies and semantic links between columns, using
       # a HierarchyBuilder.
       #
@@ -49,6 +53,7 @@ module Chicago
       def initialize(name, opts={})
         @name = name.to_sym
         @hierarchy = Hierarchies.new
+        @natural_key = []
       end
 
       # Returns the standard index name for a column / dimension name.

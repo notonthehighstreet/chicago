@@ -163,7 +163,11 @@ module Chicago
 
       def indexes
         @column_definitions.reject {|c| c.descriptive? }.inject({}) do |idx, column|
-          idx[index_name(column.name)] = {:columns => column.name}
+          if @natural_key.first == column.name
+            idx[index_name(column.name)] = {:columns => @natural_key, :unique => true}
+          else
+            idx[index_name(column.name)] = {:columns => column.name}
+          end
           idx
         end
       end

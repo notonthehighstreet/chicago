@@ -57,11 +57,6 @@ module Chicago
         @measures.empty?
       end
 
-      # Defines as unique index for the given dimension columns.
-      def unique_key(*columns)
-        @unique_key = columns
-      end
-
       # Returns the dimension key for a dimension name
       #
       # TODO: move - in the wrong place
@@ -84,12 +79,12 @@ module Chicago
 
       def indexes
         idx = {}
-        if @unique_key
-          dimension_names = @dimension_names.reject {|name| @unique_key.first == name }
-          degenerate_dimensions = @degenerate_dimensions.reject {|name| @unique_key.first == name }
+        unless @natural_key.empty?
+          dimension_names = @dimension_names.reject {|name| @natural_key.first == name }
+          degenerate_dimensions = @degenerate_dimensions.reject {|name| @natural_key.first == name }
 
-          key = @unique_key.map {|name| @dimension_names.include?(name) ? dimension_key(name) : name }
-          idx[:unique_idx] = {:columns => key, :unique => true}
+          key = @natural_key.map {|name| @dimension_names.include?(name) ? dimension_key(name) : name }
+          idx[index_name(@natural_key.first)] = {:columns => key, :unique => true}
         end
 
         (dimension_names || @dimension_names).each do |name| 
