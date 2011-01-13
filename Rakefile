@@ -40,7 +40,7 @@ task :default => :spec
 #
 spec = Gem::Specification.new do |s|
   s.name              = "chicago"
-  s.version           = "0.0.9"
+  s.version           = "0.0.10"
   s.summary           = "Chicago"
   s.author            = "Roland Swingler"
   s.email             = "roland.swingler@gmail.com"
@@ -50,7 +50,7 @@ spec = Gem::Specification.new do |s|
   s.rdoc_options      = %w(--main README)
   s.files             = %w(LICENSE Rakefile README) + Dir.glob("{spec,lib/**/*}")
   s.require_paths     = ["lib"]
-  s.add_dependency("sequel_migration_builder", "~> 0.1.2")
+  s.add_dependency("sequel_migration_builder", "~> 0.2.0")
   s.add_development_dependency("rspec")
 end
 
