@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{chicago}
-  s.version = "0.0.10"
+  s.version = "0.0.11"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Roland Swingler"]
-  s.date = %q{2011-01-13}
+  s.date = %q{2011-01-14}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = ["README"]
   s.files = ["LICENSE", "Rakefile", "README", "spec", "lib/chicago", "lib/chicago/#cube.rb#", "lib/chicago/core_ext", "lib/chicago/core_ext/array.rb", "lib/chicago/core_ext/sequel", "lib/chicago/core_ext/sequel/dataset.rb", "lib/chicago/data", "lib/chicago/data/month.rb", "lib/chicago/data/pivoted_dataset.rb", "lib/chicago/definable.rb", "lib/chicago/etl", "lib/chicago/etl/#batch.rb#", "lib/chicago/etl/#etl_table_migration.rb#", "lib/chicago/etl/#task.rb#", "lib/chicago/etl/batch.rb", "lib/chicago/etl/database_source.rb", "lib/chicago/etl/table_builder.rb", "lib/chicago/etl/task_invocation.rb", "lib/chicago/query.rb", "lib/chicago/rake_tasks.rb", "lib/chicago/schema", "lib/chicago/schema/#db_table_command.rb#", "lib/chicago/schema/column.rb", "lib/chicago/schema/column_group_builder.rb", "lib/chicago/schema/constants.rb", "lib/chicago/schema/dimension.rb", "lib/chicago/schema/fact.rb", "lib/chicago/schema/hierarchical_element.rb", "lib/chicago/schema/migration_file_writer.rb", "lib/chicago/schema/star_schema_table.rb", "lib/chicago/schema/type_converters.rb", "lib/chicago/util", "lib/chicago/util/filter_string_parser.rb", "lib/chicago/vendor", "lib/chicago/vendor/code_statistics.rb", "lib/chicago.rb"]
