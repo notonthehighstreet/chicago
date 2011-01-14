@@ -166,7 +166,7 @@ module Chicago
           if @natural_key.first == column.name
             idx[index_name(column.name)] = {:columns => @natural_key, :unique => true}
           else
-            idx[index_name(column.name)] = {:columns => column.name}
+            idx[index_name(column.name)] = {:columns => column.name, :unique => false}
           end
           idx
         end

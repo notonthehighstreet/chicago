@@ -81,18 +81,18 @@ module Chicago
         idx = {}
         unless @natural_key.empty?
           dimension_names = @dimension_names.reject {|name| @natural_key.first == name }
-          degenerate_dimensions = @degenerate_dimensions.reject {|name| @natural_key.first == name }
+          degenerate_dimensions = @degenerate_dimensions.reject {|d| @natural_key.first == d.name }
 
           key = @natural_key.map {|name| @dimension_names.include?(name) ? dimension_key(name) : name }
           idx[index_name(@natural_key.first)] = {:columns => key, :unique => true}
         end
 
         (dimension_names || @dimension_names).each do |name| 
-          idx[index_name(name)] = {:columns => dimension_key(name)}
+          idx[index_name(name)] = {:columns => dimension_key(name), :unique => false}
         end
 
         (degenerate_dimensions || @degenerate_dimensions).each do |d| 
-          idx[index_name(d.name)] = {:columns => d.name}
+          idx[index_name(d.name)] = {:columns => d.name, :unique => false}
         end
 
         idx
