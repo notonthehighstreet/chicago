@@ -125,7 +125,8 @@ describe "Chicago::Dimension#db_schema" do
       string :baz
     end
 
-    expected = {:bar_idx => {:columns => :bar}, :baz_idx => {:columns => :baz}}
+    expected = {:bar_idx => {:columns => :bar, :unique => false},
+      :baz_idx => {:columns => :baz, :unique => false}}
     @dimension.db_schema(@tc)[:dimension_user][:indexes].should == expected
   end
 
@@ -139,7 +140,7 @@ describe "Chicago::Dimension#db_schema" do
 
     expected = {
       :bar_idx => {:columns => [:bar, :baz], :unique => true}, 
-      :baz_idx => {:columns => :baz}
+      :baz_idx => {:columns => :baz, :unique => false}
     }
     @dimension.db_schema(@tc)[:dimension_user][:indexes].should == expected
   end

@@ -139,8 +139,8 @@ describe "Chicago::Fact#db_schema" do
     @fact.degenerate_dimensions { integer :baz }
 
     @fact.db_schema(@tc)[:facts_sales][:indexes].should == {
-      :bar_idx => { :columns => :bar_dimension_id },
-      :baz_idx => { :columns => :baz }
+      :bar_idx => { :columns => :bar_dimension_id, :unique => false },
+      :baz_idx => { :columns => :baz, :unique => false }
     }
   end
 
@@ -151,7 +151,7 @@ describe "Chicago::Fact#db_schema" do
 
     @fact.db_schema(@tc)[:facts_sales][:indexes].should == {
       :bar_idx => { :columns => [:bar_dimension_id, :baz], :unique => true },
-      :baz_idx => { :columns => :baz }
+      :baz_idx => { :columns => :baz, :unique => false }
     }
   end
 end
