@@ -50,7 +50,7 @@ spec = Gem::Specification.new do |s|
   s.rdoc_options      = %w(--main README)
   s.files             = %w(LICENSE Rakefile README) + Dir.glob("{spec,lib/**/*}")
   s.require_paths     = ["lib"]
-  s.add_dependency("sequel_migration_builder", "~> 0.2.0")
+  s.add_dependency("sequel_migration_builder", "~> 0.3.0")
   s.add_development_dependency("rspec")
 end
 
