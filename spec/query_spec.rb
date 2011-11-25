@@ -35,6 +35,10 @@ describe Chicago::Query do
     end
   end
 
+  it "should allow chaining on columns" do
+    Chicago::Query.new(TEST_DB, :sales).columns(:total).should be_kind_of(Chicago::Query)
+  end
+  
   it "should select the sum of a measure by default" do
     q = Chicago::Query.new(TEST_DB, :sales)
     q.columns :total
