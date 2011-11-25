@@ -1,4 +1,4 @@
-RSpec::Matchers.define :be_one_of do |possibilities|
+RSpec::Matchers.define :be_one_of do |*possibilities|
   match {|arg| possibilities.any? {|p| p == arg } }
 
   failure_message_for_should do |arg|

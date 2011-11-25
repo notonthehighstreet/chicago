@@ -69,8 +69,8 @@ describe Chicago::Query do
     q = Chicago::Query.new(TEST_DB, :sales)
     q.columns 'product'
     
-    on_clause = [[Sequel::SQL::QualifiedIdentifier.new("dimension_product", "id"),
-                  Sequel::SQL::QualifiedIdentifier.new(:facts_sales, :product_dimension_id)]]
+    on_clause = make_on_clause(Sequel::SQL::QualifiedIdentifier.new("dimension_product", "id") =>
+                               Sequel::SQL::QualifiedIdentifier.new(:facts_sales, :product_dimension_id))
     join_clause = Sequel::SQL::JoinOnClause.new(on_clause, :inner, :dimension_product)
 
     q.dataset.opts[:join].first.should == join_clause
@@ -81,13 +81,14 @@ describe Chicago::Query do
     q.columns 'product.manufacturer'
     q.dataset.opts[:select].should include(:manufacturer.qualify(:dimension_product))
   end
-
+  
   it "should join on a dimension if dimension column is included" do
     q = Chicago::Query.new(TEST_DB, :sales)
     q.columns 'product.manufacturer'
     
-    on_clause = [[Sequel::SQL::QualifiedIdentifier.new("dimension_product", "id"),
-                  Sequel::SQL::QualifiedIdentifier.new(:facts_sales, :product_dimension_id)]]
+    on_clause = make_on_clause(Sequel::SQL::QualifiedIdentifier.new("dimension_product", "id") =>
+                               Sequel::SQL::QualifiedIdentifier.new(:facts_sales, :product_dimension_id))
+
     join_clause = Sequel::SQL::JoinOnClause.new(on_clause, :inner, :dimension_product)
 
     q.dataset.opts[:join].first.should == join_clause
@@ -156,5 +157,11 @@ describe Chicago::Query do
     q = Chicago::Query.new(TEST_DB, :sales)
     q.columns 'product.sku', 'product.internal_code'
     q.dataset.opts[:group].should be_one_of([:sku.qualify(:dimension_product)], [:internal_code.qualify(:dimension_product)])
+  end
+
+  private
+
+  def make_on_clause(hash)
+    Sequel::SQL::BooleanExpression.from_value_pairs(hash, "=")
   end
 end
