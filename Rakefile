@@ -1,20 +1,46 @@
-require 'rubygems'
-require 'rake'
-require 'rake/rdoctask'
-require "rake/gempackagetask"
-require 'spec/rake/spectask'
+# encoding: utf-8
 
-Spec::Rake::SpecTask.new(:spec) do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.spec_files = FileList['spec/**/*_spec.rb']
+require 'rubygems'
+require 'bundler'
+begin
+  Bundler.setup(:default, :development)
+rescue Bundler::BundlerError => e
+  $stderr.puts e.message
+  $stderr.puts "Run `bundle install` to install missing gems"
+  exit e.status_code
+end
+require 'rake'
+
+require 'jeweler'
+Jeweler::Tasks.new do |gem|
+  # gem is a Gem::Specification... see
+  # http://docs.rubygems.org/read/chapter/20 for more options
+  gem.name              = "chicago"
+  gem.version           = "0.0.12"
+  gem.summary           = "Chicago"
+  gem.description       = "Simple Data Warehouse toolkit"
+  gem.author            = "Roland Swingler"
+  gem.email             = "roland.swingler@gmail.com"
+  gem.homepage          = "http://knaveofdiamonds.com"
+  gem.has_rdoc          = true
+  gem.license           = "MIT"
+end
+Jeweler::RubygemsDotOrgTasks.new
+
+require 'rspec/core'
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = FileList['spec/**/*_spec.rb']
 end
 
-Spec::Rake::SpecTask.new(:rcov) do |spec|
-  spec.libs << 'lib' << 'spec'
+RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.pattern = 'spec/**/*_spec.rb'
   spec.rcov = true
 end
 
+task :default => :spec
+
+require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
@@ -30,44 +56,3 @@ task :flog do
 end
 
 load 'tasks/stats.rake'
-
-task :default => :spec
-
-# This builds the actual gem. For details of what all these options
-# mean, and other ones you can add, check the documentation here:
-#
-#   http://rubygems.org/read/chapter/20
-#
-spec = Gem::Specification.new do |s|
-  s.name              = "chicago"
-  s.version           = "0.0.12"
-  s.summary           = "Chicago"
-  s.author            = "Roland Swingler"
-  s.email             = "roland.swingler@gmail.com"
-  s.homepage          = "http://knaveofdiamonds.com"
-  s.has_rdoc          = true
-  s.extra_rdoc_files  = %w(README)
-  s.rdoc_options      = %w(--main README)
-  s.files             = %w(LICENSE Rakefile README) + Dir.glob("{spec,lib/**/*}")
-  s.require_paths     = ["lib"]
-  s.add_dependency("sequel_migration_builder", "~> 0.3.0")
-  s.add_development_dependency("rspec")
-end
-
-# This task actually builds the gem.
-Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.gem_spec = spec
-end
-
-desc "Build the gemspec file #{spec.name}.gemspec"
-task :gemspec do
-  file = File.dirname(__FILE__) + "/#{spec.name}.gemspec"
-  File.open(file, "w") {|f| f << spec.to_ruby }
-end
-
-task :package => :gemspec
-
-desc 'Clear out RDoc and generated packages'
-task :clean => [:clobber_rdoc, :clobber_package] do
-  rm "#{spec.name}.gemspec"
-end

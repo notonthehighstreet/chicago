@@ -1,14 +1,18 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'rubygems'
 require 'chicago'
-require 'spec'
-require 'spec/autorun'
+require 'rspec'
 require 'yaml'
 
 include Chicago
 
-TEST_DB = Sequel.connect(YAML.load(File.read(File.dirname(__FILE__) + "/db_connections.yml")))
+unless defined? TEST_DB
+  TEST_DB = Sequel.connect(YAML.load(File.read(File.dirname(__FILE__) + "/db_connections.yml")))
+end
 
-Spec::Runner.configure do |config|
+# Requires supporting files with custom matchers and macros, etc,
+# in ./support/ and its subdirectories.
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
+
+RSpec.configure do |config|
 end

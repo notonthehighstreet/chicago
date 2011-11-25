@@ -1,10 +1,6 @@
 require File.dirname(__FILE__) + "/spec_helper"
 
 describe Chicago::Query do
-  def be_one_of(*args)
-    simple_matcher("one of #{args.inspect}") {|given| args.include?(given) }
-  end
-
   before :all do
     Chicago::Schema::Dimension.define(:product) do
       columns do
