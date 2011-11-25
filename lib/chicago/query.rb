@@ -4,25 +4,14 @@ module Chicago
   class Query
     attr_reader :dataset
 
+    # Creates a new Query object, given a database connection and a
+    # fact table name.
     def initialize(db, fact)
       @fact = Schema::Fact[fact]
       @dataset = db[@fact.table_name]
       @joins = Set.new
       @groups = []
       @group_removals = []
-    end
-
-    def column_parts(cols)
-      cols.map do |name|
-        name, dimension = name.to_s.split('.').reverse.map(&:to_sym)
-
-        if @fact.dimension_names.include?(name)
-          dimension = name
-          name = Schema::Dimension[name].main_identifier
-        end
-
-        [name, dimension]
-      end
     end
 
     def columns(*cols)
@@ -35,14 +24,7 @@ module Chicago
           additive_measure_default(name, @fact)
         elsif dimension_name
           dimension = Schema::Dimension[dimension_name]
-
-          if dimension.identifiers.include?(name) && dimension.original_key
-            @group_removals << lambda { @groups = @groups.reject {|(c_name, star_table)| star_table == dimension && c_name != dimension.original_key.name } }
-            @groups << [dimension.original_key.name, dimension]
-          else
-            @groups << [name, dimension]
-          end
-
+          add_dimension_column_to_grouping(name, dimension)
           dimension_default(name, dimension)
         else
           @groups << [name, @fact]
@@ -56,6 +38,28 @@ module Chicago
     end
 
     private
+
+    def add_dimension_column_to_grouping(name, dimension)
+      if dimension.identifiers.include?(name) && dimension.original_key
+        @group_removals << lambda { @groups = @groups.reject {|(c_name, star_table)| star_table == dimension && c_name != dimension.original_key.name } }
+        @groups << [dimension.original_key.name, dimension]
+      else
+        @groups << [name, dimension]
+      end
+    end
+    
+    def column_parts(cols)
+      cols.map do |name|
+        name, dimension = name.to_s.split('.').reverse.map(&:to_sym)
+
+        if @fact.dimension_names.include?(name)
+          dimension = name
+          name = Schema::Dimension[name].main_identifier
+        end
+
+        [name, dimension]
+      end
+    end
 
     def additive_measure_default(name, fact)
       :sum[name.qualify(fact.table_name)].as("sum_#{name}".to_sym)
