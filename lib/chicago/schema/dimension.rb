@@ -66,7 +66,7 @@ module Chicago
           raise "Extra non-conforming columns detected" if definitions.size != names.size
           @column_definitions += definitions
         else
-          @column_definitions += ColumnGroupBuilder.new(&block).column_definitions
+          @column_definitions += ColumnGroupBuilder.new(self, &block).column_definitions
         end
       end
 

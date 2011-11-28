@@ -18,7 +18,7 @@ module Chicago
       def dimensions(*dimensions)
         dimensions += dimensions.pop.keys if dimensions.last.kind_of? Hash
         dimensions.each do |dimension|
-          @dimension_keys << Column.new(dimension_key(dimension), :integer, :null => false, :min => 0)
+          @dimension_keys << Column.new(self, dimension_key(dimension), :integer, :null => false, :min => 0)
           @dimension_names << dimension
         end
       end
@@ -33,7 +33,7 @@ module Chicago
       # Within the block, use the standard column definition
       # DSL, as for defining columns on a Dimension.
       def degenerate_dimensions(&block)
-        @degenerate_dimensions += ColumnGroupBuilder.new(&block).column_definitions
+        @degenerate_dimensions += ColumnGroupBuilder.new(self, &block).column_definitions
       end
 
       # Defines the measures for this fact.
@@ -43,7 +43,7 @@ module Chicago
       # Within the block, use the standard column definition
       # DSL, as for defining columns on a Dimension.
       def measures(&block)
-        @measures += ColumnGroupBuilder.new(:null => true, &block).column_definitions
+        @measures += ColumnGroupBuilder.new(self, :null => true, &block).column_definitions
       end
 
       # Returns the all the column definitions for this fact.

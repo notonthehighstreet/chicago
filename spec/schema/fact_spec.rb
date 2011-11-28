@@ -50,7 +50,7 @@ describe "Chicago::Fact#column_definitions" do
     fact = Schema::Fact.define(:sales) do
       dimensions :product
     end
-    fact.column_definitions.should include(Schema::Column.new(:product_dimension_id, :integer, :null => false, :min => 0))
+    fact.column_definitions.should include(Schema::Column.new(fact, :product_dimension_id, :integer, :null => false, :min => 0))
   end
 
   it "should include the fact's degenerate_dimensions" do
@@ -59,7 +59,7 @@ describe "Chicago::Fact#column_definitions" do
       integer :order_number
     end
 
-    fact.column_definitions.should include(Schema::Column.new(:order_number, :integer))
+    fact.column_definitions.should include(Schema::Column.new(fact, :order_number, :integer))
   end
 
   it "should include the fact's measures, which should allow null by default." do
@@ -68,7 +68,7 @@ describe "Chicago::Fact#column_definitions" do
       integer :total
     end
 
-    fact.column_definitions.should include(Schema::Column.new(:total, :integer, :null => true))
+    fact.column_definitions.should include(Schema::Column.new(fact, :total, :integer, :null => true))
   end
 
   it "should be factless if there are no measures" do

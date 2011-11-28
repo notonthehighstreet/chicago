@@ -1,3 +1,5 @@
+require 'sequel/extensions/inflector'
+
 module Chicago
   module Schema
     # A column in a dimension or fact record.
@@ -11,9 +13,10 @@ module Chicago
     # are generally defined using the DSL on Dimension or Fact.
     class Column
       # Creates a new column definition.
-      # 
-      # name: the name of the column.
-      # type: the abstract type of the column. For example, :string.
+      #
+      # owner: the owning fact or dimension
+      # name:  the name of the column.
+      # column_type:  the abstract type of the column. For example, :string.
       #
       # Options:
       #
@@ -26,20 +29,26 @@ module Chicago
       # descriptive: whether this column is purely descriptive and
       # won't be used for grouping/filtering.
       # semi_additive: whether a measure column is semi_additive.
-      def initialize(name, type, opts={})
-        @opts = normalize_opts(type, opts)
+      def initialize(owner, name, column_type, opts={})
+        @opts = normalize_opts(column_type, opts)
 
+        @owner       = owner
         @name        = name
-        @column_type = type
+        @column_type = column_type
+        @label       = @opts[:label] || name.to_s.titlecase
+        
         @min         = @opts[:min]
         @max         = @opts[:max]
         @null        = @opts[:null]
         @elements    = @opts[:elements]
         @default     = @opts[:default]
         @descriptive = !! @opts[:descriptive]
-        @semi_additive = !!@opts[:semi_additive]
+        @semi_additive = !! @opts[:semi_additive]
       end
 
+      # Returns the owning Fact or Dimension
+      attr_reader :owner
+      
       # Returns the name of this column.
       attr_reader :name
 
@@ -58,6 +67,14 @@ module Chicago
 
       # Returns the default value for this column, or nil.
       attr_reader :default
+
+      # Returns a human-friendly version of the column name.
+      attr_reader :label
+      
+      # Returns a qualified symbol name, for use with Sequel as an SQL reference
+      def sql_name
+        @sql_name ||= name.qualify(owner.table_name)
+      end
 
       # Returns true if this measure column can be averaged, but not summed.
       def semi_additive?
@@ -106,6 +123,12 @@ module Chicago
         name.hash
       end
 
+      # Returns the abstract qualified version of this column, for
+      # example "product.title".
+      def to_s
+        [owner.name, name] * '.'
+      end
+      
       private
       
       def unsigned?

@@ -4,10 +4,14 @@ module Chicago
   class Query
     attr_reader :dataset
 
+    def self.fact(db, fact_name)
+      new(db, Schema::Fact[fact_name])
+    end
+    
     # Creates a new Query object, given a database connection and a
     # fact table name.
-    def initialize(db, fact)
-      @fact = Schema::Fact[fact]
+    def initialize(db, schema_model)
+      @fact = schema_model
       @dataset = db[@fact.table_name]
       @joins = Set.new
       @groups = []
@@ -37,6 +41,18 @@ module Chicago
       self
     end
 
+    def order(*cols)
+      order_columns = column_parts(cols).map do |(name, dimension_name)|
+        if dimension_name
+          name.qualify(Schema::Dimension[dimension_name].table_name)
+        else
+          name.qualify(@fact.table_name)
+        end
+      end
+      @dataset = @dataset.order(*order_columns)
+      self
+    end
+    
     private
 
     def add_dimension_column_to_grouping(name, dimension)

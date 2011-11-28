@@ -5,7 +5,8 @@ module Chicago
       # Returns an Array of Columns.
       attr_reader :column_definitions
       
-      def initialize(defaults = {}, &block)
+      def initialize(owner, defaults = {}, &block)
+        @owner = owner
         @defaults = defaults
         @column_definitions = []
         instance_eval(&block) if block_given?
@@ -16,7 +17,7 @@ module Chicago
         if definition.kind_of? Hash
           name = definition.delete(:name)
           type = definition.delete(:type)
-          @column_definitions << Column.new(name, type, definition)
+          @column_definitions << Column.new(@owner, name, type, definition)
         else
           @column_definitions << definition
         end
@@ -25,7 +26,7 @@ module Chicago
       # Defines a column with the type of the method name, named +name+.
       def method_missing(type, *args)
         name, rest = args
-        @column_definitions << Column.new(name, type, @defaults.merge(rest || {}))
+        @column_definitions << Column.new(@owner, name, type, @defaults.merge(rest || {}))
       end
     end
   end
