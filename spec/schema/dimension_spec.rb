@@ -5,6 +5,10 @@ describe Chicago::Schema::Dimension do
     Schema::Dimension.define(:user).name.should == :user
   end
 
+  it "should have a human-friendly label" do
+    Schema::Dimension.define(:user).label.should == "User"
+  end
+  
   it "should return a symbol from #name" do
     Schema::Dimension.define('user').name.should == :user
   end

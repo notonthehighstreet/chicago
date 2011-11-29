@@ -5,6 +5,10 @@ describe Chicago::Schema::Fact do
     Schema::Fact.define(:sales).name.should == :sales
   end
 
+  it "has a human-friendly label" do
+    Schema::Fact.define(:monthly_sales).label.should == "Monthly Sales"
+  end
+
   it "should have a table name" do
     Schema::Fact.define(:sales).table_name.should == :facts_sales
   end

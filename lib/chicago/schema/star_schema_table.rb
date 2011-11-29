@@ -7,10 +7,13 @@ module Chicago
       # Returns the name of this dimension or fact.
       attr_reader :name
 
+      # Returns a human-friendly name for this dimension or fact.
+      attr_reader :label
+      
       # Returns or sets the database table name for this dimension.
       # By default, dimension_<name> or facts_<name>.
       attr_accessor :table_name
-
+      
       # Returns a schema hash for use by Sequel::MigrationBuilder,
       # defining all the RDBMS tables needed to store and build this 
       # table.
@@ -52,6 +55,7 @@ module Chicago
 
       def initialize(name, opts={})
         @name = name.to_sym
+        @label = opts[:label] || name.to_s.titlecase
         @hierarchy = Hierarchies.new
         @natural_key = []
       end
