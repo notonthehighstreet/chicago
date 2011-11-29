@@ -1,15 +1,25 @@
 require 'set'
 
 module Chicago
+  # A query interface to the star schema, similar in interface to a Sequel
+  # dataset.
+  #
+  # A query object allows a simplified version of SQL, which leverages
+  # the metadata provided by the Dimension, Fact & Column definitions
+  # so that sensible defaults can be applied, and explicit joins
+  # can be avoided.
   class Query
     attr_reader :dataset
 
+    # Creates a new query for a Fact table.
     def self.fact(db, fact_name)
       new(db, Schema::Fact[fact_name])
     end
     
     # Creates a new Query object, given a database connection and a
-    # fact table name.
+    # schema model.
+    #
+    # FIXME: non-fact models will currently break.
     def initialize(db, schema_model)
       @fact = schema_model
       @dataset = db[@fact.table_name]
@@ -18,7 +28,13 @@ module Chicago
       @group_removals = []
     end
 
-    def columns(*cols)
+    # Selects columns, generating the appropriate sql column references
+    # in the built dataset.
+    #
+    # select may be called multiple times.
+    #
+    # Returns the same query object.
+    def select(*cols)
       select_columns = column_parts(cols).map do |(name, dimension_name)|
         measure = @fact.measures.find {|m| m.name == name }
 
