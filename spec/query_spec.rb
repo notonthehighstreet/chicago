@@ -160,6 +160,36 @@ describe Chicago::Query do
     end
   end
 
+  describe "#columns" do
+    it "returns an empty array if no columns are selected" do
+      Chicago::Query.fact(TEST_DB, :sales).columns.should be_empty
+    end
+    
+    it "returns degenerate dimensions" do
+      Chicago::Query.fact(TEST_DB, :sales).select(:order_ref).columns.
+        should == [Chicago::Schema::Fact[:sales][:order_ref]]
+    end
+
+    it "returns dimension columns" do
+      Chicago::Query.fact(TEST_DB, :sales).select("product.name").columns.
+        should == [Chicago::Schema::Dimension[:product][:name]]
+    end
+
+    it "returns measure columns" do
+      Chicago::Query.fact(TEST_DB, :sales).select("total").columns.
+        should == [Chicago::Schema::Fact[:sales][:total]]
+    end
+
+    it "returns the main identifier for bare dimensions" do
+      column = Chicago::Query.fact(TEST_DB, :sales).select("product").columns.first
+      
+      column.label.should == "Product"
+      column.name.should == :product
+      column.to_s.should == "product"
+      column.sql_name.should == :name.qualify(:dimension_product).as(:product)
+    end
+  end
+  
   describe "ordering" do
     it "can be ordered by a dimension column" do
       q = Chicago::Query.fact(TEST_DB, :sales).order('product.sku')

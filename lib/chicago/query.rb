@@ -26,6 +26,7 @@ module Chicago
       @joins = Set.new
       @groups = []
       @group_removals = []
+      @columns = []
     end
 
     # Selects columns, generating the appropriate sql column references
@@ -39,15 +40,23 @@ module Chicago
         measure = @fact.measures.find {|m| m.name == name }
 
         if measure && measure.semi_additive?
+          @columns << @fact[name]
           semi_additive_measure_default(name, @fact)
         elsif measure
+          @columns << @fact[name]
           additive_measure_default(name, @fact)
         elsif dimension_name
           dimension = Schema::Dimension[dimension_name]
+          if name == dimension.main_identifier
+            @columns << Schema::DimensionAsColumn.new(dimension[name])
+          else
+            @columns << dimension[name]
+          end
           add_dimension_column_to_grouping(name, dimension)
           dimension_default(name, dimension)
         else
           @groups << [name, @fact]
+          @columns << @fact[name]
           degenerate_dimension_default(name, @fact)
         end
       end
@@ -57,6 +66,11 @@ module Chicago
       self
     end
 
+    # Returns an array of Columns selected in this query.
+    def columns
+      @columns
+    end
+    
     def order(*cols)
       order_columns = column_parts(cols).map do |(name, dimension_name)|
         if dimension_name

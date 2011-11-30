@@ -13,7 +13,7 @@ describe Chicago::Schema::Dimension do
     Schema::Dimension.define('user').name.should == :user
   end
 
-  it "should return the named dimension from #[]" do
+  it "should return the named dimension from []" do
     dimension = Schema::Dimension.define(:user)
     Schema::Dimension[:user].should == dimension
   end
@@ -54,6 +54,19 @@ describe Chicago::Schema::Dimension do
     end
 
     dd.column_definitions.should == [column]
+  end
+
+  it "returns a column from #[]" do
+    column = stub(:column, :name => :col_name)
+    mock_builder = mock(:builder)
+    Schema::ColumnGroupBuilder.stub(:new).and_return(mock_builder)
+    mock_builder.stub(:column_definitions).and_return([column])
+
+    dd = Schema::Dimension.define(:user) do
+      columns { string :username }
+    end
+
+    dd[:col_name] == [column]
   end
 
   it "should specify a main identifier column" do

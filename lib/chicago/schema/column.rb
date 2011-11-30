@@ -1,4 +1,4 @@
-require 'sequel/extensions/inflector'
+require 'delegate'
 
 module Chicago
   module Schema
@@ -165,6 +165,26 @@ module Chicago
 
       def default_min(type)
         0 if type == :money
+      end
+    end
+
+    # Decorates a column to provide the illusion that a dimension is a
+    # column.
+    class DimensionAsColumn < DelegateClass(Column)
+      def label
+        owner.label
+      end
+
+      def name
+        owner.name
+      end
+
+      def to_s
+        name.to_s
+      end
+
+      def sql_name
+        __getobj__.sql_name.as(name)
       end
     end
   end

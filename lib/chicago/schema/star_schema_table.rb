@@ -51,6 +51,11 @@ module Chicago
         @hierarchy.implications(name).map(&:name)
       end
 
+      # Returns the column named 'name'.
+      def [](name)
+        column_definitions.find {|c| c.name == name }
+      end
+      
       protected
 
       def initialize(name, opts={})
