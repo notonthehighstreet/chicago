@@ -73,7 +73,7 @@ module Chicago
       
       # Returns a qualified symbol name, for use with Sequel as an SQL reference
       def sql_name
-        @sql_name ||= name.qualify(owner.table_name)
+        @sql_name ||= name.qualify(owner.table_name).as(qualified_name)
       end
 
       # Returns true if this measure column can be averaged, but not summed.
@@ -125,8 +125,12 @@ module Chicago
 
       # Returns the abstract qualified version of this column, for
       # example "product.title".
-      def to_s
+      def qualified_name
         [owner.name, name] * '.'
+      end
+      
+      def to_s
+        qualified_name
       end
       
       private
@@ -179,12 +183,35 @@ module Chicago
         owner.name
       end
 
-      def to_s
+      def qualified_name
         name.to_s
       end
 
+      def to_s
+        qualified_name
+      end
+
       def sql_name
-        __getobj__.sql_name.as(name)
+        __getobj__.name.qualify(owner.table_name).as(qualified_name)
+      end
+    end
+
+    class CalculatedColumn < DelegateClass(Column)
+      def initialize(column, operation)
+        @operation = operation
+        super column
+      end
+      
+      def qualified_name
+        [@operation,__getobj__.qualified_name] * '.'
+      end
+
+      def to_s
+        qualified_name
+      end
+
+      def sql_name
+        @operation[__getobj__.sql_name.expression].as(qualified_name)
       end
     end
   end

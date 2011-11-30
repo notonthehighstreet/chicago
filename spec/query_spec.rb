@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/spec_helper"
+require File.expand_path(File.dirname(__FILE__) + "/spec_helper")
 
 describe Chicago::Query do
   before :all do
@@ -33,6 +33,11 @@ describe Chicago::Query do
         decimal :vat_rate, :semi_additive => true
       end
     end
+  end
+
+  after :all do
+    Chicago::Schema::Dimension.clear_definitions
+    Chicago::Schema::Fact.clear_definitions
   end
 
   describe "#select" do
@@ -186,7 +191,7 @@ describe Chicago::Query do
       column.label.should == "Product"
       column.name.should == :product
       column.to_s.should == "product"
-      column.sql_name.should == :name.qualify(:dimension_product).as(:product)
+      column.sql_name.should == :name.qualify(:dimension_product).as("product")
     end
   end
   

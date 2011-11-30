@@ -26,6 +26,7 @@ module Chicago
   autoload :Definable, 'chicago/definable'
   autoload :RakeTasks, 'chicago/rake_tasks'
   autoload :Query,     'chicago/query'
+  autoload :ColumnParser, 'chicago/column_parser'  
   autoload :FilterStringParser, 'chicago/util/filter_string_parser'
 
   module Data
@@ -33,7 +34,15 @@ module Chicago
   end
 
   module Schema
+    class InvalidDimensionError < RuntimeError
+    end
+
+    class InvalidColumnError < RuntimeError
+    end
+
     autoload :Column,              'chicago/schema/column'
+    autoload :CalculatedColumn,    'chicago/schema/column'
+    autoload :DimensionAsColumn,   'chicago/schema/column'    
     autoload :StarSchemaTable,     'chicago/schema/star_schema_table'
     autoload :Dimension,           'chicago/schema/dimension'
     autoload :Fact,                'chicago/schema/fact'

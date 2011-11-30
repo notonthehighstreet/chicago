@@ -9,14 +9,20 @@ describe Chicago::Schema::Column do
     Schema::Column.new(@dimension, :username, :string).owner.should == @dimension
   end
 
+  it "returns 'dimension.name' as the qualfied name" do
+    @dimension = Schema::Dimension.define(:customer)
+    Schema::Column.new(@dimension, :username, :string).qualified_name.
+      should == "customer.username"
+  end
+  
   it "returns 'dimension.name' when to_s is called" do
     @dimension = Schema::Dimension.define(:customer)
     Schema::Column.new(@dimension, :username, :string).to_s.should == "customer.username"
   end
 
   it "returns a qualified name for use with SQL" do
-    @dimension.should_receive(:table_name).and_return(:dimension_customer)
-    Schema::Column.new(@dimension, :username, :string).sql_name.should == :username.qualify(:dimension_customer)
+    @dimension = Schema::Dimension.define(:customer)
+    Schema::Column.new(@dimension, :username, :string).sql_name.should == :username.qualify(:dimension_customer).as('customer.username')
   end
 
   it "has a human-friendly label" do
