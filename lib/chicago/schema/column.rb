@@ -76,6 +76,14 @@ module Chicago
         @sql_name ||= name.qualify(owner.table_name).as(qualified_name)
       end
 
+      def sql_group_name
+        qualified_name.to_sym
+      end
+      
+      def sql_order_name
+        name.qualify(owner.table_name)
+      end
+      
       # Returns true if this measure column can be averaged, but not summed.
       def semi_additive?
         @semi_additive
@@ -194,6 +202,18 @@ module Chicago
       def sql_name
         __getobj__.name.qualify(owner.table_name).as(qualified_name)
       end
+
+      def sql_group_name
+        original_id_column = owner.original_key
+
+        if original_id_column
+          original_id_column.name.qualify(owner.table_name)
+        end
+      end
+
+      def sql_order_name
+        owner.main_identifier.qualify(owner.table_name)
+      end
     end
 
     class CalculatedColumn < DelegateClass(Column)
@@ -212,6 +232,9 @@ module Chicago
 
       def sql_name
         @operation[__getobj__.sql_name.expression].as(qualified_name)
+      end
+
+      def sql_group_name
       end
     end
   end

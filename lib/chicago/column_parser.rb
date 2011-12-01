@@ -32,7 +32,7 @@ module Chicago
       elsif ! context.dimension_names.include?(table_name)
         raise Chicago::Schema::InvalidDimensionError.new("#{context.label} does not have a dimension #{table_name}")
       elsif column_name
-        Chicago::Schema::Dimension[table_name][column_name]
+        context.dimension_definitions[table_name][column_name]
       else
         d = Chicago::Schema::Dimension[table_name]
         Chicago::Schema::DimensionAsColumn.new(d[d.main_identifier])

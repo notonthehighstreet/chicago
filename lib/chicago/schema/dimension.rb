@@ -1,3 +1,5 @@
+require 'delegate'
+
 module Chicago
   module Schema
     class Dimension < StarSchemaTable
@@ -170,6 +172,15 @@ module Chicago
           end
           idx
         end
+      end
+    end
+
+    class RoleplayingDimension < DelegateClass(Dimension)
+      attr_reader :name
+      
+      def initialize(name, dimension)
+        @name = name
+        super dimension
       end
     end
   end

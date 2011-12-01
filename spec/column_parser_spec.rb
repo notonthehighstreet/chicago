@@ -5,7 +5,10 @@ describe "Parsing column strings" do
     Chicago::Schema::Dimension.define(:date) do
       columns do
         date :date
+        integer :year
       end
+
+      identified_by :date
     end
     
     Chicago::Schema::Dimension.define(:product) do
@@ -88,11 +91,11 @@ describe "Parsing column strings" do
 
   it "returns a column from a roleplayed dimension" do
     pending
-    column = parse_column(@fact, "ship_date.date")
+    column = parse_column(@fact, "ship_date.year")
 
-    column.name.should == :date
-    column.sql_name.should == :date.qualify(:dimension_ship_date).as('ship_date.date')
-    column.qualified_name.should == 'ship_date.date'
+    column.name.should == :year
+    column.sql_name.should == :year.qualify(:dimension_ship_date).as('ship_date.year')
+    column.qualified_name.should == 'ship_date.year'
   end
 
   def parse_column(context, str)

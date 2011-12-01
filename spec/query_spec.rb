@@ -21,8 +21,14 @@ describe Chicago::Query do
       identified_by :name
     end
 
+    Chicago::Schema::Dimension.define(:customer) do
+      columns do
+        string :name
+      end
+    end
+    
     Chicago::Schema::Fact.define(:sales) do
-      dimensions :product
+      dimensions :product, :customer
 
       degenerate_dimensions do
         string :order_ref
@@ -41,164 +47,184 @@ describe Chicago::Query do
   end
 
   describe "#select" do
-    it "allows chained method calls" do
-      Chicago::Query.fact(TEST_DB, :sales).select(:total).should be_kind_of(Chicago::Query)
+    before :each do
+      @q = Chicago::Query.fact(TEST_DB, :sales)
     end
     
-    it "selects the sum of a measure by default" do
-      q = Chicago::Query.fact(TEST_DB, :sales).select(:total)
-      q.dataset.opts[:select].should include(:sum[:total.qualify(:facts_sales)].as(:sum_total))
+    it "allows chained method calls" do
+      @q.select("product.name").should be_kind_of(Chicago::Query)
     end
-
-    it "selects the average of a semi-additive measure by default" do
-      q = Chicago::Query.fact(TEST_DB, :sales).select(:vat_rate)
-      q.dataset.opts[:select].should include(:avg[:vat_rate.qualify(:facts_sales)].as(:avg_vat_rate))
+    
+    it "selects the sum of a measure" do
+      @q.select("sum.sales.total")
+      @q.dataset.opts[:select].should include(:sum[:total.qualify(:facts_sales)].as("sum.sales.total"))
     end
 
     it "selects the column, qualified to the fact table, if a degenerate dimension" do
-      q = Chicago::Query.fact(TEST_DB, :sales).select(:order_ref)
-      q.dataset.opts[:select].should include(:order_ref.qualify(:facts_sales))
-    end
-
-    it "is indifferent to being passed Strings or Symbols" do
-      q = Chicago::Query.fact(TEST_DB, :sales).select('order_ref')
-      q.dataset.opts[:select].should include(:order_ref.qualify(:facts_sales))
+      @q.select("sales.order_ref")
+      @q.dataset.opts[:select].should include(:order_ref.qualify(:facts_sales).as("sales.order_ref"))
     end
 
     it "selects the dimension identifier if plain dimension is passed" do
-      q = Chicago::Query.fact(TEST_DB, :sales).select('product')
-      q.dataset.opts[:select].should include(:name.qualify(:dimension_product).as(:product))
+      @q.select('product')
+      @q.dataset.opts[:select].should include(:name.qualify(:dimension_product).as("product"))
     end
 
-    it "splits a dimension column on '.' and select that column" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product.manufacturer'
-      q.dataset.opts[:select].should include(:manufacturer.qualify(:dimension_product))
+    it "selects a dimension column" do
+      @q.select 'product.manufacturer'
+      @q.dataset.opts[:select].should include(:manufacturer.qualify(:dimension_product).as("product.manufacturer"))
     end
 
     it "joins on the dimension if the dimension is selected" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product'
+      @q.select 'product'
     
       on_clause = make_on_clause(Sequel::SQL::QualifiedIdentifier.new("dimension_product", "id") =>
                                  Sequel::SQL::QualifiedIdentifier.new(:facts_sales, :product_dimension_id))
       join_clause = Sequel::SQL::JoinOnClause.new(on_clause, :inner, :dimension_product)
       
-      q.dataset.opts[:join].first.should == join_clause
+      @q.dataset.opts[:join].first.should == join_clause
     end
 
     it "joins on the dimension if dimension column is included" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product.manufacturer'
+      @q.select 'product.manufacturer'
     
       on_clause = make_on_clause(Sequel::SQL::QualifiedIdentifier.new("dimension_product", "id") =>
                                  Sequel::SQL::QualifiedIdentifier.new(:facts_sales, :product_dimension_id))
       
       join_clause = Sequel::SQL::JoinOnClause.new(on_clause, :inner, :dimension_product)
       
-      q.dataset.opts[:join].first.should == join_clause
+      @q.dataset.opts[:join].first.should == join_clause
     end
 
     it "should not attempt to join on a dimension multiple times" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product.manufacturer', 'product.type'
-      
-      q.dataset.opts[:join].first.table.should == :dimension_product
-      q.dataset.opts[:join].size.should == 1
+      @q.select 'product.manufacturer', 'product.type'      
+      @q.dataset.opts[:join].map(&:table).should == [:dimension_product]
     end
 
+    it "doesn't try to join on the fact table" do
+      @q.select 'product.manufacturer', 'sum.sales.total'
+      @q.dataset.opts[:join].map(&:table).should == [:dimension_product]
+    end
+
+    it "joins on multiple dimensions" do
+      @q.select 'product.manufacturer', 'customer.name'
+      @q.dataset.opts[:join].map(&:table).should == [:dimension_product, :dimension_customer]
+    end
+    
     it "groups on a degenerate dimension column" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'order_ref'
-      q.dataset.opts[:group].should == [:order_ref.qualify(:facts_sales)]
+      @q.select 'sales.order_ref'
+      @q.dataset.opts[:group].should == ['sales.order_ref'.to_sym]
     end
 
     it "groups on a dimension column" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product.manufacturer'
-      q.dataset.opts[:group].should == [:manufacturer.qualify(:dimension_product)]
+      @q.select 'product.manufacturer'
+      @q.dataset.opts[:group].should == ['product.manufacturer'.to_sym]
     end
 
     it "groups on the original key instead of a main identifier column" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product'
-      q.dataset.opts[:group].should == [:original_id.qualify(:dimension_product)]
+      Chicago::Schema::Dimension[:product].original_key.should_not be_nil
+      @q.select 'product'
+      @q.dataset.opts[:group].should == [:original_id.qualify(:dimension_product)]
     end
 
-    it "should only group on dimension original key if plain dimension is used" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product.manufacturer', 'product', 'product.type'
-      q.dataset.opts[:group].should == [:original_id.qualify(:dimension_product)]
+    it "only groups on dimension original key if plain dimension is used" do
+      @q.select 'product.manufacturer', 'product', 'product.type', 'customer.name'
+      @q.dataset.opts[:group].should == [:original_id.qualify(:dimension_product),
+                                         :'customer.name']
     end
 
-    it "should only group on dimension original key if dimension identifier is used" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product.manufacturer', 'product.name', 'product.type'
-      q.dataset.opts[:group].should == [:original_id.qualify(:dimension_product)]
+    it "doesn't group on calculated columns" do
+      @q.select 'product', 'sum.sales.total'
+      @q.dataset.opts[:group].should == [:original_id.qualify(:dimension_product)]
     end
     
     it "allows multiple calls without overwriting previous column selections" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product'
-      q.select 'product.manufacturer'
-      q.select 'total'
-      q.select 'order_ref'
-
-      q.dataset.opts[:select].should == [:name.qualify(:dimension_product).as(:product),
-                                         :manufacturer.qualify(:dimension_product),
-                                         :sum[:total.qualify(:facts_sales)].as(:sum_total),
-                                         :order_ref.qualify(:facts_sales)]
-      q.dataset.opts[:join].size.should == 1    
-      q.dataset.opts[:group].should == [:original_id.qualify(:dimension_product), :order_ref.qualify(:facts_sales)]
+      @q.select 'product'
+      @q.select 'product.manufacturer'
+      @q.select 'sum.sales.total'
+      @q.select 'sales.order_ref'
+      
+      @q.dataset.opts[:select].should == [:name.qualify(:dimension_product).as('product'),
+                                         :manufacturer.qualify(:dimension_product).as('product.manufacturer'),
+                                         :sum[:total.qualify(:facts_sales)].as('sum.sales.total'),
+                                         :order_ref.qualify(:facts_sales).as('sales.order_ref')]
+      @q.dataset.opts[:join].size.should == 1    
+      @q.dataset.opts[:group].should == [:original_id.qualify(:dimension_product),
+                                         :'sales.order_ref']
     end
 
     it "doesn't group on columns that are implied by columns already grouped" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product.manufacturer', 'product.manufacturer_address'
-      q.dataset.opts[:group].should == [:manufacturer.qualify(:dimension_product)]
+      pending
+      @q.select 'product.manufacturer', 'product.manufacturer_address'
+      @q.dataset.opts[:group].should == [:'product.manufacturer']
     end
 
     it "groups on at least one column out of 2 that imply each other" do
-      q = Chicago::Query.fact(TEST_DB, :sales)
-      q.select 'product.sku', 'product.internal_code'
-      q.dataset.opts[:group].should be_one_of([:sku.qualify(:dimension_product)], [:internal_code.qualify(:dimension_product)])
+      pending
+      @q.select 'product.sku', 'product.internal_code'
+      @q.dataset.opts[:group].should be_one_of([:sku.qualify(:dimension_product)], [:internal_code.qualify(:dimension_product)])
     end
   end
 
   describe "#columns" do
+    before :each do
+      @q = Chicago::Query.fact(TEST_DB, :sales)
+    end
+    
     it "returns an empty array if no columns are selected" do
-      Chicago::Query.fact(TEST_DB, :sales).columns.should be_empty
+      @q.columns.should be_empty
     end
     
     it "returns degenerate dimensions" do
-      Chicago::Query.fact(TEST_DB, :sales).select(:order_ref).columns.
+      @q.select('sales.order_ref').columns.
         should == [Chicago::Schema::Fact[:sales][:order_ref]]
     end
 
     it "returns dimension columns" do
-      Chicago::Query.fact(TEST_DB, :sales).select("product.name").columns.
+      @q.select("product.name").columns.
         should == [Chicago::Schema::Dimension[:product][:name]]
     end
 
     it "returns measure columns" do
-      Chicago::Query.fact(TEST_DB, :sales).select("total").columns.
-        should == [Chicago::Schema::Fact[:sales][:total]]
+      column = @q.select("sum.sales.total").columns.first
+      column.label.should == "Total"
+      column.qualified_name.should == "sum.sales.total"
     end
 
     it "returns the main identifier for bare dimensions" do
-      column = Chicago::Query.fact(TEST_DB, :sales).select("product").columns.first
-      
+      column = @q.select("product").columns.first
       column.label.should == "Product"
-      column.name.should == :product
-      column.to_s.should == "product"
-      column.sql_name.should == :name.qualify(:dimension_product).as("product")
+      column.qualified_name.should == "product"
     end
   end
   
   describe "ordering" do
+    before :each do
+      @q = Chicago::Query.fact(TEST_DB, :sales)
+    end
     it "can be ordered by a dimension column" do
-      q = Chicago::Query.fact(TEST_DB, :sales).order('product.sku')
-      q.dataset.opts[:order].should == [:sku.qualify(:dimension_product)]
+      @q.select('product.sku').order('product.sku')
+      @q.dataset.opts[:order].should == ['product.sku']
+    end
+
+    it "can be ordered by a column not part of the select" do
+      @q.order('product.sku')
+      @q.dataset.opts[:order].should == [:sku.qualify(:dimension_product)]
+    end
+
+    it "can be ordered by a bare dimension not part of the select" do
+      @q.order('product')
+      @q.dataset.opts[:order].should == [:name.qualify(:dimension_product)]
+    end
+  end
+
+  describe "#limit" do
+    it "delegates limiting to the underlying Sequel Dataset" do
+      dataset = mock(:dataset)
+      stub_db = stub(:database, :[] => dataset)
+
+      dataset.should_receive(:limit).with(10)
+      Chicago::Query.fact(stub_db, :sales).limit(10)
     end
   end
   

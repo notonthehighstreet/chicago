@@ -9,6 +9,9 @@ module Chicago
       # All measure columns for this fact.
       attr_reader :measures
 
+      # Returns a hash of :dimension_name => Dimension
+      attr_reader :dimension_definitions
+      
       # Returns the schema for this fact.
       def db_schema(type_converter)      
         {table_name => base_table(type_converter)}
@@ -16,13 +19,22 @@ module Chicago
 
       # Sets the dimensions with which a fact row is associated.
       def dimensions(*dimensions)
-        dimensions += dimensions.pop.keys if dimensions.last.kind_of? Hash
+        roleplay_dimensions = dimensions.last.kind_of?(Hash) ? dimensions.pop : {}
+        dimensions.each do |d|
+          @dimension_definitions[d] = Dimension[d]
+        end
+
+        roleplay_dimensions.each do |name, dimension_name|
+          @dimension_definitions[name] = RoleplayingDimension.new(name, Dimension[dimension_name])
+        end
+
+        dimensions += roleplay_dimensions.keys
         dimensions.each do |dimension|
           @dimension_keys << Column.new(self, dimension_key(dimension), :integer, :null => false, :min => 0)
           @dimension_names << dimension
         end
       end
-
+      
       # Defines the degenerate dimensions for this fact.
       #
       # Degenerate dimensions are typically ids / numbers from
@@ -73,6 +85,7 @@ module Chicago
         @degenerate_dimensions = []
         @measures = []
         @dimension_keys = []
+        @dimension_definitions = {}
       end
 
       private
