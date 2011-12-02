@@ -26,7 +26,6 @@ module Chicago
   autoload :Definable, 'chicago/definable'
   autoload :RakeTasks, 'chicago/rake_tasks'
   autoload :Query,     'chicago/query'
-  autoload :Query2,     'chicago/query'  
   autoload :ColumnParser, 'chicago/column_parser'  
   autoload :FilterStringParser, 'chicago/util/filter_string_parser'
 
@@ -44,7 +43,6 @@ module Chicago
     autoload :Column,              'chicago/schema/column'
     autoload :CalculatedColumn,    'chicago/schema/column'
     autoload :DimensionAsColumn,   'chicago/schema/column'
-    autoload :RoleplayingColumn,   'chicago/schema/column'
     autoload :StarSchemaTable,     'chicago/schema/star_schema_table'
     autoload :Dimension,           'chicago/schema/dimension'
     autoload :RoleplayingDimension,'chicago/schema/dimension'
