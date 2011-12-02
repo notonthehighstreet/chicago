@@ -47,6 +47,11 @@ module Chicago
       self
     end
 
+    def filter(expression)
+      @dataset = FilterStringParser.new(expression).apply_to(@dataset)
+      self
+    end
+    
     # Orders the rows in this query.
     def order(*cols)
       columns_to_order = cols.map {|str| @parser.parse_column(@fact, str) }

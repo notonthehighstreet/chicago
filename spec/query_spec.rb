@@ -202,6 +202,7 @@ describe Chicago::Query do
     before :each do
       @q = Chicago::Query.fact(TEST_DB, :sales)
     end
+
     it "can be ordered by a dimension column" do
       @q.select('product.sku').order('product.sku')
       @q.dataset.opts[:order].should == ['product.sku']
@@ -218,6 +219,21 @@ describe Chicago::Query do
     end
   end
 
+  describe "filtering" do
+    before :each do
+      @q = Chicago::Query.fact(TEST_DB, :sales)
+    end
+
+    it "should use a FilterStringParser" do
+      parser = mock(:parser)
+      parser.should_receive(:apply_to).with(kind_of(Sequel::MySQL::Dataset)).and_return(stub(:dataset))
+
+      Chicago::FilterStringParser.should_receive(:new).with("filters").and_return(parser)
+
+      @q.filter("filters").should == @q
+    end
+  end
+  
   describe "#limit" do
     it "delegates limiting to the underlying Sequel Dataset" do
       dataset = mock(:dataset)
