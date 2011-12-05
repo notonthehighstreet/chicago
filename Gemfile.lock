@@ -19,7 +19,7 @@ GEM
     rspec-expectations (2.3.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.3.0)
-    sequel (3.28.0)
+    sequel (3.30.0)
     sequel_migration_builder (0.3.1)
       sequel (>= 3.20.0)
 
@@ -33,4 +33,5 @@ DEPENDENCIES
   rcov
   rdoc (~> 2.4.2)
   rspec (~> 2.3.0)
+  sequel (~> 3)
   sequel_migration_builder (~> 0.3.0)
