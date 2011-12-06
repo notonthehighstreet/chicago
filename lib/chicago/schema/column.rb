@@ -236,6 +236,10 @@ module Chicago
 
       def sql_group_name
       end
+
+      def sql_order_name
+        sql_name.expression
+      end
     end
   end
 end

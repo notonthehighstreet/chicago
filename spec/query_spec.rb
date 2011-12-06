@@ -227,6 +227,17 @@ describe Chicago::Query do
       @q.order('-product.sku', 'product.manufacturer')
       @q.dataset.opts[:order].should == [:sku.qualify(:dimension_product).desc, :manufacturer.qualify(:dimension_product).asc]
     end
+
+    it "can be ordered on calculated columns" do
+      @q.select('product.sku', 'sum.sales.total')
+      @q.order('sum.sales.total')
+      @q.dataset.opts[:order].should == [:'sum.sales.total'.asc]
+    end
+
+    it "can be ordered on calculated columns, not in select" do
+      @q.select('product.sku').order('sum.sales.total')
+      @q.dataset.opts[:order].should == [:sum[:total.qualify(:facts_sales)].asc]
+    end
   end
 
   describe "filtering" do

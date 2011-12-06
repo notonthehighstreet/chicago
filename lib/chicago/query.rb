@@ -68,7 +68,7 @@ module Chicago
         end
 
         c = @parser.parse_column(@fact, col_str)
-        @columns.include?(c) ? c.qualified_name.to_sym.send(direction) : c.sql_order_name.send(direction)
+        @columns.any? {|x| x.qualified_name == c.qualified_name } ? c.qualified_name.to_sym.send(direction) : c.sql_order_name.send(direction)
       end
       
       @dataset = @dataset.order(*columns_to_order)
