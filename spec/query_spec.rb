@@ -222,6 +222,11 @@ describe Chicago::Query do
       @q.order('-product.sku')
       @q.dataset.opts[:order].should == [:sku.qualify(:dimension_product).desc]
     end
+
+    it "can be ordered by multiple columns" do
+      @q.order('-product.sku', 'product.manufacturer')
+      @q.dataset.opts[:order].should == [:sku.qualify(:dimension_product).desc, :manufacturer.qualify(:dimension_product).asc]
+    end
   end
 
   describe "filtering" do
