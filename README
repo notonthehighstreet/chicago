@@ -2,3 +2,10 @@ Chicago
 =======
 
 Chicago is a small-scale data warehouse implementation written in Ruby.
+
+Contributing
+============
+
+To get specs passing, you'll need to create a test myqsl database, and
+copy spec/database.yml.dist to spec/database.yml and populate it
+appropriately.
