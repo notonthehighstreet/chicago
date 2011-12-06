@@ -15,4 +15,8 @@ end
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
 RSpec.configure do |config|
+  config.after :all do
+    Chicago::Schema::Dimension.clear_definitions
+    Chicago::Schema::Fact.clear_definitions
+  end
 end

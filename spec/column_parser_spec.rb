@@ -35,11 +35,6 @@ describe "Parsing column strings" do
     end
   end
 
-  after :all do
-    Chicago::Schema::Dimension.clear_definitions
-    Chicago::Schema::Fact.clear_definitions
-  end
-
   before :each do
     @fact = Chicago::Schema::Fact[:sales]
     @dimension = Chicago::Schema::Fact[:product]

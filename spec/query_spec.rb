@@ -41,11 +41,6 @@ describe Chicago::Query do
     end
   end
 
-  after :all do
-    Chicago::Schema::Dimension.clear_definitions
-    Chicago::Schema::Fact.clear_definitions
-  end
-
   describe "#select" do
     before :each do
       @q = Chicago::Query.fact(TEST_DB, :sales)
