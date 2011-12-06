@@ -200,17 +200,27 @@ describe Chicago::Query do
 
     it "can be ordered by a dimension column" do
       @q.select('product.sku').order('product.sku')
-      @q.dataset.opts[:order].should == ['product.sku']
+      @q.dataset.opts[:order].should == [:'product.sku'.asc]
     end
 
     it "can be ordered by a column not part of the select" do
       @q.order('product.sku')
-      @q.dataset.opts[:order].should == [:sku.qualify(:dimension_product)]
+      @q.dataset.opts[:order].should == [:sku.qualify(:dimension_product).asc]
     end
 
     it "can be ordered by a bare dimension not part of the select" do
       @q.order('product')
-      @q.dataset.opts[:order].should == [:name.qualify(:dimension_product)]
+      @q.dataset.opts[:order].should == [:name.qualify(:dimension_product).asc]
+    end
+
+    it "can be ordered in descending order" do
+      @q.select('product.sku').order('-product.sku')
+      @q.dataset.opts[:order].should == [:'product.sku'.desc]
+    end
+
+    it "can be ordered in descending order for a column not part of the select" do
+      @q.order('-product.sku')
+      @q.dataset.opts[:order].should == [:sku.qualify(:dimension_product).desc]
     end
   end
 

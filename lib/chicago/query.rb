@@ -53,10 +53,22 @@ module Chicago
     end
     
     # Orders the rows in this query.
-    def order(*cols)
-      columns_to_order = cols.map {|str| @parser.parse_column(@fact, str) }
-      columns_to_order = columns_to_order.map do |c|
-        @columns.include?(c) ? c.qualified_name : c.sql_order_name
+    #
+    # Columns is a list of strings like 'dimension.column'. Descending
+    # order can be specified by prefixing the string with a '-' sign.
+    def order(*columns)
+      columns_to_order = columns.map do |str|
+        direction = str[0..0] == '-' ? :desc : :asc
+        if str[0..0] == '-'
+          direction = :desc
+          col_str = str[1..str.length]
+        else
+          direction = :asc
+          col_str = str
+        end
+
+        c = @parser.parse_column(@fact, col_str)
+        @columns.include?(c) ? c.qualified_name.to_sym.send(direction) : c.sql_order_name.send(direction)
       end
       
       @dataset = @dataset.order(*columns_to_order)
