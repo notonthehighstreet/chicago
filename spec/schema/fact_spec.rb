@@ -14,6 +14,8 @@ describe Chicago::Schema::Fact do
   end
 
   it "should set the dimensions for the fact" do
+    Schema::Dimension.define(:product)
+    Schema::Dimension.define(:customer)
     fact = Schema::Fact.define(:sales) do
       dimensions :product, :customer
     end
@@ -21,6 +23,8 @@ describe Chicago::Schema::Fact do
   end
 
   it "should allow dimensional roleplaying via a hash of name => dimension" do
+    Schema::Dimension.define(:product)
+    Schema::Dimension.define(:user)
     fact = Schema::Fact.define(:sales) do
       dimensions :product, :customer => :user
     end
