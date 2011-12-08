@@ -116,6 +116,18 @@ describe Chicago::Schema::Column do
   it "should not be numeric if a string" do
     Schema::Column.new(@dimension, :username, :string).should_not be_numeric
   end
+
+  it "can be countable" do
+    col = Schema::Column.new(@dimension, :username, :string, :countable => true)
+    col.should be_countable
+    col.countable_label.should == col.label
+  end
+
+  it "can have a specific label when counted" do
+    col = Schema::Column.new(@dimension, :username, :string, :countable => "No. of users")
+    col.should be_countable
+    col.countable_label.should == "No. of users"
+  end
 end
 
 describe "A Hash returned by Chicago::Column#db_schema" do

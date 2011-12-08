@@ -36,7 +36,8 @@ module Chicago
         @name        = name
         @column_type = column_type
         @label       = @opts[:label] || name.to_s.titlecase
-        
+        @countable_label = @opts[:countable].kind_of?(String) ? @opts[:countable] : @label
+        @countable   = !! @opts[:countable]
         @min         = @opts[:min]
         @max         = @opts[:max]
         @null        = @opts[:null]
@@ -70,6 +71,12 @@ module Chicago
 
       # Returns a human-friendly version of the column name.
       attr_reader :label
+
+      attr_reader :countable_label
+
+      def countable?
+        @countable
+      end
       
       # Returns a qualified symbol name, for use with Sequel as an SQL reference
       def sql_name
@@ -221,6 +228,14 @@ module Chicago
         @operation = operation
         super column
       end
+
+      def label
+        if @operation == :count
+          __getobj__.countable_label
+        else
+          __getobj__.label
+        end
+      end
       
       def qualified_name
         [@operation,__getobj__.qualified_name] * '.'
@@ -231,7 +246,13 @@ module Chicago
       end
 
       def sql_name
-        @operation[__getobj__.sql_name.expression].as(qualified_name)
+        if @operation.to_sym == :count
+          table = __getobj__.sql_name.expression.table
+          field = __getobj__.sql_name.expression.column
+          :count.sql_function("distinct `#{table}`.`#{field}`".lit).as(qualified_name)
+        else
+          @operation.sql_function(__getobj__.sql_name.expression).as(qualified_name)
+        end
       end
 
       def sql_group_name

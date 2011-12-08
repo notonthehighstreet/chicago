@@ -84,6 +84,13 @@ describe "Parsing column strings" do
     column.qualified_name.should == 'sum.sales.total'
   end
 
+  it "counts distinct rows" do
+    column = parse_column(@fact, "count.sales.order_ref")
+
+    column.sql_name.should == :count["distinct `facts_sales`.`order_ref`"].as('count.sales.order_ref')
+    column.qualified_name.should == 'count.sales.order_ref'
+  end
+
   it "returns a column from a roleplayed dimension" do
     pending
     column = parse_column(@fact, "ship_date.year")
