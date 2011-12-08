@@ -128,6 +128,11 @@ describe Chicago::Schema::Column do
     col.should be_countable
     col.countable_label.should == "No. of users"
   end
+
+  it "can be internal, i.e. for internal use only, and not to be displayed in an interface" do
+    Schema::Column.new(@dimension, :random_ref, :string, :internal => true).
+      should be_internal
+  end
 end
 
 describe "A Hash returned by Chicago::Column#db_schema" do

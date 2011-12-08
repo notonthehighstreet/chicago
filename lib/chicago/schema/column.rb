@@ -45,6 +45,7 @@ module Chicago
         @default     = @opts[:default]
         @descriptive = !! @opts[:descriptive]
         @semi_additive = !! @opts[:semi_additive]
+        @internal    = !! @opts[:internal]
       end
 
       # Returns the owning Fact or Dimension
@@ -74,8 +75,15 @@ module Chicago
 
       attr_reader :countable_label
 
+      # Returns true if this column can be counted.
       def countable?
         @countable
+      end
+
+      # Returns true if this column should be ignored in user-facing
+      # parts of an application
+      def internal?
+        @internal
       end
       
       # Returns a qualified symbol name, for use with Sequel as an SQL reference
