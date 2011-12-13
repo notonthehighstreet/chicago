@@ -249,7 +249,7 @@ describe Chicago::Query do
       parser = mock(:parser, :dimensions => Set.new)
       parser.should_receive(:apply_to).with(kind_of(Sequel::MySQL::Dataset)).and_return(stub(:dataset))
 
-      Chicago::FilterStringParser.should_receive(:new).with("filters").and_return(parser)
+      Chicago::FilterStringParser.should_receive(:new).with("filters", anything()).and_return(parser)
 
       @q.filter("filters").should == @q
     end

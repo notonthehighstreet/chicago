@@ -48,7 +48,7 @@ module Chicago
     end
 
     def filter(expression)
-      parser = FilterStringParser.new(expression)
+      parser = FilterStringParser.new(expression, @fact)
       @dataset = parser.apply_to(@dataset)
       add_filter_joins_to_dataset(parser.dimensions)
       self
@@ -95,7 +95,7 @@ module Chicago
     end
 
     def add_filter_joins_to_dataset(dimension_names)
-      to_join = dimension_names.map {|d| Chicago::Schema::Dimension[d] }.compact.reject {|d| @joined_tables.include?(d) }.uniq
+      to_join = dimension_names.reject {|d| @fact.name == d }.map {|d| Chicago::Schema::Dimension[d] }.compact.reject {|d| @joined_tables.include?(d) }.uniq
       add_joins_to_dataset(to_join)
     end
 

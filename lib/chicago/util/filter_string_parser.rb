@@ -14,10 +14,11 @@ module Chicago
     # Returns a set of dimensions that have been filtered.
     attr_reader :dimensions
 
-    def initialize(string)
+    def initialize(string, context=nil)
       @original_string = string
       @filters = []
       @dimensions = Set.new
+      @context = context
       parse
     end
 
@@ -38,7 +39,11 @@ module Chicago
         
         values = scanner[0].split(",")
         value = values.size == 1 ? values.first : values
-        @filters << {field.qualify("dimension_#{dimension}".to_sym) => value}
+        if @context && dimension == @context.name
+          @filters << {field.qualify(@context.table_name) => value}
+        else
+          @filters << {field.qualify("dimension_#{dimension}".to_sym) => value}
+        end
         scanner.skip(/;/)
       end
     end
