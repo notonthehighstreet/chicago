@@ -40,15 +40,17 @@ module Chicago
     def select(*cols)
       @columns += cols.map {|str| @parser.parse_column(@fact, str) }
       
-      add_columns_to_dataset
-      add_joins_to_dataset
+      add_select_columns_to_dataset
+      add_select_joins_to_dataset
       add_groups_to_dataset
       
       self
     end
 
     def filter(expression)
-      @dataset = FilterStringParser.new(expression).apply_to(@dataset)
+      parser = FilterStringParser.new(expression)
+      @dataset = parser.apply_to(@dataset)
+      add_filter_joins_to_dataset(parser.dimensions)
       self
     end
     
@@ -83,13 +85,21 @@ module Chicago
     
     private
     
-    def add_columns_to_dataset
+    def add_select_columns_to_dataset
       @dataset = @dataset.select *(@columns.map(&:sql_name))
     end
     
-    def add_joins_to_dataset
+    def add_select_joins_to_dataset
       to_join = @columns.map(&:owner).reject {|o| o == @fact || @joined_tables.include?(o) }.uniq
+      add_joins_to_dataset(to_join)
+    end
 
+    def add_filter_joins_to_dataset(dimension_names)
+      to_join = dimension_names.map {|d| Chicago::Schema::Dimension[d] }.compact.reject {|d| @joined_tables.include?(d) }.uniq
+      add_joins_to_dataset(to_join)
+    end
+
+    def add_joins_to_dataset(to_join)
       @joined_tables.merge(to_join)
       
       unless to_join.empty?

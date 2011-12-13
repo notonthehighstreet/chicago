@@ -246,12 +246,32 @@ describe Chicago::Query do
     end
 
     it "should use a FilterStringParser" do
-      parser = mock(:parser)
+      parser = mock(:parser, :dimensions => Set.new)
       parser.should_receive(:apply_to).with(kind_of(Sequel::MySQL::Dataset)).and_return(stub(:dataset))
 
       Chicago::FilterStringParser.should_receive(:new).with("filters").and_return(parser)
 
       @q.filter("filters").should == @q
+    end
+
+    it "should join on filtered dimensions" do
+      @q.filter("product.sku:123").should == @q
+
+      on_clause = make_on_clause(Sequel::SQL::QualifiedIdentifier.new("dimension_product", "id") =>
+                                 Sequel::SQL::QualifiedIdentifier.new(:facts_sales, :product_dimension_id))
+      
+      join_clause = Sequel::SQL::JoinOnClause.new(on_clause, :inner, :dimension_product)
+      
+      @q.dataset.opts[:join].first.should == join_clause
+    end
+
+    it "shouldn't attempt to join on the fact table" do
+      @q.filter("sales.order_ref:123").dataset.opts[:join].should be_nil
+    end
+
+    it "shouldn't rejoin selected columns" do
+      @q.select("product.sku").filter("product.sku:123")
+      @q.dataset.opts[:join].size.should == 1
     end
   end
   
