@@ -22,6 +22,14 @@ describe Chicago::Schema::Dimension do
     Schema::Dimension.define(:user).table_name.should == :dimension_user
   end
 
+  it "should be identifiable if it has an original key" do
+    Schema::Dimension.define(:user) do
+      columns do
+        integer :original_id
+      end
+    end.should be_identifiable
+  end
+  
   it "should know every defined dimension" do
     Schema::Dimension.clear_definitions
     Schema::Dimension.define(:user)

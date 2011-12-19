@@ -128,6 +128,12 @@ module Chicago
         db[table_name].insert_replace.insert_multiple(@null_records) unless @null_records.empty?
       end
 
+      # Returns true if this dimension can be identified as a concrete
+      # entity, with an original_id from a source system.
+      def identifiable?
+        !! original_key
+      end
+      
       def original_key
         @original_key ||= @column_definitions.find {|c| c.name == :original_id }
       end
