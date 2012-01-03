@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{chicago}
-  s.version = "0.0.12"
+  s.version = "0.0.13"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Roland Swingler}]
-  s.date = %q{2011-11-29}
+  s.date = %q{2012-01-03}
   s.description = %q{Simple Data Warehouse toolkit}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = [
@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "chicago.gemspec",
     "lib/chicago.rb",
+    "lib/chicago/column_parser.rb",
     "lib/chicago/core_ext/array.rb",
     "lib/chicago/core_ext/sequel/dataset.rb",
     "lib/chicago/data/month.rb",
@@ -48,6 +49,7 @@ Gem::Specification.new do |s|
     "lib/chicago/schema/type_converters.rb",
     "lib/chicago/util/filter_string_parser.rb",
     "lib/chicago/vendor/code_statistics.rb",
+    "spec/column_parser_spec.rb",
     "spec/core_ext/array_spec.rb",
     "spec/data/month_spec.rb",
     "spec/data/pivoted_dataset_spec.rb",
@@ -79,6 +81,7 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<sequel>, ["~> 3"])
       s.add_runtime_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
       s.add_runtime_dependency(%q<mysql>, ["= 2.8.1"])
       s.add_development_dependency(%q<rdoc>, ["~> 2.4.2"])
@@ -87,6 +90,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
     else
+      s.add_dependency(%q<sequel>, ["~> 3"])
       s.add_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
       s.add_dependency(%q<mysql>, ["= 2.8.1"])
       s.add_dependency(%q<rdoc>, ["~> 2.4.2"])
@@ -96,6 +100,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rcov>, [">= 0"])
     end
   else
+    s.add_dependency(%q<sequel>, ["~> 3"])
     s.add_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
     s.add_dependency(%q<mysql>, ["= 2.8.1"])
     s.add_dependency(%q<rdoc>, ["~> 2.4.2"])

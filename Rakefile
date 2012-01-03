@@ -16,7 +16,7 @@ Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see
   # http://docs.rubygems.org/read/chapter/20 for more options
   gem.name              = "chicago"
-  gem.version           = "0.0.12"
+  gem.version           = "0.0.13"
   gem.summary           = "Chicago"
   gem.description       = "Simple Data Warehouse toolkit"
   gem.author            = "Roland Swingler"
