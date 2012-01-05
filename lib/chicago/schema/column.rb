@@ -198,6 +198,10 @@ module Chicago
     # Decorates a column to provide the illusion that a dimension is a
     # column.
     class DimensionAsColumn < DelegateClass(Column)
+      def countable_label
+        "No. of #{owner.label.pluralize}"
+      end
+      
       def label
         owner.label
       end
@@ -255,8 +259,14 @@ module Chicago
 
       def sql_name
         if @operation.to_sym == :count
-          table = __getobj__.sql_name.expression.table
-          field = __getobj__.sql_name.expression.column
+          # Yuk
+          if __getobj__.kind_of?(DimensionAsColumn)
+            table = __getobj__.sql_group_name.table
+            field = __getobj__.sql_group_name.column
+          else
+            table = __getobj__.sql_name.expression.table
+            field = __getobj__.sql_name.expression.column
+          end
           :count.sql_function("distinct `#{table}`.`#{field}`".lit).as(qualified_name)
         else
           @operation.sql_function(__getobj__.sql_name.expression).as(qualified_name)

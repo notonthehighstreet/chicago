@@ -17,6 +17,11 @@ module Chicago
     
     def split_input_string(str)
       column_name, table_name, op_name = str.split('.').reverse.map(&:to_sym)
+
+      if table_name == :count
+        op_name = table_name
+        table_name = nil
+      end
       
       if table_name.nil?
         table_name = column_name

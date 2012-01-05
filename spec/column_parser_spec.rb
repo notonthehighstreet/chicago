@@ -35,6 +35,11 @@ describe "Parsing column strings" do
     end
   end
 
+  after :all do
+    Chicago::Schema::Dimension.clear_definitions
+    Chicago::Schema::Fact.clear_definitions
+  end
+  
   before :each do
     @fact = Chicago::Schema::Fact[:sales]
     @dimension = Chicago::Schema::Fact[:product]
@@ -89,6 +94,13 @@ describe "Parsing column strings" do
 
     column.sql_name.should == :count["distinct `facts_sales`.`order_ref`"].as('count.sales.order_ref')
     column.qualified_name.should == 'count.sales.order_ref'
+  end
+
+  it "counts a dimension via its original id" do
+    column = parse_column(@fact, "count.product")
+
+    column.sql_name.should == :count["distinct `dimension_product`.`original_id`"].as('count.product')
+    column.qualified_name.should == 'count.product'
   end
 
   it "returns a column from a roleplayed dimension" do
