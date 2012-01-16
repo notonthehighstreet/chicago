@@ -1,0 +1,68 @@
+require 'chicago/schema/builders/table_builder'
+
+module Chicago::Schema::Builders
+  class FactBuilder < TableBuilder
+    # Builds a Fact, given the name of the fact and a definition
+    # block.
+    #
+    # Refer to the protected methods in this block to see how to
+    # define attributes of the fact.
+    def build(name, &block)
+      @options = {
+        :dimensions => [],
+        :measures => [],
+        :degenerate_dimensions => []
+      }
+      super Chicago::Fact, name, &block
+    end
+    
+    protected
+    
+    # Defines the dimensions with which a fact is associated.
+    #
+    # See Fact#dimensions, Dimension
+    def dimensions(*dimension_names)
+      dimension_names.each do |name|
+        @options[:dimensions] << find_dimension(name)
+      end
+    end
+    
+    # Defines the degenerate dimensions for this fact.
+    #
+    # Within the block, use the standard column definition
+    # DSL, as for defining columns on a Dimension.
+    #
+    # See Fact#degenerate_dimensions.
+    def degenerate_dimensions(&block)
+      @options[:degenerate_dimensions] += @column_builder.new.build(&block)
+    end
+    
+    # Defines the measures for this fact.
+    #
+    # Within the block, use the standard column definition
+    # DSL, as for defining columns on a Dimension.
+    #
+    # See Fact#measures
+    #
+    # FIXME: By default, measures are allowed null values.
+    def measures(&block)
+      @options[:measures] += @column_builder.new(:null => true).build(&block)
+    end
+    
+    private
+    
+    def find_dimension(reference)
+      if reference.kind_of?(Sequel::SQL::AliasedExpression)
+        RolePlayingDimension.new(reference.aliaz,
+                                 _find_dimension(reference.expression))
+      else
+        _find_dimension(reference)
+      end
+    end
+    
+    def _find_dimension(name)
+      @schema.dimensions.detect {|d| d.name == name } or
+        raise MissingDefinitionError.new "Dimension #{name} is not defined in #{@schema}"
+    end
+  end
+end

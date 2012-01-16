@@ -8,6 +8,8 @@ require 'chicago/core_ext/array'
 require 'chicago/schema/constants'
 require 'chicago/data/month'
 
+require 'chicago/star_schema'
+
 autoload :CodeStatistics, 'chicago/vendor/code_statistics.rb'
 
 module Chicago
