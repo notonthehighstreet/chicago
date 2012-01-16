@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/../spec_helper"
+require "spec_helper"
 
 shared_examples_for "All DB type converters" do
   context "#db_type" do

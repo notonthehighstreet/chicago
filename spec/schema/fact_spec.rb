@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/../spec_helper"
+require "spec_helper"
 
 describe Chicago::Schema::Fact do
   it "should be defined with a name" do

@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/../spec_helper"
+require "spec_helper"
 
 describe Chicago::ETL::DatabaseSource do
   it "should have a name" do
