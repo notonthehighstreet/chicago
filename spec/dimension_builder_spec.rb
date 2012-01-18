@@ -15,6 +15,9 @@ describe Chicago::Schema::Builders::DimensionBuilder do
 
   it "can have a column builder specified" do    
     @builder.column_builder = Class.new do
+      def initialize(klass)
+      end
+      
       def build
         [:column] if block_given?
       end

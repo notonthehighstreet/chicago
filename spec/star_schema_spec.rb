@@ -148,7 +148,7 @@ describe Chicago::StarSchema do
       fact = @schema.define_fact(:foo) do
         dimensions :date
       end
-      fact.dimensions.should include(dim)
+      fact.dimensions.map(&:name).should include(:date)
     end
 
     specify "raises an error if unspecified dimension is referenced" do

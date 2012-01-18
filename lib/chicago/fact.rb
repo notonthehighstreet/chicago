@@ -49,5 +49,10 @@ module Chicago
     def factless?
       @measures.empty?
     end
+
+    # Facts accept Visitors
+    def visit(visitor)
+      visitor.visit_fact(self)
+    end
   end
 end

@@ -19,7 +19,7 @@ module Chicago::Schema::Builders
     protected
 
     def columns(&block)
-      @options[:columns] += @column_builder.new.build(&block) if block_given?
+      @options[:columns] += @column_builder.new(Chicago::Column).build(&block) if block_given?
     end
 
     def null_record(attributes)

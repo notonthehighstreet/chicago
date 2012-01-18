@@ -28,7 +28,6 @@ module Chicago
     # default::  the default value for this column. 
     # descriptive:: whether this column is purely descriptive and
     # won't be used for grouping/filtering.
-    # semi_additive:: whether a measure column is semi_additive.
     def initialize(name, column_type, opts={})
       @opts = normalize_opts(column_type, opts)
       
@@ -43,7 +42,6 @@ module Chicago
       @elements    = @opts[:elements]
       @default     = @opts[:default]
       @descriptive = !! @opts[:descriptive]
-      @semi_additive = !! @opts[:semi_additive]
       @internal    = !! @opts[:internal]
     end
 
@@ -76,12 +74,6 @@ module Chicago
       @internal
     end
 
-    # Returns true if this measure column can be averaged, but not
-    # summed.
-    def semi_additive?
-      @semi_additive
-    end
-
     # Returns true if null values are allowed.
     def null?
       @null
@@ -110,7 +102,48 @@ module Chicago
       name.hash
     end
 
+    # Returns a hash of column options.
+    def to_hash
+      db_schema = {
+        :name => name,
+        :column_type => column_type,
+        :null => null?
+      }
+      db_schema[:default]  = default   if default || column_type == :timestamp
+      db_schema[:elements] = elements  if elements
+      db_schema[:size]     = size      if size
+      db_schema[:unsigned] = !! unsigned? if numeric?
+      db_schema
+    end
+
+    def qualify_by(table)
+      name.qualify(table)
+    end
+    
+    # Columns accept Visitors
+    def visit(visitor)
+      visitor.visit_column(self)
+    end
+    
     private
+
+    def unsigned?
+      return @unsigned if defined? @unsigned      
+      default_unsigned = column_type == :percent || column_type == :money
+      @unsigned = min ? min >= 0 : default_unsigned
+    end
+
+    def size
+      @size ||= if @opts[:size]
+                  @opts[:size]
+                elsif max && column_type == :string
+                  max
+                elsif column_type == :money
+                  [12,2]
+                elsif column_type == :percent
+                  [6,3]
+                end
+    end
     
     def normalize_opts(type, opts)
       opts = {:null => default_null(type), :min => default_min(type)}.merge(opts)

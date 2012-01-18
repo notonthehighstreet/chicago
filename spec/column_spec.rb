@@ -1,18 +1,10 @@
 require 'spec_helper'
 
 describe Chicago::Column do
-  it "has a human-friendly label" do
-    described_class.new(:user_name, :string).label.should == "User Name"
-  end
+  subject { described_class.new(:user_name, :string) }
 
-  it "should have a name" do
-    described_class.new(:username, :string).name.should == :username
-  end
-
-  it "should have a column type" do
-    described_class.new(:username, :string).column_type.should == :string
-  end
-
+  it_behaves_like "a column"
+  
   it "should be equal to another column definition with the same attributes" do
     described_class.new(:username, :string).should == described_class.new(:username, :string)
   end
@@ -108,5 +100,67 @@ describe Chicago::Column do
   it "can be internal, i.e. for internal use only, and not to be displayed in an interface" do
     described_class.new(:random_ref, :string, :internal => true).
       should be_internal
+  end
+
+  it "is visitable" do
+    visitor = mock(:visitor)
+    column = described_class.new(:foo, :integer)
+    visitor.should_receive(:visit_column).with(column)
+    column.visit(visitor)
+  end
+end
+
+describe "Chicago::Column#hash" do
+  it "should have a :name entry" do
+    Chicago::Column.new(:username, :string, :max => 8).to_hash[:name].should == :username
+  end
+
+  it "should have a :column_type entry" do
+    Chicago::Column.new(:username, :string, :max => 8).to_hash[:column_type].should == :string
+  end
+
+  it "should not have a :default entry by default" do
+    Chicago::Column.new(:username, :string).to_hash.keys.should_not include(:default)
+  end
+
+  it "should have a :default entry if specified" do
+    Chicago::Column.new(:username, :string, :default => 'A').to_hash[:default].should == 'A'
+  end
+
+  it "should have an :unsigned entry if relevant" do
+    Chicago::Column.new(:id, :integer, :min => 0).to_hash[:unsigned].should be_true
+  end
+
+  it "should have an :entries entry if relevant" do
+    Chicago::Column.new(:username, :string, :elements => ['A']).to_hash[:elements].should == ['A']
+  end
+
+  it "should not have an :entries entry if relevant" do
+    Chicago::Column.new(:username, :string).to_hash.keys.should_not include(:elements)
+  end
+
+  it "should have a :size entry if max is present and type is string" do
+    Chicago::Column.new(:username, :string, :max => 8).to_hash[:size].should == 8
+  end
+
+  it "should have a default :size of [12,2] for money types" do
+    Chicago::Column.new(:some_value, :money).to_hash[:size].should == [12,2]
+  end
+
+  it "should be unsigned by default if a percentage" do
+    Chicago::Column.new(:some_value, :percent).to_hash[:unsigned].should be_true
+  end
+
+  it "should have a default :size of [6,3] for percent types" do
+    Chicago::Column.new(:rate, :percent).to_hash[:size].should == [6,3]
+  end
+
+  it "should have a :size that is set explictly" do
+    Chicago::Column.new(:username, :money, :size => 'huge').to_hash[:size].should == 'huge'
+  end
+
+  it "should explicitly set the default to nil for timestamp columns" do
+    Chicago::Column.new(:username, :timestamp).to_hash.has_key?(:default).should be_true
+    Chicago::Column.new(:username, :timestamp).to_hash[:default].should be_nil
   end
 end

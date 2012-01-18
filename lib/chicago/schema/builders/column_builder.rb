@@ -1,6 +1,9 @@
+require 'chicago/column'
+
 module Chicago::Schema::Builders
   class ColumnBuilder
-    def initialize(defaults={})
+    def initialize(column_class, defaults={})
+      @column_class = column_class
       @defaults = defaults
     end
     
@@ -12,7 +15,7 @@ module Chicago::Schema::Builders
     
     def method_missing(type, *args)
       name, rest = args
-      @columns << Column.new(name, type, @defaults.merge(rest || {}))
+      @columns << @column_class.new(name, type, @defaults.merge(rest || {}))
     end
   end
 end

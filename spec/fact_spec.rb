@@ -69,4 +69,11 @@ describe Chicago::Fact do
     described_class.new(:f, :natural_key => [:foo, :bar]).
       natural_key.should == [:foo, :bar]
   end
+
+  it "is visitable" do
+    visitor = mock(:visitor)
+    fact = described_class.new(:foo)
+    visitor.should_receive(:visit_fact).with(fact)
+    fact.visit(visitor)
+  end
 end

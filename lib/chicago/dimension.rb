@@ -73,6 +73,11 @@ module Chicago
       @original_key ||= @columns.detect {|c| c.name == :original_id }
     end
 
+    # Dimensions accept Visitors
+    def visit(visitor)
+      visitor.visit_dimension(self)
+    end
+    
     private
 
     def check_null_records

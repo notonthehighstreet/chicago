@@ -77,4 +77,11 @@ describe Chicago::Dimension do
     column = stub(:c, :name => :original_id)
     described_class.new(:user, :columns => [column]).should be_identifiable
   end
+
+  it "is visitable" do
+    visitor = mock(:visitor)
+    dimension = described_class.new(:foo)
+    visitor.should_receive(:visit_dimension).with(dimension)
+    dimension.visit(visitor)
+  end
 end
