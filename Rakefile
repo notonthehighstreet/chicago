@@ -16,7 +16,7 @@ Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see
   # http://docs.rubygems.org/read/chapter/20 for more options
   gem.name              = "chicago"
-  gem.version           = "0.0.14"
+  gem.version           = "0.1.0"
   gem.summary           = "Chicago"
   gem.description       = "Simple Data Warehouse toolkit"
   gem.author            = "Roland Swingler"
@@ -52,7 +52,7 @@ end
 
 desc "Flog this baby!"
 task :flog do
-  sh 'find lib -name "*.rb" | xargs flog'
+  sh 'find lib -name "*.rb" | xargs flog -m'
 end
 
 load 'tasks/stats.rake'
