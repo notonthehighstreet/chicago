@@ -1,32 +1,107 @@
 require 'set'
 
 module Chicago
-  # A query interface to the star schema, similar in interface to a Sequel
-  # dataset.
-  #
-  # A query object allows a simplified version of SQL, which leverages
-  # the metadata provided by the Dimension, Fact & Column definitions
-  # so that sensible defaults can be applied, and explicit joins
-  # can be avoided.
-  class Query
+  class ColumnDecorator
+    instance_methods.each do |m|
+      undef_method m unless m =~ /(^__|^send$|^object_id$)/
+    end
+
+    def initialize(column)
+      @column = column
+    end
+
+    def method_missing(*args, &block)
+      @column.send(*args, &block)
+    end
+  end
+  
+  class QualifiedColumn < ColumnDecorator
+    def initialize(owner, column, column_alias)
+      super column
+      @owner = owner
+      @column_alias = column_alias
+
+      if column.kind_of?(Chicago::Dimension)
+        @select_name = @column.main_identifier.qualify(@column.name)
+      else
+        @select_name = @column.name.qualify(@owner.name)
+      end
+      
+      if owner.kind_of?(Chicago::Dimension) && owner.identifiable? && owner.identifiers.include?(column.name)
+        @group_name = owner.original_key.name.qualify(owner.name)
+      else
+        @group_name = column_alias
+      end
+    end
+    
+    attr_reader :owner, :select_name, :column_alias, :group_name
+  end
+
+  class SqlSimpleAggregateColumn < ColumnDecorator
+    def initialize(column, operation)
+      super column
+      @operation = operation
+      normalize_operation
+    end
+    
+    def select_name
+      @operation.sql_function(@column.select_name)
+    end
+
+    def group_name
+      nil
+    end
+
+    private
+
+    def normalize_operation
+      @operation = :var_samp if @operation == :variance
+      @operation = :stddev_samp if @operation == :stddev     
+    end
+  end
+
+  class CountColumn < ColumnDecorator
+    def select_name
+      if @column.kind_of?(Dimension)
+        :count.sql_function("distinct `#{@column.owner.name}`.`#{@column.original_key.name}`".lit)
+      else
+        :count.sql_function("distinct `#{@column.owner.name}`.`#{@column.select_name.column}`".lit)
+      end
+    end
+
+    def label
+      "No. of #{@column.label.pluralize}"
+    end
+    
+    def group_name
+      nil
+    end
+  end
+  
+  class Query   
     attr_reader :dataset
 
     # Returns an array of Columns selected in this query.
     attr_reader :columns
     
-    # Creates a new query for a Fact table.
-    def self.fact(db, fact_name)
-      new(db, Schema::Fact[fact_name])
+    class << self
+      attr_accessor :default_schema, :default_db
     end
 
-    # Creates a new Query object, given a database connection and a
-    # schema model.
-    #
-    # FIXME: non-fact models will currently break.
-    def initialize(db, schema_model)
-      @fact = schema_model
-      @dataset = db[@fact.table_name]
-      @parser = ColumnParser.new
+    # Creates a new query rooted on a Dimension table.
+    def self.dimension(name)
+      new(default_db, default_schema, :dimension, name)
+    end
+
+    # Creates a new query rooted on a Fact table.
+    def self.fact(name)
+      new(default_db, default_schema, :fact, name)
+    end
+    
+    def initialize(db, schema, table_type, name)
+      @base_table = schema.send(table_type, name)
+      @dataset = db[@base_table.table_name.as(name)]
+      @schema = schema
       @columns = []
       @joined_tables = Set.new
     end
@@ -37,20 +112,33 @@ module Chicago
     # select may be called multiple times.
     #
     # Returns the same query object.
-    def select(*cols)
-      @columns += cols.map {|str| @parser.parse_column(@fact, str) }
-      
+    def select(*columns)
+      @columns += columns.map {|str| parse_column(str) }
       add_select_columns_to_dataset
-      add_select_joins_to_dataset
-      add_groups_to_dataset
-      
+      add_select_joins_to_dataset(@columns)
+      add_group_to_dataset
       self
     end
 
-    def filter(expression)
-      parser = FilterStringParser.new(expression, @fact)
-      @dataset = parser.apply_to(@dataset)
-      add_filter_joins_to_dataset(parser.dimensions)
+    # Filters results, generating the appropriate WHERE clause and
+    # adding joins where appropriate.
+    #
+    # filter may be called multiple times.
+    #
+    # Returns the same query object.
+    def filter(*filters)
+      filter_columns = []
+      
+      filter_attributes = filters.inject({}) do |filters, filter|
+        col_str, value = filter.split(":")
+        value = value.split(",")
+        value = value.size == 1 ? value.first : value
+        c = parse_column(col_str)
+        filter_columns << c
+        filters.merge(c.select_name => value)
+      end
+      add_select_joins_to_dataset(filter_columns)
+      @dataset = @dataset.filter(filter_attributes)
       self
     end
     
@@ -69,8 +157,8 @@ module Chicago
           col_str = str
         end
 
-        c = @parser.parse_column(@fact, col_str)
-        @columns.any? {|x| x.qualified_name == c.qualified_name } ? c.qualified_name.to_sym.send(direction) : c.sql_order_name.send(direction)
+        c = parse_column(col_str)
+        alias_or_sql_name(c).send(direction)
       end
       
       @dataset = @dataset.order(*columns_to_order)
@@ -84,43 +172,66 @@ module Chicago
     end
     
     private
+
+    def alias_or_sql_name(c)
+      @columns.any? {|x| x.column_alias == c.column_alias } ? c.column_alias : c.select_name
+    end
     
     def add_select_columns_to_dataset
-      @dataset = @dataset.select *(@columns.map(&:sql_name))
+      @dataset = @dataset.select(*(@columns.map {|c| c.select_name.as(c.column_alias)}))
+    end
+
+    def add_select_joins_to_dataset(columns)
+      to_join = columns.map(&:owner).uniq.reject {|t| t == @base_table || @joined_tables.include?(t) }
+      add_joins_to_dataset(to_join)
     end
     
-    def add_select_joins_to_dataset
-      to_join = @columns.map(&:owner).reject {|o| o == @fact || @joined_tables.include?(o) }.uniq
-      add_joins_to_dataset(to_join)
-    end
-
-    def add_filter_joins_to_dataset(dimension_names)
-      to_join = dimension_names.reject {|d| @fact.name == d }.map {|d| Chicago::Schema::Dimension[d] }.compact.reject {|d| @joined_tables.include?(d) }.uniq
-      add_joins_to_dataset(to_join)
-    end
-
     def add_joins_to_dataset(to_join)
       @joined_tables.merge(to_join)
       
       unless to_join.empty?
-        @dataset = to_join.inject(@dataset) do |dataset, d|
-          dataset.join(d.table_name,
-                       :id => @fact.dimension_key(d.name).qualify(@fact.table_name))
+        @dataset = to_join.inject(@dataset) do |dataset, t|
+          dataset.join(t.table_name.as(t.name), :id => t.key_name.qualify(@base_table.name))
         end
       end
     end
-
-    def add_groups_to_dataset
-      cols = columns_to_group.map(&:sql_group_name).compact
-      @dataset = @dataset.group(*cols)
+    
+    def add_group_to_dataset
+      @dataset = @dataset.group(*(@columns.map(&:group_name).compact))
     end
+    
+    def parse_column(str)
+      parts = str.split('.').map(&:to_sym)
+      root = parts.shift
+      table = @schema.fact(root) || @schema.dimension(root)
 
-    def columns_to_group
-      dimensions = @columns.select {|c| c.kind_of?(Schema::DimensionAsColumn) }.map(&:owner)
-      columns.select do |c|
-        c.kind_of?(Schema::DimensionAsColumn) ||
-        ! dimensions.include?(c.owner)
+      col = table[parts.shift]
+
+      if col.kind_of?(Chicago::Dimension)
+        table = col
+        new_column_name = parts.shift
+        if new_column_name.nil?
+          col = table
+        elsif new_column_name == :count
+          col = table
+          parts.unshift :count
+        else
+          col = table[new_column_name]
+        end
       end
-    end
+
+      return_column = QualifiedColumn.new(table, col, str.to_sym)
+
+      unless parts.empty?
+        operation = parts.shift
+        if operation == :count
+          return_column = CountColumn.new(return_column)
+        else
+          return_column = SqlSimpleAggregateColumn.new(return_column, operation)
+        end
+      end
+
+      return_column
+    end    
   end
 end

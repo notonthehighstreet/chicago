@@ -20,18 +20,6 @@ module Chicago::Schema::Builders
 
     # Define a set of columns for this dimension or fact. See
     # Chicago::Schema::Builders::ColumnBuilder for details.
-    #
-    # For example:
-    #
-    #    @schema.define_dimension(:date) do
-    #      columns do
-    #        date   :date
-    #        year   :year
-    #        string :month
-    #        ...
-    #      end
-    #    end
-    #
     def columns(&block)
       @options[:columns] += @column_builder.new(Chicago::Column).build(&block) if block_given?
     end
@@ -63,7 +51,7 @@ module Chicago::Schema::Builders
     #
     # See Chicago::Dimension#identifiers
     def identified_by(main_id, opts={:and => []})
-      @options[identifiers] = [main_id] + opts[:and]
+      @options[:identifiers] = [main_id] + opts[:and]
     end
   end
 end

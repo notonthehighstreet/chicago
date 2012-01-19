@@ -37,7 +37,7 @@ module Chicago
       @measures = opts[:measures] || []
       @table_name = :"facts_#{@name}"
     end
-
+    
     # Returns an Array of all dimensions, degenerate_dimensions and
     # measures for this fact table.
     def columns

@@ -28,6 +28,14 @@ module Chicago
       @dimensions.dup
     end
 
+    def fact(name)
+      @facts.detect {|f| f.name == name }
+    end
+
+    def dimension(name)
+      @dimensions.detect {|d| d.name == name }
+    end
+    
     # Returns an Array of all dimensions and facts in this schema.
     def tables
       @dimensions + @facts
