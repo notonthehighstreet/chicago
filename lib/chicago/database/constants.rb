@@ -1,5 +1,5 @@
 module Chicago
-  module Schema
+  module Database
     TINY_INT_MAX   = 255
     SMALL_INT_MAX  = 65_535
     MEDIUM_INT_MAX = 16_777_215

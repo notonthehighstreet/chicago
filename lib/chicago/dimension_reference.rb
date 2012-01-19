@@ -15,6 +15,12 @@ module Chicago
       @table_name = "dimension_#{@name}".to_sym
       @key_name   = "#{@name}_dimension_id".to_sym
     end
+
+    def to_hash
+      hsh = super
+      hsh[:name] = @key_name
+      hsh
+    end
     
     def qualify(col)
       col.qualify_by(@table_name)

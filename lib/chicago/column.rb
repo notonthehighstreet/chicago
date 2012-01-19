@@ -63,9 +63,15 @@ module Chicago
 
     attr_reader :countable_label
 
+    alias :key_name :name
+    
     # Returns true if this column can be counted.
     def countable?
       @countable
+    end
+
+    def indexed?
+      ! descriptive?
     end
     
     # Returns true if this column should be ignored in user-facing

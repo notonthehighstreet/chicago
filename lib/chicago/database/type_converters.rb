@@ -1,5 +1,5 @@
 module Chicago
-  module Schema
+  module Database
     module TypeConverters
       # Generic type conversion strategy.
       #

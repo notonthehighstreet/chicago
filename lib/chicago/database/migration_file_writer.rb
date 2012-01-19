@@ -1,7 +1,7 @@
 require 'sequel/migration_builder'
 
 module Chicago
-  module Schema
+  module Database
     # Writes Sequel migrations for the star schema
     class MigrationFileWriter
       # Creates a new migration file writer, given a Sequel::Database
@@ -10,13 +10,15 @@ module Chicago
       def initialize(db, migration_directory)
         @db = db
         @migration_directory = migration_directory
-        @type_converter = TypeConverters::DbTypeConverter.for_db(@db)
       end
 
-      # Writes the migration file necessary for all defined facts and dimensions.
-      def write_migration_file
+      # Writes the migration file necessary for all defined facts and
+      # dimensions.
+      def write_migration_file(schema)
         @file = nil
-        tables = combine_definitions(Dimension.definitions + Fact.definitions)
+        type_converter = TypeConverters::DbTypeConverter.for_db(@db)
+        tables = SchemaGenerator.new(type_converter).traverse(schema)
+
         File.open(migration_file, "w") do |fh|
           fh.write Sequel::MigrationBuilder.new(@db).generate_migration(tables)
         end
@@ -26,12 +28,6 @@ module Chicago
       def migration_file
         @file ||= File.join(@migration_directory, 
                             "#{Time.now.strftime("%Y%m%d%H%M%S")}_auto_migration.rb")
-      end
-
-      private
-
-      def combine_definitions(definitions)
-        definitions.inject({}) {|hsh, d| hsh.merge d.db_schema(@type_converter) }
       end
     end
   end

@@ -9,6 +9,10 @@ require 'chicago/schema/constants'
 require 'chicago/data/month'
 
 require 'chicago/star_schema'
+require 'chicago/database/constants'
+require 'chicago/database/type_converters'
+require 'chicago/database/migration_file_writer'
+require 'chicago/database/schema_generator'
 
 autoload :CodeStatistics, 'chicago/vendor/code_statistics.rb'
 
@@ -49,9 +53,7 @@ module Chicago
     autoload :Dimension,           'chicago/schema/dimension'
     autoload :RoleplayingDimension,'chicago/schema/dimension'
     autoload :Fact,                'chicago/schema/fact'
-    autoload :MigrationFileWriter, 'chicago/schema/migration_file_writer'
     autoload :ColumnGroupBuilder,  'chicago/schema/column_group_builder'
-    autoload :TypeConverters,      'chicago/schema/type_converters'
     autoload :HierarchicalElement, 'chicago/schema/hierarchical_element'
     autoload :HierarchyBuilder,    'chicago/schema/hierarchical_element'
     autoload :Hierarchies,         'chicago/schema/hierarchical_element'

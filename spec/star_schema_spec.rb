@@ -206,4 +206,10 @@ describe Chicago::StarSchema do
     expect { @schema.define_dimension(:user) }.
       to_not raise_error(Chicago::DuplicateTableError)
   end
+
+  it "returns all dimensions and facts from #tables" do
+    @schema.define_fact(:fact)
+    @schema.define_dimension(:dimension)
+    @schema.tables.map(&:name).should == [:dimension, :fact]
+  end
 end

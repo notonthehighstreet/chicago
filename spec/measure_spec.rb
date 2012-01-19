@@ -14,6 +14,10 @@ describe Chicago::Measure do
       should be_semi_additive
   end
 
+  it "is not indexed" do
+    described_class.new(:rate, :integer).should_not be_indexed
+  end
+  
   it "is visitable" do
     visitor = mock(:visitor)
     measure = described_class.new(:foo, :integer)

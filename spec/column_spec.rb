@@ -61,6 +61,14 @@ describe Chicago::Column do
     described_class.new(:username, :string, :descriptive => true).should be_descriptive
   end
 
+  it "is indexed by default" do
+    described_class.new(:rate, :integer).should be_indexed
+  end
+
+  it "should not be indexed if descriptive" do
+    described_class.new(:username, :string, :descriptive => true).should_not be_indexed
+  end
+
   it "should be numeric if an integer" do
     described_class.new(:username, :integer).should be_numeric
   end

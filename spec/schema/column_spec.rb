@@ -138,7 +138,7 @@ end
 describe "A Hash returned by Chicago::Column#db_schema" do
   before :each do
     @dimension = stub(:dimension)
-    @tc = Chicago::Schema::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :generic))
+    @tc = Chicago::Database::TypeConverters::DbTypeConverter.for_db(stub(:database_type => :generic))
   end
 
   it "should have a :name entry" do

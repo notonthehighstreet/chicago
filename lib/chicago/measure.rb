@@ -14,6 +14,10 @@ module Chicago
       @semi_additive = !! opts[:semi_additive]
     end
 
+    def indexed?
+      false
+    end
+    
     # Returns true if this measure can be averaged, but not summed.
     def semi_additive?
       @semi_additive

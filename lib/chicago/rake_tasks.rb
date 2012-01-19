@@ -3,9 +3,10 @@ require 'rake/tasklib'
 module Chicago
   # Rake tasks for a Chicago project.
   class RakeTasks < Rake::TaskLib
-    def initialize(db)
+    def initialize(db, schema)
       @migration_dir = "migrations"
       @db = db
+      @schema = schema
       @test_dir = "test"
       define
     end
@@ -24,17 +25,18 @@ module Chicago
         task :create_null_records do
           # TODO: replace this with proper logging.
           warn "Loading NULL records."
-          Schema::Dimension.definitions.each {|dimension| dimension.create_null_records(@db) }
+          @schema.dimensions.each {|dimension| dimension.create_null_records(@db) }
         end
 
         desc "Creates the etl tables"
         task :create_etl_tables do
-          Chicago::ETL::TableBuilder.build(DB)
+          Chicago::ETL::TableBuilder.build(@db)
         end
 
         desc "Writes a migration file to change the database based on defined Facts & Dimensions"
         task :write_migrations do
-          Schema::MigrationFileWriter.new(@db, @migration_dir).write_migration_file
+          Database::MigrationFileWriter.new(@db, @migration_dir).
+            write_migration_file(@schema)
         end
       end
     end
