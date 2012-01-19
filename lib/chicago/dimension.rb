@@ -43,10 +43,6 @@ module Chicago
 
     # Creates null records in a Database.
     #
-    # Null records represent missing or not-applicable dimension
-    # values, and should always be used in preference to having NULL
-    # in a dimension key field in a fact table.
-    #
     # This will overwrite any records that share the id with the
     # null record, so be careful.
     def create_null_records(db)

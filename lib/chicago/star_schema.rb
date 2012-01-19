@@ -70,6 +70,21 @@ module Chicago
     # See Chicago::Dimension and
     # Chicago::Schema::Builders::DimensionBuilder for details of the
     # DSL.
+    #
+    # For example:
+    #
+    #    @schema.define_dimension(:date) do
+    #      columns do
+    #        date   :date
+    #        year   :year
+    #        string :month
+    #        ...
+    #      end
+    #
+    #      natural_key :date
+    #      null_record :id => 1, :month => "Unknown Month"
+    #    end
+    #
     def define_dimension(name, &block)
       add Schema::Builders::DimensionBuilder.new(self).build(name, &block)
       @dimensions.last
