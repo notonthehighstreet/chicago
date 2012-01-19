@@ -12,14 +12,6 @@ module Chicago
     end
 
     def define
-      desc "Report code statistics (KLOCs, etc) from the application"
-      task :stats do
-        verbose = true
-        stats_dirs = [['Code', './lib'], 
-                      ['Test', "./#{@test_dir}"]].select { |name, dir| File.directory?(dir) }
-        CodeStatistics.new(*stats_dirs).to_s
-      end
-
       namespace :db do
         desc "Write Null dimension records"
         task :create_null_records do
