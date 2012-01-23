@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Chicago::DimensionReference do
+describe Chicago::Schema::DimensionReference do
   before :each do
     @dimension = Chicago::Schema::Dimension.new(:bar)
   end

@@ -1,4 +1,4 @@
-require 'chicago/column'
+require 'chicago/schema/column'
 
 module Chicago::Schema::Builders
   class ColumnBuilder

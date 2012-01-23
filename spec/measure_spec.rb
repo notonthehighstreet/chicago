@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Chicago::Measure do
+describe Chicago::Schema::Measure do
   subject { described_class.new(:user_name, :string) }
 
   it_behaves_like "a column"

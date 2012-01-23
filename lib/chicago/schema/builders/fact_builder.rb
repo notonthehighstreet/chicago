@@ -34,7 +34,7 @@ module Chicago::Schema::Builders
     #
     # See Fact#degenerate_dimensions.
     def degenerate_dimensions(&block)
-      @options[:degenerate_dimensions] += @column_builder.new(Chicago::DegenerateDimension).build(&block)
+      @options[:degenerate_dimensions] += @column_builder.new(Chicago::Schema::DegenerateDimension).build(&block)
     end
     
     # Defines the measures for this fact.
@@ -46,17 +46,17 @@ module Chicago::Schema::Builders
     #
     # FIXME: By default, measures are allowed null values.
     def measures(&block)
-      @options[:measures] += @column_builder.new(Chicago::Measure, :null => true).build(&block)
+      @options[:measures] += @column_builder.new(Chicago::Schema::Measure, :null => true).build(&block)
     end
     
     private
     
     def find_dimension(reference)
       if reference.kind_of?(Sequel::SQL::AliasedExpression)
-        Chicago::DimensionReference.new(reference.aliaz,
+        Chicago::Schema::DimensionReference.new(reference.aliaz,
                                         _find_dimension(reference.expression))
       else
-        Chicago::DimensionReference.new(reference, _find_dimension(reference))
+        Chicago::Schema::DimensionReference.new(reference, _find_dimension(reference))
       end
     end
     

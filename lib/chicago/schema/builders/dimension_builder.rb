@@ -21,7 +21,7 @@ module Chicago::Schema::Builders
     # Define a set of columns for this dimension or fact. See
     # Chicago::Schema::Builders::ColumnBuilder for details.
     def columns(&block)
-      @options[:columns] += @column_builder.new(Chicago::Column).build(&block) if block_given?
+      @options[:columns] += @column_builder.new(Chicago::Schema::Column).build(&block) if block_given?
     end
 
     # Defines a null record for this dimension.
