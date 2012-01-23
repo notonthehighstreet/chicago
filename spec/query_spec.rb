@@ -99,56 +99,56 @@ describe Chicago::Query do
     @q = described_class.new(TEST_DB, @schema, :fact, :sales)
     @q.select("sales.total.sum")
     @q.dataset.opts[:select].
-      should == [:sum[:total.qualify(:sales)].as("sales.total.sum".to_sym)]
+      should == [:sum.sql_function(:total.qualify(:sales)).as("sales.total.sum".to_sym)]
   end
 
   it "selects an explicit avg of a column" do
     @q = described_class.new(TEST_DB, @schema, :fact, :sales)
     @q.select("sales.total.avg")
     @q.dataset.opts[:select].
-      should == [:avg[:total.qualify(:sales)].as("sales.total.avg".to_sym)]
+      should == [:avg.sql_function(:total.qualify(:sales)).as("sales.total.avg".to_sym)]
   end
 
   it "selects an explicit maximum of a column" do
     @q = described_class.new(TEST_DB, @schema, :fact, :sales)
     @q.select("sales.total.max")
     @q.dataset.opts[:select].
-      should == [:max[:total.qualify(:sales)].as("sales.total.max".to_sym)]
+      should == [:max.sql_function(:total.qualify(:sales)).as("sales.total.max".to_sym)]
   end
 
   it "selects an explicit minimum of a column" do
     @q = described_class.new(TEST_DB, @schema, :fact, :sales)
     @q.select("sales.total.min")
     @q.dataset.opts[:select].
-      should == [:min[:total.qualify(:sales)].as("sales.total.min".to_sym)]
+      should == [:min.sql_function(:total.qualify(:sales)).as("sales.total.min".to_sym)]
   end
 
   it "selects an explicit sample variance of a column" do
     @q = described_class.new(TEST_DB, @schema, :fact, :sales)
     @q.select("sales.total.variance")
     @q.dataset.opts[:select].
-      should == [:var_samp[:total.qualify(:sales)].as("sales.total.variance".to_sym)]
+      should == [:var_samp.sql_function(:total.qualify(:sales)).as("sales.total.variance".to_sym)]
   end
 
   it "selects an explicit sample standard deviation of a column" do
     @q = described_class.new(TEST_DB, @schema, :fact, :sales)
     @q.select("sales.total.stddev")
     @q.dataset.opts[:select].
-      should == [:stddev_samp[:total.qualify(:sales)].as("sales.total.stddev".to_sym)]
+      should == [:stddev_samp.sql_function(:total.qualify(:sales)).as("sales.total.stddev".to_sym)]
   end
 
   it "selects an explicit distinct count" do
     @q = described_class.new(TEST_DB, @schema, :dimension, :product)
     @q.select("product.type.count")
     @q.dataset.opts[:select].
-      should == [:count["distinct `product`.`type`".lit].as("product.type.count".to_sym)]
+      should == [:count.sql_function("distinct `product`.`type`".lit).as("product.type.count".to_sym)]
   end
 
   it "selects an explicit distinct count, via a dimension reference" do
     @q = described_class.new(TEST_DB, @schema, :dimension, :product)
     @q.select("sales.product.type.count")
     @q.dataset.opts[:select].
-      should == [:count["distinct `product`.`type`".lit].as("sales.product.type.count".to_sym)]
+      should == [:count.sql_function("distinct `product`.`type`".lit).as("sales.product.type.count".to_sym)]
   end
 
   it "selects the main identifier for a bare dimension" do
@@ -162,7 +162,7 @@ describe Chicago::Query do
     @q = described_class.new(TEST_DB, @schema, :dimension, :product)
     @q.select("sales.product.count")
     @q.dataset.opts[:select].
-      should == [:count["distinct `product`.`original_id`".lit].as("sales.product.count".to_sym)]
+      should == [:count.sql_function("distinct `product`.`original_id`".lit).as("sales.product.count".to_sym)]
   end
 
   it "allows chained method calls with select" do
@@ -275,7 +275,7 @@ describe Chicago::Query do
 
     it "can be ordered on calculated columns, not in select" do
       @q.select('sales.product.sku').order('sales.total.sum')
-      @q.dataset.opts[:order].should == [:sum[:total.qualify(:sales)].asc]
+      @q.dataset.opts[:order].should == [:sum.sql_function(:total.qualify(:sales)).asc]
     end
   end
 
