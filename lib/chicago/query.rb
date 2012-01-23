@@ -21,13 +21,13 @@ module Chicago
       @owner = owner
       @column_alias = column_alias
 
-      if column.kind_of?(Chicago::Dimension)
+      if column.kind_of?(Chicago::Schema::Dimension)
         @select_name = @column.main_identifier.qualify(@column.name)
       else
         @select_name = @column.name.qualify(@owner.name)
       end
       
-      if owner.kind_of?(Chicago::Dimension) && owner.identifiable? && owner.identifiers.include?(column.name)
+      if owner.kind_of?(Chicago::Schema::Dimension) && owner.identifiable? && owner.identifiers.include?(column.name)
         @group_name = owner.original_key.name.qualify(owner.name)
       else
         @group_name = column_alias
@@ -62,7 +62,7 @@ module Chicago
 
   class CountColumn < ColumnDecorator
     def select_name
-      if @column.kind_of?(Dimension)
+      if @column.kind_of?(Schema::Dimension)
         :count.sql_function("distinct `#{@column.owner.name}`.`#{@column.original_key.name}`".lit)
       else
         :count.sql_function("distinct `#{@column.owner.name}`.`#{@column.select_name.column}`".lit)
@@ -207,7 +207,7 @@ module Chicago
 
       col = table[parts.shift]
 
-      if col.kind_of?(Chicago::Dimension)
+      if col.kind_of?(Chicago::Schema::Dimension)
         table = col
         new_column_name = parts.shift
         if new_column_name.nil?

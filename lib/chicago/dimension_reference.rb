@@ -31,7 +31,7 @@ module Chicago
     end
 
     def kind_of?(klass)
-      klass == Chicago::Dimension || super
+      klass == Chicago::Schema::Dimension || super
     end
     
     # Dimension references are visitable

@@ -14,7 +14,7 @@ module Chicago::Schema::Builders
         :columns => [],
         :identifiers => []
       }
-      super Chicago::Dimension, name, &block
+      super Chicago::Schema::Dimension, name, &block
     end
 
     protected

@@ -6,7 +6,7 @@ describe Chicago::Schema::Builders::DimensionBuilder do
   end
 
   it "builds a dimension" do
-    @builder.build("foo").should be_kind_of(Chicago::Dimension)
+    @builder.build("foo").should be_kind_of(Chicago::Schema::Dimension)
   end
   
   it "builds a dimension with a name" do

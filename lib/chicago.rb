@@ -35,14 +35,6 @@ module Chicago
     autoload :PivotedDataset,         'chicago/data/pivoted_dataset'
   end
 
-  module Schema
-    class InvalidDimensionError < RuntimeError
-    end
-
-    class InvalidColumnError < RuntimeError
-    end
-  end
-
   module ETL
     autoload :TableBuilder,   'chicago/etl/table_builder.rb'
     autoload :Batch,          'chicago/etl/batch.rb'

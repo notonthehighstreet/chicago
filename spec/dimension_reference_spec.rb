@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Chicago::DimensionReference do
   before :each do
-    @dimension = Chicago::Dimension.new(:bar)
+    @dimension = Chicago::Schema::Dimension.new(:bar)
   end
 
   it "returns columns from the dimension" do
@@ -74,7 +74,7 @@ describe Chicago::DimensionReference do
   end
 
   it "should be considered a kind of dimension" do
-    described_class.new(:foo, @dimension).should be_kind_of(Chicago::Dimension)
+    described_class.new(:foo, @dimension).should be_kind_of(Chicago::Schema::Dimension)
   end
   
   it "is visitable" do

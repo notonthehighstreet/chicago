@@ -13,7 +13,7 @@ module Chicago::Schema::Builders
         :null_records => [],
         :identifiers => []
       }
-      super Chicago::Dimension, name, &block
+      super Chicago::Schema::Dimension, name, &block
     end
 
     protected
@@ -49,7 +49,7 @@ module Chicago::Schema::Builders
     #
     #    identified_by :full_name, :and => [:email]
     #
-    # See Chicago::Dimension#identifiers
+    # See Chicago::Schema::Dimension#identifiers
     def identified_by(main_id, opts={:and => []})
       @options[:identifiers] = [main_id] + opts[:and]
     end

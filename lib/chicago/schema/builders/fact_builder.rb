@@ -13,7 +13,7 @@ module Chicago::Schema::Builders
         :measures => [],
         :degenerate_dimensions => []
       }
-      super Chicago::Fact, name, &block
+      super Chicago::Schema::Fact, name, &block
     end
     
     protected

@@ -3,8 +3,8 @@ require 'chicago/column'
 require 'chicago/measure'
 require 'chicago/dimension_reference'
 require 'chicago/degenerate_dimension'
-require 'chicago/dimension'
-require 'chicago/fact'
+require 'chicago/schema/dimension'
+require 'chicago/schema/fact'
 require 'chicago/schema/builders/fact_builder'
 require 'chicago/schema/builders/dimension_builder'
 require 'chicago/schema/builders/shrunken_dimension_builder'
@@ -49,9 +49,9 @@ module Chicago
     # TODO: figure out how to deal with linked dimensions when adding
     # facts.
     def add(schema_table)
-      if schema_table.kind_of? Fact
+      if schema_table.kind_of? Schema::Fact
         collection = @facts
-      elsif schema_table.kind_of? Dimension
+      elsif schema_table.kind_of? Schema::Dimension
         collection = @dimensions
       end
       
@@ -64,7 +64,7 @@ module Chicago
 
     # Defines a fact table named 'name' in this schema.
     #
-    # See Chicago::Fact and Chicago::Schema::Builders::FactBuilder for
+    # See Chicago::Schema::Fact and Chicago::Schema::Builders::FactBuilder for
     # details of the DSL.
     #
     # @raises Chicago::MissingDefinitionError
@@ -75,7 +75,7 @@ module Chicago
 
     # Defines a dimension table named 'name' in this schema.
     #
-    # See Chicago::Dimension and
+    # See Chicago::Schema::Dimension and
     # Chicago::Schema::Builders::DimensionBuilder for details of the
     # DSL.
     #

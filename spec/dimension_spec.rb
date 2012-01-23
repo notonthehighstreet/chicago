@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Chicago::Dimension do
+describe Chicago::Schema::Dimension do
   it_behaves_like "a named schema element"
 
   it "has a table name" do

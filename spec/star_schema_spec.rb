@@ -11,7 +11,7 @@ describe Chicago::StarSchema do
     end
 
     specify "can be defined" do
-      @schema.define_dimension(:user).should be_kind_of(Chicago::Dimension)
+      @schema.define_dimension(:user).should be_kind_of(Chicago::Schema::Dimension)
       @schema.dimensions.should_not be_empty
     end
 
@@ -68,7 +68,7 @@ describe Chicago::StarSchema do
     end
 
     specify "can be prebuilt and attached" do
-      d = Chicago::Dimension.new(:foo)
+      d = Chicago::Schema::Dimension.new(:foo)
       @schema.add(d)
       @schema.dimensions.should == [d]
     end
@@ -114,7 +114,7 @@ describe Chicago::StarSchema do
     end
 
     specify "can be defined" do
-      @schema.define_fact(:user).should be_kind_of(Chicago::Fact)
+      @schema.define_fact(:user).should be_kind_of(Chicago::Schema::Fact)
       @schema.facts.should_not be_empty
     end
 
@@ -131,14 +131,14 @@ describe Chicago::StarSchema do
     end
 
     specify "can be prebuilt and attached" do
-      f = Chicago::Fact.new(:foo)
+      f = Chicago::Schema::Fact.new(:foo)
       @schema.add(f)
       @schema.facts.should == [f]
     end
 
     specify "can be prebuilt and attached, but still must have unique names" do
-      f = Chicago::Fact.new(:foo)
-      f2 = Chicago::Fact.new(:foo)
+      f = Chicago::Schema::Fact.new(:foo)
+      f2 = Chicago::Schema::Fact.new(:foo)
       @schema.add(f)
       expect { @schema.add(f2) }.to raise_error(Chicago::DuplicateTableError)
     end
