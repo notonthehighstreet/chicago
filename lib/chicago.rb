@@ -27,7 +27,6 @@ module Chicago
 
   ### Autoloads
 
-  autoload :Definable, 'chicago/definable'
   autoload :RakeTasks, 'chicago/rake_tasks'
   autoload :FilterStringParser, 'chicago/util/filter_string_parser'
 
@@ -39,7 +38,6 @@ module Chicago
     autoload :TableBuilder,   'chicago/etl/table_builder.rb'
     autoload :Batch,          'chicago/etl/batch.rb'
     autoload :TaskInvocation, 'chicago/etl/task_invocation.rb'
-    autoload :DatabaseSource, 'chicago/etl/database_source.rb'
   end
 end
 
