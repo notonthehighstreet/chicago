@@ -34,7 +34,7 @@ module Chicago::Schema::Builders
     #
     # See Fact#degenerate_dimensions.
     def degenerate_dimensions(&block)
-      @options[:degenerate_dimensions] += @column_builder.new(Chicago::Schema::DegenerateDimension).build(&block)
+      @options[:degenerate_dimensions] += @column_builder.new(Chicago::Schema::Column).build(&block)
     end
     
     # Defines the measures for this fact.

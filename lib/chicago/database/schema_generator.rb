@@ -34,7 +34,6 @@ module Chicago
         column.to_hash.merge :column_type => @type_converter.db_type(column)
       end
 
-      alias :visit_degenerate_dimension :visit_column
       alias :visit_measure :visit_column
       alias :visit_dimension_reference :visit_column
 

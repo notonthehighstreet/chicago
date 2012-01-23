@@ -3,10 +3,6 @@ shared_examples_for "a schema visitor" do
     subject.should respond_to(:visit_measure)
   end
 
-  it "supports visit_degenerate_dimension" do
-    subject.should respond_to(:visit_degenerate_dimension)
-  end
-
   it "supports visit_dimension_reference" do
     subject.should respond_to(:visit_dimension_reference)
   end
