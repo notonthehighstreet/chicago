@@ -70,10 +70,12 @@ module Chicago
         end
 
         if table.natural_key
-          indexes["#{table.natural_key.first}_idx".to_sym] = {
-            :columns => table.natural_key.map {|name| table[name].key_name },
-            :unique => true
-          }
+            indexes["#{table.natural_key.first}_idx".to_sym] = {
+              :columns => table.natural_key.map do |name|
+                table[name].key_name rescue raise MissingDefinitionError.new("Column #{name} is not defined in #{table.name}")
+              end,
+              :unique => true
+            }
         end
 
         indexes
