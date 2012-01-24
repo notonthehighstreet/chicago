@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{chicago}
-  s.version = "0.0.14"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Roland Swingler}]
-  s.date = %q{2012-01-05}
+  s.date = %q{2012-01-24}
   s.description = %q{Simple Data Warehouse toolkit}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = [
@@ -20,55 +20,63 @@ Gem::Specification.new do |s|
     ".document",
     ".rspec",
     "Gemfile",
-    "Gemfile.lock",
     "LICENSE",
     "README",
     "Rakefile",
     "chicago.gemspec",
     "lib/chicago.rb",
-    "lib/chicago/column_parser.rb",
     "lib/chicago/core_ext/array.rb",
     "lib/chicago/core_ext/sequel/dataset.rb",
     "lib/chicago/data/month.rb",
     "lib/chicago/data/pivoted_dataset.rb",
-    "lib/chicago/definable.rb",
+    "lib/chicago/database/constants.rb",
+    "lib/chicago/database/migration_file_writer.rb",
+    "lib/chicago/database/schema_generator.rb",
+    "lib/chicago/database/type_converters.rb",
+    "lib/chicago/errors.rb",
     "lib/chicago/etl/batch.rb",
-    "lib/chicago/etl/database_source.rb",
     "lib/chicago/etl/table_builder.rb",
     "lib/chicago/etl/task_invocation.rb",
     "lib/chicago/query.rb",
     "lib/chicago/rake_tasks.rb",
+    "lib/chicago/schema/builders/column_builder.rb",
+    "lib/chicago/schema/builders/dimension_builder.rb",
+    "lib/chicago/schema/builders/fact_builder.rb",
+    "lib/chicago/schema/builders/shrunken_dimension_builder.rb",
+    "lib/chicago/schema/builders/table_builder.rb",
     "lib/chicago/schema/column.rb",
-    "lib/chicago/schema/column_group_builder.rb",
-    "lib/chicago/schema/constants.rb",
     "lib/chicago/schema/dimension.rb",
+    "lib/chicago/schema/dimension_reference.rb",
     "lib/chicago/schema/fact.rb",
-    "lib/chicago/schema/hierarchical_element.rb",
-    "lib/chicago/schema/migration_file_writer.rb",
-    "lib/chicago/schema/star_schema_table.rb",
-    "lib/chicago/schema/type_converters.rb",
+    "lib/chicago/schema/measure.rb",
+    "lib/chicago/schema/named_element.rb",
+    "lib/chicago/schema/table.rb",
+    "lib/chicago/star_schema.rb",
     "lib/chicago/util/filter_string_parser.rb",
-    "lib/chicago/vendor/code_statistics.rb",
-    "spec/column_parser_spec.rb",
     "spec/core_ext/array_spec.rb",
     "spec/data/month_spec.rb",
     "spec/data/pivoted_dataset_spec.rb",
+    "spec/database/db_type_converter_spec.rb",
+    "spec/database/migration_file_writer_spec.rb",
+    "spec/database/schema_generator_spec.rb",
     "spec/db_connections.yml.dist",
     "spec/etl/batch_spec.rb",
-    "spec/etl/database_source_spec.rb",
     "spec/etl/table_builder_spec.rb",
     "spec/etl/task_spec.rb",
     "spec/query_spec.rb",
-    "spec/schema/column_group_builder_spec.rb",
     "spec/schema/column_spec.rb",
-    "spec/schema/db_type_converter_spec.rb",
+    "spec/schema/dimension_builder_spec.rb",
+    "spec/schema/dimension_reference_spec.rb",
     "spec/schema/dimension_spec.rb",
     "spec/schema/fact_spec.rb",
-    "spec/schema/heirarchy_spec.rb",
-    "spec/schema/migration_file_writer_spec.rb",
+    "spec/schema/measure_spec.rb",
     "spec/spec_helper.rb",
+    "spec/star_schema_spec.rb",
     "spec/support/matchers/be_one_of.rb",
-    "spec/util/filter_string_parser_spec.rb",
+    "spec/support/matchers/column_matchers.rb",
+    "spec/support/shared_examples/column.rb",
+    "spec/support/shared_examples/schema_table.rb",
+    "spec/support/shared_examples/schema_visitor.rb",
     "tasks/stats.rake"
   ]
   s.homepage = %q{http://knaveofdiamonds.com}
@@ -85,29 +93,32 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
       s.add_runtime_dependency(%q<mysql>, ["= 2.8.1"])
       s.add_development_dependency(%q<rdoc>, ["~> 2.4.2"])
-      s.add_development_dependency(%q<rspec>, ["~> 2.3.0"])
+      s.add_development_dependency(%q<rspec>, ["~> 2.0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<flog>, [">= 0"])
     else
       s.add_dependency(%q<sequel>, ["~> 3"])
       s.add_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
       s.add_dependency(%q<mysql>, ["= 2.8.1"])
       s.add_dependency(%q<rdoc>, ["~> 2.4.2"])
-      s.add_dependency(%q<rspec>, ["~> 2.3.0"])
+      s.add_dependency(%q<rspec>, ["~> 2.0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<flog>, [">= 0"])
     end
   else
     s.add_dependency(%q<sequel>, ["~> 3"])
     s.add_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
     s.add_dependency(%q<mysql>, ["= 2.8.1"])
     s.add_dependency(%q<rdoc>, ["~> 2.4.2"])
-    s.add_dependency(%q<rspec>, ["~> 2.3.0"])
+    s.add_dependency(%q<rspec>, ["~> 2.0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
     s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<flog>, [">= 0"])
   end
 end
 
