@@ -1,6 +1,7 @@
 source "http://rubygems.org"
 
-gem "sequel", "~> 3"
+# The distinct extension won't work in Sequel 3.30 onwards at present.
+gem "sequel", "<= 3.29.0"
 gem "sequel_migration_builder", "~> 0.3.0"
 gem "mysql", "2.8.1"
 

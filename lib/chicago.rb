@@ -4,6 +4,8 @@ require 'sequel/extensions/inflector'
 
 # TODO: move this back to the Sequel MySQL adapter
 require 'chicago/core_ext/sequel/dataset'
+require 'chicago/core_ext/sequel/sql'
+
 require 'chicago/core_ext/array'
 require 'chicago/data/month'
 

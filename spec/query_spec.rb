@@ -14,6 +14,9 @@ describe Chicago::Query do
         string :type
         string :sku
         string :internal_code
+        boolean :flag
+        integer :rating, :range => (1..10)
+        string :sale, :elements => ["No", "Half Price", "Custom"]
       end
 
       identified_by :name
@@ -140,15 +143,13 @@ describe Chicago::Query do
   it "selects an explicit distinct count" do
     @q = described_class.new(TEST_DB, @schema, :dimension, :product)
     @q.select("product.type.count")
-    @q.dataset.opts[:select].
-      should == [:count.sql_function("distinct `product`.`type`".lit).as("product.type.count".to_sym)]
+    @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`type`\)/i
   end
 
   it "selects an explicit distinct count, via a dimension reference" do
     @q = described_class.new(TEST_DB, @schema, :dimension, :product)
     @q.select("sales.product.type.count")
-    @q.dataset.opts[:select].
-      should == [:count.sql_function("distinct `product`.`type`".lit).as("sales.product.type.count".to_sym)]
+    @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`type`\)/i
   end
 
   it "selects the main identifier for a bare dimension" do
@@ -161,8 +162,7 @@ describe Chicago::Query do
   it "selects the count of a dimension" do
     @q = described_class.new(TEST_DB, @schema, :dimension, :product)
     @q.select("sales.product.count")
-    @q.dataset.opts[:select].
-      should == [:count.sql_function("distinct `product`.`original_id`".lit).as("sales.product.count".to_sym)]
+    @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`original_id`\)/i
   end
 
   it "allows chained method calls with select" do
@@ -198,6 +198,57 @@ describe Chicago::Query do
     @q = described_class.fact(:sales)
     @q.select 'sales.product.type.count, sales.product.count'
     @q.dataset.opts[:group].should be_nil
+  end
+
+  describe "pivoting columns" do
+    it "should generate SQL pivots, via IF, for a measure, by a boolean column" do
+      @q = described_class.fact(:sales)
+      @q.select 'sales.total.sum ~ sales.product.flag'
+      @q.dataset.opts[:select].
+        should == [:sum.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), 0)).as("sales.total.0.sum".to_sym),
+                   :sum.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), 0)).as("sales.total.1.sum".to_sym)
+                  ]
+    end
+
+    it "should generate SQL pivots, with units of nil for averages" do
+      @q = described_class.fact(:sales)
+      @q.select 'sales.total.avg ~ sales.product.flag'
+      @q.dataset.opts[:select].
+        should == [:avg.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), nil)).as("sales.total.0.avg".to_sym),
+                   :avg.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), nil)).as("sales.total.1.avg".to_sym)
+                  ]
+    end
+
+    it "should generate SQL pivots for counts" do
+      @q = described_class.fact(:sales)
+      @q.select 'sales.product.count ~ sales.product.flag'
+      @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS TRUE\), `product`.`original_id`, NULL\)\) AS `sales.product.0.count`/
+      @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS FALSE\), `product`.`original_id`, NULL\)\) AS `sales.product.1.count`/
+    end
+
+    it "should generate SQL pivots, via IF, for a measure, by a bounded integer" do
+      @q = described_class.fact(:sales)
+      @q.select 'sales.total.sum ~ sales.product.rating'
+      @q.dataset.opts[:select].size.should == 10
+    end
+
+    it "should generate SQL pivots, via IF, for a measure, by a string with elements" do
+      @q = described_class.fact(:sales)
+      @q.select 'sales.total.sum ~ sales.product.sale'
+      @q.dataset.opts[:select].size.should == 3
+    end
+
+    it "should join on the pivoted column's table if necessary" do
+      @q = described_class.fact(:sales)
+      @q.select 'sales.total.sum ~ sales.product.sale'
+      @q.dataset.sql.should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
+    end
+
+    it "should not group on pivoted columns" do
+      @q = described_class.fact(:sales)
+      @q.select 'sales.total.sum ~ sales.product.sale'
+      @q.dataset.opts[:group].should be_nil
+    end
   end
 
   describe "joins" do

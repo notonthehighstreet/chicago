@@ -12,4 +12,7 @@ module Chicago
   # Null records must have explicit ids to avoid overwriting extracted
   # data unintentionally.
   class UnsafeNullRecordError < StandardError ; end
+
+  # Used for edge cases which the Chicago API does not support.
+  class UnimplementedError < RuntimeError ; end
 end
