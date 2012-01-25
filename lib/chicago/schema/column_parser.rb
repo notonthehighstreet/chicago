@@ -104,7 +104,7 @@ module Chicago
       end
 
       def label
-        @value
+        [@column.label, @value]
       end
       
       def owner
@@ -139,8 +139,8 @@ module Chicago
           col_parts = col.split(".")
           operation = col_parts.pop.to_sym
           unit = [:avg, :count].include?(operation) ? nil : 0
-          col = parse(col_parts.join("."))
-          pivot_col = parse(pivot)
+          col = parse(col_parts.join(".")).first
+          pivot_col = parse(pivot).first
 
           if pivot_col.column_type == :boolean
             elements = [true, false]
@@ -179,12 +179,12 @@ module Chicago
         end
 
         if parts.empty?
-          QualifiedColumn.new(table, col, str.to_sym)
+          [QualifiedColumn.new(table, col, str.to_sym)]
         else
           new_parts = str.split(".")
           new_parts.pop
-          CalculatedColumn.build(parts.shift,
-                                 QualifiedColumn.new(table, col, new_parts.join(".").to_sym))
+          [CalculatedColumn.build(parts.shift,
+                                 QualifiedColumn.new(table, col, new_parts.join(".").to_sym))]
         end
       end
     end

@@ -38,7 +38,7 @@ module Chicago
     #
     # Returns the same query object.
     def select(*columns)
-      @columns += columns.map {|str| @parser.parse(str) }.flatten
+      @columns += columns.map {|str| @parser.parse(str) }
       add_select_columns_to_dataset
       add_select_joins_to_dataset(@columns)
       add_group_to_dataset
@@ -58,7 +58,7 @@ module Chicago
         col_str, value = filter.split(":")
         value = value.split(",")
         value = value.size == 1 ? value.first : value
-        c = @parser.parse(col_str)
+        c = @parser.parse(col_str).first
         filter_columns << c
         filters.merge(c.select_name => value)
       end
@@ -72,7 +72,7 @@ module Chicago
     # Columns is a list of strings like 'dimension.column'. Descending
     # order can be specified by prefixing the string with a '-' sign.
     def order(*columns)
-      columns_to_order = columns.map do |str|
+      columns_to_order = columns.flatten.map do |str|
         direction = str[0..0] == '-' ? :desc : :asc
         if str[0..0] == '-'
           direction = :desc
@@ -82,7 +82,7 @@ module Chicago
           col_str = str
         end
 
-        c = @parser.parse(col_str)
+        c = @parser.parse(col_str).first
         alias_or_sql_name(c).send(direction)
       end
       
@@ -99,15 +99,15 @@ module Chicago
     private
 
     def alias_or_sql_name(c)
-      @columns.any? {|x| x.column_alias == c.column_alias } ? c.column_alias : c.select_name
+      @columns.flatten.any? {|x| x.column_alias == c.column_alias } ? c.column_alias : c.select_name
     end
     
     def add_select_columns_to_dataset
-      @dataset = @dataset.select(*(@columns.map {|c| c.select_name.as(c.column_alias)}))
+      @dataset = @dataset.select(*(@columns.flatten.map {|c| c.select_name.as(c.column_alias)}))
     end
 
     def add_select_joins_to_dataset(columns)
-      to_join = columns.map(&:owner).uniq.reject {|t| t == @base_table || @joined_tables.include?(t) }
+      to_join = columns.flatten.map(&:owner).uniq.reject {|t| t == @base_table || @joined_tables.include?(t) }
       add_joins_to_dataset(to_join)
     end
     
@@ -122,7 +122,7 @@ module Chicago
     end
     
     def add_group_to_dataset
-      @dataset = @dataset.group(*(@columns.map(&:group_name).compact))
+      @dataset = @dataset.group(*(@columns.flatten.map(&:group_name).compact))
     end
   end
 end

@@ -210,6 +210,13 @@ describe Chicago::Query do
                   ]
     end
 
+    it "should have labels of the underlying column and the value" do
+      @q = described_class.fact(:sales)
+      @q.select 'sales.total.sum ~ sales.product.flag'
+      @q.columns.first.first.label.should == ["Total", true]
+      @q.columns.first.last.label.should == ["Total", false]
+    end
+
     it "should generate SQL pivots, with units of nil for averages" do
       @q = described_class.fact(:sales)
       @q.select 'sales.total.avg ~ sales.product.flag'
@@ -394,30 +401,30 @@ describe Chicago::Query do
 
     it "returns degenerate dimensions" do
       @q.select('sales.order_ref').columns.
-        should == [@schema.fact(:sales)[:order_ref]]
-      @q.select('sales.order_ref').columns.first.column_alias.to_s.should == 'sales.order_ref'
+        should == [[@schema.fact(:sales)[:order_ref]]]
+      @q.select('sales.order_ref').columns.first.first.column_alias.to_s.should == 'sales.order_ref'
     end
 
     it "returns dimension columns" do
       @q.select("sales.product.name").columns.
-        should == [@schema.dimension(:product)[:name]]
-      @q.select('sales.product.name').columns.first.column_alias.to_s.should == 'sales.product.name'
+        should == [[@schema.dimension(:product)[:name]]]
+      @q.select('sales.product.name').columns.first.first.column_alias.to_s.should == 'sales.product.name'
     end
 
     it "returns measure columns" do
-      column = @q.select("sales.total.sum").columns.first
+      column = @q.select("sales.total.sum").columns.first.first
       column.label.should == "Total"
       column.column_alias.to_s.should == "sales.total.sum"
     end
 
     it "returns the main identifier for bare dimensions" do
-      column = @q.select("sales.product").columns.first
+      column = @q.select("sales.product").columns.first.first
       column.label.should == "Product"
       column.column_alias.to_s.should == "sales.product"
     end
 
     it "returns the main identifier for bare dimensions" do
-      column = @q.select("sales.product.count").columns.first
+      column = @q.select("sales.product.count").columns.first.first
       column.label.should == "No. of Products"
       column.column_alias.to_s.should == "sales.product.count"
     end
