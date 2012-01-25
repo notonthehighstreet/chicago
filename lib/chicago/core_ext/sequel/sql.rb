@@ -1,7 +1,23 @@
 module Sequel
   class Dataset
+    COLUMN_DISTINCT = "DISTINCT ".freeze
+    
     def distinct_expression_sql(e)
-      "DISTINCT #{literal(e.expression)}"
+      s = ""
+      distinct_expression_sql_append(s, e)
+      s
+    end
+
+    def distinct_expression_sql_append(sql, e)
+      sql << COLUMN_DISTINCT
+      literal_append(sql, e.expression)
+    end
+
+    # Provide support for Sequel versions before 3.30.0
+    unless method_defined?(:literal_append)
+      def literal_append(sql, expression)
+        sql << literal(expression)
+      end
     end
   end
   
