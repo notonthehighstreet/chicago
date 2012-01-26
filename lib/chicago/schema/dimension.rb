@@ -2,14 +2,21 @@ require 'chicago/schema/table'
 
 module Chicago
   module Schema
+    # A dimension in the star schema.
+    #
+    # Dimensions contain denormalized values from various source
+    # systems, and are used to group and filter the fact tables. They
+    # may also be queried themselves.
+    #
+    # You shouldn't need to initialize a Dimension yourself - they
+    # should be created via StarSchema#define_dimension.
     class Dimension < Table
       # Returns an array of Columns defined on this dimension.
       #
-      # See Column.
+      # @see Chicago::Schema::Column.
       attr_reader :columns
 
-      # Deprecated. Use columns instead.
-      # TODO: remove.
+      # @deprecated Use columns instead.
       alias :column_definitions :columns
       
       # Returns all the human-friendly identifying columns for this
@@ -22,17 +29,15 @@ module Chicago
 
       # Creates a new Dimension, named +name+.
       #
-      # Available options:
-      #
-      # columns:: an array of columns for this dimension.
-      # identifiers:: an array of columns.
-      # null_records:: an array of attribute hashes, used to create null
-      #                record rows in the database. Hashes must have an
-      #                :id key.
-      # +natual_key+:: an array of symbols, representing a uniqueness
-      #                constraint on the dimension.
-      #
-      # May raise a Chicago::UnsafeNullRecordError.
+      # @param name the name of the dimension
+      # @option opts [Array] columns
+      # @option opts [Array] identifiers
+      # @option opts [Array] null_records an array of attribute
+      #   hashes, used to create null record rows in the database.
+      #   Hashes must have an :id key.
+      # @option opts [Array<Symbol>] natual_key an array of symbols,
+      #   representing a uniqueness constraint on the dimension.
+      # @raise [Chicago::UnsafeNullRecordError] 
       def initialize(name, opts={})
         super
         @columns = opts[:columns] || []
@@ -57,15 +62,18 @@ module Chicago
 
       # Returns true if this dimension can be identified as a concrete
       # entity, with an original_id from a source system.
-      #
-      # DEPRECATED.
-      # TODO: change to be consistent with identifiers
+      # 
+      # @todo change to be consistent with identifiers
       def identifiable?
         !! original_key
       end
 
-      # DEPRECATED
-      # TODO: at least make configurable.
+      # Returns the column that represents the id in the original
+      # source for the dimension.
+      #
+      # Currently this column *must* be called +original_id+
+      #
+      # @todo make configurable.
       def original_key
         @original_key ||= @columns.detect {|c| c.name == :original_id }
       end

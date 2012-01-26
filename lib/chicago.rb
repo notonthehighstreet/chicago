@@ -17,16 +17,11 @@ require 'chicago/database/schema_generator'
 require 'chicago/query'
 
 module Chicago
-  # Sets the root directory for the project.
-  def self.project_root=(dir)
-    @project_root = dir
+  class << self
+    # The root directory for the project.
+    attr_accessor :project_root
   end
-
-  # Returns the root directory for the project.
-  def self.project_root
-    @project_root
-  end
-
+  
   ### Autoloads
 
   autoload :RakeTasks, 'chicago/rake_tasks'
@@ -41,8 +36,4 @@ module Chicago
     autoload :Batch,          'chicago/etl/batch.rb'
     autoload :TaskInvocation, 'chicago/etl/task_invocation.rb'
   end
-end
-
-class Array
-  include Chicago::ArrayExtensions
 end

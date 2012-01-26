@@ -1,4 +1,5 @@
 module Sequel
+  # @private
   class Dataset
     COLUMN_DISTINCT = "DISTINCT ".freeze
     
@@ -22,7 +23,7 @@ module Sequel
   end
   
   module SQL
-    class DistinctExpression < Expression
+    class DistinctExpression < Expression # :nodoc:
       attr_reader :expression
 
       def initialize(expression)
@@ -38,20 +39,24 @@ module Sequel
       end
     end
 
+    # @private
     class ComplexExpression
       include DistinctMethods
     end
 
+    # @private
     class GenericExpression
       include DistinctMethods
     end
   end
 end
 
+# @private
 class Symbol
   include Sequel::SQL::DistinctMethods
 end
 
+# @private
 class String
   include Sequel::SQL::DistinctMethods
 end

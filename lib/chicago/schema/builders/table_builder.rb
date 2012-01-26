@@ -1,4 +1,9 @@
+# Classes that implement the Schema definition DSL.
+#
+# Builders generally take a block which is evaluated in its context,
+# and protected methods on the builder define the DSL.
 module Chicago::Schema::Builders
+  # @abstract
   class TableBuilder
     # Allows the column builder to be changed when building dimensions
     # & facts.

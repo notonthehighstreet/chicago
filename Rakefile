@@ -13,8 +13,6 @@ require 'rake'
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see
-  # http://docs.rubygems.org/read/chapter/20 for more options
   gem.name              = "chicago"
   gem.version           = "0.1.0"
   gem.summary           = "Chicago"
@@ -24,6 +22,7 @@ Jeweler::Tasks.new do |gem|
   gem.homepage          = "http://knaveofdiamonds.com"
   gem.has_rdoc          = true
   gem.license           = "MIT"
+  gem.homepage          = "http://github.com/notonthehighstreet/chicago"
 end
 Jeweler::RubygemsDotOrgTasks.new
 
@@ -40,15 +39,8 @@ end
 
 task :default => :spec
 
-require 'rdoc/task'
-Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "Chicago #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
+require 'yard'
+YARD::Rake::YardocTask.new
 
 desc "Flog this baby!"
 task :flog do

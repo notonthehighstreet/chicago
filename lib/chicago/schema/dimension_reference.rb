@@ -3,6 +3,8 @@ require 'forwardable'
 
 module Chicago
   module Schema
+    # A reference to a dimension - supports the API of Column and of
+    # Dimension, so you can treat it as either.
     class DimensionReference < Column
       extend Forwardable
 
@@ -31,6 +33,7 @@ module Chicago
         @key_name.qualify(table)
       end
 
+      # @private
       def kind_of?(klass)
         klass == Chicago::Schema::Dimension || super
       end

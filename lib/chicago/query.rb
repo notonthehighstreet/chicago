@@ -3,13 +3,18 @@ require 'chicago/schema/column_parser'
 
 module Chicago  
   class Query   
+    # Returns the dataset built by this query.
     attr_reader :dataset
 
     # Returns an array of Columns selected in this query.
     attr_reader :columns
     
     class << self
-      attr_accessor :default_schema, :default_db
+      # Sets the default Chicago::StarSchema used by queries.
+      attr_accessor :default_schema
+
+      # Sets the default Sequel::Database used by queries.
+      attr_accessor :default_db
     end
 
     # Creates a new query rooted on a Dimension table.
@@ -21,7 +26,13 @@ module Chicago
     def self.fact(name)
       new(default_db, default_schema, :fact, name)
     end
-    
+
+    # Creates a new Query, given a Sequel::Database, a
+    # Chicago::StarSchema, either :fact or :dimension and a table
+    # name.
+    #
+    # If you only have one schema in your application, use the fact
+    # and dimension factory methods instead.
     def initialize(db, schema, table_type, name)
       @base_table = schema.send(table_type, name)
       @dataset = db[@base_table.table_name.as(name)]
@@ -91,6 +102,8 @@ module Chicago
     end
 
     # Limits the number of rows returned by this query.
+    #
+    # See Sequel::Dataset#limit
     def limit(*args)
       @dataset = @dataset.limit(*args)
       self

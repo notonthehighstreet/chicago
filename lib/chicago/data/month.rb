@@ -21,12 +21,14 @@ module Chicago
       # Returns the first three letters of the English name of this month.
       attr_reader :short_name
 
+      # @private
       def initialize(name, number)
         @name = name
         @short_name = name[0..2]
         @number = number
       end
 
+      # Months are ordered.
       def <=>(other)
         to_i <=> other.to_i 
       end

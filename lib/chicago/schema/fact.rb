@@ -2,6 +2,14 @@ require 'chicago/schema/table'
 
 module Chicago
   module Schema
+    # A fact table in the star schema.
+    #
+    # Facts contain keys to dimension tables, ad-hoc fields used for
+    # filtering and grouping (termed degenerate dimensions), and
+    # measures, which are values to be summed, averaged etc.
+    #
+    # You shouldn't need to initialize a Fact yourself - they
+    # should be created via StarSchema#define_fact.
     class Fact < Schema::Table
       # The Dimensions associated with this fact.
       #

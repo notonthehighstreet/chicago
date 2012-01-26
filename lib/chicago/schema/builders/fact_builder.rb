@@ -1,6 +1,9 @@
 require 'chicago/schema/builders/table_builder'
 
 module Chicago::Schema::Builders
+  # An API to build facts via a DSL-like syntax.
+  #
+  # You shouldn't need to initialize a FactBuilder yourself.
   class FactBuilder < TableBuilder
     # Builds a Fact, given the name of the fact and a definition
     # block.
@@ -20,7 +23,7 @@ module Chicago::Schema::Builders
     
     # Defines the dimensions with which a fact is associated.
     #
-    # See Fact#dimensions, Dimension
+    # @see Fact#dimensions, Dimension
     def dimensions(*dimension_names)
       dimension_names.each do |name|
         @options[:dimensions] << find_dimension(name)
@@ -32,7 +35,7 @@ module Chicago::Schema::Builders
     # Within the block, use the standard column definition
     # DSL, as for defining columns on a Dimension.
     #
-    # See Fact#degenerate_dimensions.
+    # @see Fact#degenerate_dimensions.
     def degenerate_dimensions(&block)
       @options[:degenerate_dimensions] += @column_builder.new(Chicago::Schema::Column).build(&block)
     end
@@ -42,7 +45,7 @@ module Chicago::Schema::Builders
     # Within the block, use the standard column definition
     # DSL, as for defining columns on a Dimension.
     #
-    # See Fact#measures
+    # @see Fact#measures
     #
     # FIXME: By default, measures are allowed null values.
     def measures(&block)

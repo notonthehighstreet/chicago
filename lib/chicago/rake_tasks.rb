@@ -2,15 +2,30 @@ require 'rake/tasklib'
 
 module Chicago
   # Rake tasks for a Chicago project.
+  #
+  # To use, simply include:
+  #
+  #     Chicago::RakeTasks.new(db, schema)
+  #
+  # in your project's Rakefile.
+  #
+  # Provides the following tasks:
+  #
+  # +db:create_null_records+:: creates all the null dimension records
+  #                            in db
+  # +db:create_etl_tables+:: defines the tables used for ETL batches
+  #                          and the like
+  # +db:write_migrations+:: writes the auto migrations to a
+  #                         "migrations" directory.
   class RakeTasks < Rake::TaskLib
     def initialize(db, schema)
       @migration_dir = "migrations"
       @db = db
       @schema = schema
-      @test_dir = "test"
       define
     end
 
+    # @private
     def define
       namespace :db do
         desc "Write Null dimension records"

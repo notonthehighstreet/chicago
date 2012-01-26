@@ -22,6 +22,8 @@ module Chicago
     # It is assumed that pivoted columns will be on the right hand
     # side of the set of drilldowns - in the example above, Year could
     # not be pivoted by itself.
+    #
+    # @deprecated
     class PivotedDataset
       include Enumerable
 

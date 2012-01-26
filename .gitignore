@@ -1,8 +1,11 @@
 coverage/
-rdoc/
+coverage.data
+doc/
 spec/db_connections.yml
 spec/tmp
 \#*
 .\#*
 pkg
 Gemfile.lock
+.yardoc
+.bundle

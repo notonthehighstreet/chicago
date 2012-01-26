@@ -12,30 +12,45 @@ require 'chicago/schema/builders/column_builder'
 module Chicago
   # A collection of facts & dimensions.
   class StarSchema
+    # Creates a new star schema.
     def initialize
       @dimensions = []
       @facts = []
     end
 
-    # Returns an Array of facts in this schema.
+    # Returns an array of all the facts defined in this schema.
+    #
+    # @return [Array<Chicago::Schema::Fact>]
     def facts
       @facts.dup
     end
 
-    # Returns an Array of dimensions in this schema.
+    # Returns an array of all the dimensions defined in this schema.
+    #
+    # @return [Array<Chicago::Schema::Dimension>]
     def dimensions
       @dimensions.dup
     end
 
+    # Returns a fact, named +name+
+    #
+    # @param [Symbol] name the name of the fact
+    # @return [Chicago::Schema::Fact]
     def fact(name)
       @facts.detect {|f| f.name == name }
     end
 
+    # Returns a dimension, named +name+
+    #
+    # @param [Symbol] name the name of the dimension
+    # @return [Chicago::Schema::Dimension]
     def dimension(name)
       @dimensions.detect {|d| d.name == name }
     end
     
     # Returns an Array of all dimensions and facts in this schema.
+    #
+    # @return [Array]
     def tables
       @dimensions + @facts
     end
@@ -61,22 +76,17 @@ module Chicago
       collection << schema_table
     end
 
-    # Defines a fact table named 'name' in this schema.
+    # Defines a fact table named +name+ in this schema.
     #
-    # See Chicago::Schema::Fact and Chicago::Schema::Builders::FactBuilder for
-    # details of the DSL.
-    #
-    # @raises Chicago::MissingDefinitionError
+    # @see Chicago::Schema::Builders::FactBuilder
+    # @return [Chicago::Schema::Fact] the defined fact.
+    # @raise Chicago::MissingDefinitionError
     def define_fact(name, &block)
       add Schema::Builders::FactBuilder.new(self).build(name, &block)
       @facts.last
     end
 
-    # Defines a dimension table named 'name' in this schema.
-    #
-    # See Chicago::Schema::Dimension and
-    # Chicago::Schema::Builders::DimensionBuilder for details of the
-    # DSL.
+    # Defines a dimension table named +name+ in this schema.
     #
     # For example:
     #
@@ -92,22 +102,22 @@ module Chicago
     #      null_record :id => 1, :month => "Unknown Month"
     #    end
     #
+    # @see Chicago::Schema::Builders::DimensionBuilder
+    # @return [Chicago::Schema::Dimension] the defined dimension.
     def define_dimension(name, &block)
       add Schema::Builders::DimensionBuilder.new(self).build(name, &block)
       @dimensions.last
     end
 
-    # Defines a shrunken dimension table named 'name' in this schema.
+    # Defines a shrunken dimension table named +name+ in this schema.
     #
-    # base_name is the name of the base dimension that the shrunken
+    # +base_name+ is the name of the base dimension that the shrunken
     # dimension is derived from; this base dimention must already be
     # defined.
     #
-    # See Chicago::ShrunkenDimension and
-    # Chicago::Schema::Builders::ShrunkenDimensionBuilder for details
-    # of the DSL.
-    #
-    # @raises Chicago::MissingDefinitionError
+    # @see Chicago::Schema::Builders::ShrunkenDimensionBuilder
+    # @raise [Chicago::MissingDefinitionError] if the base dimension is not defined.
+    # @return [Chicago::Schema::Dimension] the defined dimension.
     def define_shrunken_dimension(name, base_name, &block)
       add Schema::Builders::ShrunkenDimensionBuilder.new(self, base_name).
         build(name, &block)
