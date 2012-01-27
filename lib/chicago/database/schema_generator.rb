@@ -64,21 +64,38 @@ module Chicago
       end
       
       def indexes(table)
-        indexes = table.columns.select(&:indexed?).inject({}) do |hsh, d|
-          hsh.merge("#{d.name}_idx".to_sym => {:columns => d.key_name,
+        IndexGenerator.new(table).indexes
+      end
+    end
+
+    class IndexGenerator
+      def initialize(table)
+        @table = table
+      end
+
+      def indexes
+        indexes = @table.columns.select(&:indexed?).inject({}) do |hsh, d|
+          hsh.merge("#{d.name}_idx".to_sym => {
+                      :columns => d.key_name,
                       :unique => false})
         end
-
-        if table.natural_key
-            indexes["#{table.natural_key.first}_idx".to_sym] = {
-              :columns => table.natural_key.map do |name|
-                table[name].key_name rescue raise MissingDefinitionError.new("Column #{name} is not defined in #{table.name}")
-              end,
-              :unique => true
-            }
-        end
-
+        indexes.merge!(natural_key_index) if @table.natural_key
         indexes
+      end
+
+      def natural_key_index
+        {
+          "#{@table.natural_key.first}_idx".to_sym => {
+            :columns => natural_key_index_columns,
+            :unique => true
+          }
+        }
+      end
+
+      def natural_key_index_columns
+        @table.natural_key.map do |name|
+          @table[name].key_name rescue raise MissingDefinitionError.new("Column #{name} is not defined in #{@table.name}")
+        end
       end
     end
   end
