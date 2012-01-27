@@ -90,7 +90,13 @@ module Chicago
       end
       
       def label
-        "No. of #{@column.label.pluralize}"
+        if @column.label.kind_of?(Array)
+          new_label = @column.label.dup
+          new_label[0] = "No. of #{@column.label.first.pluralize}"
+          new_label
+        else
+          "No. of #{@column.label.pluralize}"
+        end
       end
     end
 
@@ -108,7 +114,7 @@ module Chicago
       end
       
       def owner
-        @pivoted_column.owner
+        [@pivoted_column.owner, @column.owner]
       end
       
       def column_alias
@@ -132,7 +138,12 @@ module Chicago
       def initialize(schema)
         @schema = schema
       end
-      
+
+      # Parses a column string.
+      #
+      # @return [Array<Column>] an array of columns. In most cases
+      #   this will be a 1-element array, unless the column is
+      #   pivoted.
       def parse(str)
         if str.include?("~")
           col, pivot = str.split(/\s*~\s*/)
@@ -142,16 +153,7 @@ module Chicago
           col = parse(col_parts.join(".")).first
           pivot_col = parse(pivot).first
 
-          if pivot_col.column_type == :boolean
-            elements = [true, false]
-          elsif pivot_col.elements
-            elements = pivot_col.elements
-          elsif pivot_col.column_type == :integer && pivot_col.max && pivot_col.min && (pivot_col.max - pivot_col.min <= 500)
-            elements = (pivot_col.min..pivot_col.max).to_a
-          else
-            raise UnimplementedError.new("General pivoting not yet support")
-          end
-
+          elements = pivotable_elements(pivot_col)
           return elements.zip((0..elements.size).to_a).map do |e,i|
             CalculatedColumn.build(operation,
                                    PivotedColumn.new(col,
@@ -185,6 +187,23 @@ module Chicago
           new_parts.pop
           [CalculatedColumn.build(parts.shift,
                                  QualifiedColumn.new(table, col, new_parts.join(".").to_sym))]
+        end
+      end
+
+      protected
+      
+      # Returns an Array of values, given a column to pivot with.
+      #
+      # May be overriden by subclasses
+      def pivotable_elements(pivot_col)
+        if pivot_col.column_type == :boolean
+          [true, false]
+        elsif pivot_col.elements
+          pivot_col.elements
+        elsif pivot_col.column_type == :integer && pivot_col.max && pivot_col.min && (pivot_col.max - pivot_col.min <= 500)
+          (pivot_col.min..pivot_col.max).to_a
+        else
+          raise UnimplementedError.new("General pivoting not yet support")
         end
       end
     end

@@ -26,6 +26,7 @@ describe Chicago::Query do
       columns do
         string :name
         string :email
+        boolean :recent
       end
     end
     
@@ -251,6 +252,12 @@ describe Chicago::Query do
       @q.dataset.sql.should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
     end
 
+    it "should join on the counted table when pivoting" do
+      @q = described_class.fact(:sales)
+      @q.select 'sales.product.count ~ sales.buyer.recent'
+      @q.dataset.sql.should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
+    end
+
     it "should not group on pivoted columns" do
       @q = described_class.fact(:sales)
       @q.select 'sales.total.sum ~ sales.product.sale'
@@ -279,6 +286,13 @@ describe Chicago::Query do
         should =~ /INNER JOIN `dimension_customer` AS `seller` ON \(`seller`.`id` = `sales`.`seller_dimension_id`\)/
     end
 
+    it "joins when counting dimensions" do
+      described_class.fact(:sales).
+        select("sales.product.count").
+        dataset.sql.
+        should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
+    end
+    
     it "joins on multiple tables" do
       described_class.
         fact(:sales).

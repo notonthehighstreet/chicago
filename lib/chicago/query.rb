@@ -15,8 +15,14 @@ module Chicago
 
       # Sets the default Sequel::Database used by queries.
       attr_accessor :default_db
-    end
 
+      # Sets the column parser class to be used.
+      #
+      # By default Schema::ColumnParser
+      attr_accessor :column_parser
+    end
+    self.column_parser = Schema::ColumnParser
+    
     # Creates a new query rooted on a Dimension table.
     def self.dimension(name)
       new(default_db, default_schema, :dimension, name)
@@ -39,7 +45,7 @@ module Chicago
       @schema = schema
       @columns = []
       @joined_tables = Set.new
-      @parser = Schema::ColumnParser.new(schema)
+      @parser = self.class.column_parser.new(schema)
     end
 
     # Selects columns, generating the appropriate sql column references
@@ -120,7 +126,7 @@ module Chicago
     end
 
     def add_select_joins_to_dataset(columns)
-      to_join = columns.flatten.map(&:owner).uniq.reject {|t| t == @base_table || @joined_tables.include?(t) }
+      to_join = columns.flatten.map(&:owner).flatten.uniq.reject {|t| t == @base_table || @joined_tables.include?(t) }
       add_joins_to_dataset(to_join)
     end
     
