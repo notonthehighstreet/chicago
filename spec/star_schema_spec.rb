@@ -15,12 +15,6 @@ describe Chicago::StarSchema do
       @schema.dimensions.should_not be_empty
     end
 
-    specify "are not have mutable after definition" do
-      @schema.define_dimension(:user)
-      @schema.dimensions.clear
-      @schema.dimensions.should_not be_empty
-    end
-
     specify "are unique by name within a schema" do
       @schema.define_dimension(:user)
       expect { @schema.define_dimension(:user) }.
@@ -70,7 +64,7 @@ describe Chicago::StarSchema do
     specify "can be prebuilt and attached" do
       d = Chicago::Schema::Dimension.new(:foo)
       @schema.add(d)
-      @schema.dimensions.should == [d]
+      @schema.dimensions.should include(d)
     end
   end
 
@@ -118,12 +112,6 @@ describe Chicago::StarSchema do
       @schema.facts.should_not be_empty
     end
 
-    specify "are not have mutable after definition" do
-      @schema.define_fact(:user)
-      @schema.facts.clear
-      @schema.facts.should_not be_empty
-    end
-
     specify "are unique by name within a schema" do
       @schema.define_fact(:user)
       expect { @schema.define_fact(:user) }.
@@ -133,7 +121,7 @@ describe Chicago::StarSchema do
     specify "can be prebuilt and attached" do
       f = Chicago::Schema::Fact.new(:foo)
       @schema.add(f)
-      @schema.facts.should == [f]
+      @schema.facts.should include(f)
     end
 
     specify "can be prebuilt and attached, but still must have unique names" do

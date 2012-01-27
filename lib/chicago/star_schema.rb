@@ -1,4 +1,5 @@
 require 'chicago/errors'
+require 'chicago/schema/named_element_collection'
 require 'chicago/schema/column'
 require 'chicago/schema/measure'
 require 'chicago/schema/dimension_reference'
@@ -12,24 +13,16 @@ require 'chicago/schema/builders/column_builder'
 module Chicago
   # A collection of facts & dimensions.
   class StarSchema
+    # a collection of all the facts defined in this schema.
+    attr_reader :facts
+
+    # a collection of all the dimensions defined in this schema.
+    attr_reader :dimensions
+
     # Creates a new star schema.
     def initialize
-      @dimensions = []
-      @facts = []
-    end
-
-    # Returns an array of all the facts defined in this schema.
-    #
-    # @return [Array<Chicago::Schema::Fact>]
-    def facts
-      @facts.dup
-    end
-
-    # Returns an array of all the dimensions defined in this schema.
-    #
-    # @return [Array<Chicago::Schema::Dimension>]
-    def dimensions
-      @dimensions.dup
+      @dimensions = Schema::NamedElementCollection.new
+      @facts = Schema::NamedElementCollection.new
     end
 
     # Returns a fact, named +name+
@@ -37,7 +30,7 @@ module Chicago
     # @param [Symbol] name the name of the fact
     # @return [Chicago::Schema::Fact]
     def fact(name)
-      @facts.detect {|f| f.name == name }
+      @facts[name]
     end
 
     # Returns a dimension, named +name+
@@ -45,14 +38,14 @@ module Chicago
     # @param [Symbol] name the name of the dimension
     # @return [Chicago::Schema::Dimension]
     def dimension(name)
-      @dimensions.detect {|d| d.name == name }
+      @dimensions[name]
     end
     
-    # Returns an Array of all dimensions and facts in this schema.
+    # Returns all dimensions and facts in this schema.
     #
     # @return [Array]
     def tables
-      @dimensions + @facts
+      @dimensions.to_a + @facts.to_a
     end
     
     # Adds a prebuilt schema table to the schema
@@ -69,13 +62,9 @@ module Chicago
         collection = @dimensions
       end
       
-      if collection.any? {|t| t.name == schema_table.name }
-        raise DuplicateTableError.new("#{schema_table.class} '#{schema_table.name}' has already been defined.")
-      end
-
-      collection << schema_table
+      add_to_collection collection, schema_table
     end
-
+    
     # Defines a fact table named +name+ in this schema.
     #
     # @see Chicago::Schema::Builders::FactBuilder
@@ -83,7 +72,6 @@ module Chicago
     # @raise Chicago::MissingDefinitionError
     def define_fact(name, &block)
       add Schema::Builders::FactBuilder.new(self).build(name, &block)
-      @facts.last
     end
 
     # Defines a dimension table named +name+ in this schema.
@@ -106,7 +94,6 @@ module Chicago
     # @return [Chicago::Schema::Dimension] the defined dimension.
     def define_dimension(name, &block)
       add Schema::Builders::DimensionBuilder.new(self).build(name, &block)
-      @dimensions.last
     end
 
     # Defines a shrunken dimension table named +name+ in this schema.
@@ -121,7 +108,16 @@ module Chicago
     def define_shrunken_dimension(name, base_name, &block)
       add Schema::Builders::ShrunkenDimensionBuilder.new(self, base_name).
         build(name, &block)
-      @dimensions.last
+    end
+
+    private
+
+    def add_to_collection(collection, schema_table)
+      if collection.contain?(schema_table)
+        raise DuplicateTableError.new("#{schema_table.class} '#{schema_table.name}' has already been defined.")
+      end
+
+      collection << schema_table
     end
   end
 end
