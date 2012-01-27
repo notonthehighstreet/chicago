@@ -1,3 +1,5 @@
+require 'forwardable'
+
 module Chicago
   module Schema
     # Stores named elements in a Set-like collection.
