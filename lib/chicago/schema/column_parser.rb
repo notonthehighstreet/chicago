@@ -14,32 +14,12 @@ module Chicago
       #   pivoted.
       def parse(str)
         return parse_pivoted_column(str) if str.include?("~")
-        
-        parts = str.split('.').map(&:to_sym)
-        root = parts.shift
-        table = @schema.fact(root) || @schema.dimension(root)
-        
-        col = table[parts.shift]
-
-        if col.kind_of?(Chicago::Schema::Dimension)
-          table = col
-          new_column_name = parts.shift
-          if new_column_name.nil?
-            col = table
-          elsif new_column_name == :count
-            col = table
-            parts.unshift :count
-          else
-            col = table[new_column_name]
-          end
-        end
-
-        if parts.empty?
+        table, col, operation = parse_parts(str)
+        if operation.nil?
           [QueryColumn.column(table, col, str.to_sym)]
         else
-          new_parts = str.split(".")
-          new_parts.pop
-          [QueryColumn.column(table, col, new_parts.join(".").to_sym).calculate(parts.shift)]
+          ref = str.sub(/\.[^.]+$/,'').to_sym
+          [QueryColumn.column(table, col, ref).calculate(operation)]
         end
       end
 
@@ -61,6 +41,29 @@ module Chicago
       end
 
       private
+
+      def parse_parts(str)
+        parts = str.split('.').map(&:to_sym)
+        root = parts.shift
+        table = @schema.fact(root) || @schema.dimension(root)
+        
+        col = table[parts.shift]
+
+        if col.kind_of?(Chicago::Schema::Dimension)
+          table = col
+          new_column_name = parts.shift
+          if new_column_name.nil?
+            col = table
+          elsif new_column_name == :count
+            col = table
+            parts.unshift :count
+          else
+            col = table[new_column_name]
+          end
+        end
+
+        [table, col, parts.last]
+      end
 
       def parse_pivoted_column(str)
         col, pivot = str.split(/\s*~\s*/)
