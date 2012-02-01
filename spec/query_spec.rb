@@ -112,7 +112,7 @@ describe Chicago::Query do
     end
     
     it "should select from the right table" do
-      @q.dataset.first_source.should == :facts_sales
+      @q.dataset.sql.should =~ /FROM `facts_sales` AS `sales`/
     end
 
     it "should select a column from the fact table" do

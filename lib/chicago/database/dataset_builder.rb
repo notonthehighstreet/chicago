@@ -7,7 +7,7 @@ module Chicago
       def initialize(db, query)
         @base_table = query.table
         @query = query
-        @dataset = db[query.table.table_name]
+        @dataset = db[query.table.table_name.as(query.table.name)]
         @joined_tables = Set.new
         @selected_columns = []
       end
