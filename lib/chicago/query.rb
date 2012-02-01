@@ -1,18 +1,29 @@
 require 'set'
+require 'chicago/database/dataset_builder'
 require 'chicago/schema/column_parser'
 
-module Chicago  
-  class Query   
-    # Returns the dataset built by this query.
-    attr_reader :dataset
+module Chicago
+  # A query object, wrapping a raw AST and linked to a schema.
+  #
+  # The raw AST looks like the following:
+  #
+  #     {
+  #       :table_name => "name",
+  #       :query_type => "fact",
+  #       :columns => [... column definitions ...],
+  #       :filters => [... filter definitions ...],
+  #       :order => [... order definitions ...] 
+  #     }
+  #
+  # @api public
+  class Query
+    # Returns an the fact or dimension this query is based on.
+    attr_reader :table
 
     # Returns an array of Columns selected in this query.
     attr_reader :columns
-    
-    class << self
-      # Sets the default Chicago::StarSchema used by queries.
-      attr_accessor :default_schema
 
+    class << self
       # Sets the default Sequel::Database used by queries.
       attr_accessor :default_db
 
@@ -22,126 +33,69 @@ module Chicago
       attr_accessor :column_parser
     end
     self.column_parser = Schema::ColumnParser
-    
-    # Creates a new query rooted on a Dimension table.
-    def self.dimension(name)
-      new(default_db, default_schema, :dimension, name)
-    end
 
-    # Creates a new query rooted on a Fact table.
-    def self.fact(name)
-      new(default_db, default_schema, :fact, name)
-    end
-
-    # Creates a new Query, given a Sequel::Database, a
-    # Chicago::StarSchema, either :fact or :dimension and a table
-    # name.
+    # Creates a query over a schema from a raw query AST.
     #
-    # If you only have one schema in your application, use the fact
-    # and dimension factory methods instead.
-    def initialize(db, schema, table_type, name)
-      @base_table = schema.send(table_type, name)
-      @dataset = db[@base_table.table_name.as(name)]
-      @schema = schema
+    # @api public
+    def initialize(schema, ast)
+      @table_name = (ast[:table_name] || ast["table_name"]).to_sym
+      @query_type = (ast[:query_type] || ast["query_type"]).to_sym
       @columns = []
-      @joined_tables = Set.new
-      @parser = self.class.column_parser.new(schema)
+      @filters = []
+      @order = []
+      @table = schema.send(@query_type, @table_name) or
+        raise MissingDefinitionError.new("#{@query_type} '#{@table_name}' is not in the schema")
+      @column_parser = Schema::ColumnParser.new(schema)
+
+      select(*(ast[:columns] || ast["columns"]) || [])
+      filter(*(ast[:filters] || ast["filters"]) || [])
+      order(*(ast[:order] || ast["order"]) || [])
     end
 
-    # Selects columns, generating the appropriate sql column references
-    # in the built dataset.
-    #
-    # select may be called multiple times.
-    #
-    # Returns the same query object.
+    # @api public
     def select(*columns)
-      @columns += columns.map {|str| @parser.parse(str) }
-      add_select_columns_to_dataset
-      add_select_joins_to_dataset(@columns)
-      add_group_to_dataset
+      @columns += columns.map {|c| @column_parser.parse(c) }
       self
     end
 
-    # Filters results, generating the appropriate WHERE clause and
-    # adding joins where appropriate.
-    #
-    # filter may be called multiple times.
-    #
-    # Returns the same query object.
+    # @api public
     def filter(*filters)
-      filter_columns = []
-      
-      filter_attributes = filters.inject({}) do |filters, filter|
-        col_str, value = filter.split(":")
-        value = value.split(",")
-        value = value.size == 1 ? value.first : value
-        c = @parser.parse(col_str).first
-        filter_columns << c
-        filters.merge(c.select_name => value)
+      copied_filters = filters.dup
+      copied_filters.each do |filter|
+        filter[:column] = @column_parser.parse(filter[:column]).first
       end
-      add_select_joins_to_dataset(filter_columns)
-      @dataset = @dataset.filter(filter_attributes)
+      @filters += copied_filters
       self
     end
-    
-    # Orders the rows in this query.
-    #
-    # Columns is a list of strings like 'dimension.column'. Descending
-    # order can be specified by prefixing the string with a '-' sign.
-    def order(*columns)
-      columns_to_order = columns.flatten.map do |str|
-        direction = str[0..0] == '-' ? :desc : :asc
-        if str[0..0] == '-'
-          direction = :desc
-          col_str = str[1..str.length]
+
+    # Order the results by the specified columns.
+    # 
+    # @param ordering an array of hashes, of the form {:column =>
+    #   "name", :ascending => true}
+    # @api public
+    def order(*ordering)
+      @order = ordering.map do |c|
+        if c.kind_of?(String)
+          {:column => @column_parser.parse(c).first, :ascending => true}
         else
-          direction = :asc
-          col_str = str
+          {:column => @column_parser.parse(c[:column]).first,
+            :ascending => c[:ascending]}
         end
-
-        c = @parser.parse(col_str).first
-        alias_or_sql_name(c).send(direction)
       end
-      
-      @dataset = @dataset.order(*columns_to_order)
       self
     end
-
-    # Limits the number of rows returned by this query.
+    
+    # Applies the query to a Sequel::Database and returns a
+    # Sequel::Dataset.
     #
-    # See Sequel::Dataset#limit
-    def limit(*args)
-      @dataset = @dataset.limit(*args)
-      self
-    end
-    
-    private
-
-    def alias_or_sql_name(c)
-      @columns.flatten.any? {|x| x.column_alias == c.column_alias } ? c.column_alias : c.select_name
-    end
-    
-    def add_select_columns_to_dataset
-      @dataset = @dataset.select(*(@columns.flatten.map {|c| c.select_name.as(c.column_alias)}))
-    end
-
-    def add_select_joins_to_dataset(columns)
-      to_join = columns.flatten.map(&:owner).flatten.uniq.reject {|t| t == @base_table || @joined_tables.include?(t) }
-      add_joins_to_dataset(to_join)
-    end
-    
-    def add_joins_to_dataset(to_join)
-      @joined_tables.merge(to_join)
-      
-      unless to_join.empty?
-        @dataset = to_join.inject(@dataset) do |dataset, t|
-          dataset.join(t.table_name.as(t.name), :id => t.key_name.qualify(@base_table.name))
-        end
-      end
-    end
-    
-    def add_group_to_dataset
-      @dataset = @dataset.group(*(@columns.flatten.map(&:group_name).compact))
+    # @api public
+    def dataset(db=nil)
+      db ||= self.class.default_db
+      builder = Database::DatasetBuilder.new(db, self)
+      builder.select(@columns)
+      builder.filter(@filters)
+      builder.order(@order)
+      builder.dataset
     end
   end
 end
