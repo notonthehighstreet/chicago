@@ -33,8 +33,7 @@ module Chicago
 
       def order(order)
         columns_to_order = order.map do |c|
-          order_column = alias_or_sql_name(c[:column])
-          c[:ascending] ? order_column.asc : order_column.desc
+          c[:ascending] ? c[:column].to_sym.asc : c[:column].to_sym.desc
         end
         @dataset = @dataset.order(*columns_to_order)
       end

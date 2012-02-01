@@ -76,10 +76,9 @@ module Chicago
     def order(*ordering)
       @order = ordering.map do |c|
         if c.kind_of?(String)
-          {:column => @column_parser.parse(c).first, :ascending => true}
+          {:column => c, :ascending => true}
         else
-          {:column => @column_parser.parse(c[:column]).first,
-            :ascending => c[:ascending]}
+          c
         end
       end
       self

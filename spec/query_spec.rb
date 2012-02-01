@@ -138,43 +138,43 @@ describe Chicago::Query do
     end
 
     it "selects an explicit sum of a column" do
-      @q.select("sales.total.sum")
+      @q.select({:column => "sales.total", :op => "sum"})
       @q.dataset.opts[:select].
         should == [:sum.sql_function(:total.qualify(:sales)).as("sales.total.sum".to_sym)]
     end
 
     it "selects an explicit avg of a column" do
-      @q.select("sales.total.avg")
+      @q.select({:column => "sales.total", :op => "avg"})
       @q.dataset.opts[:select].
         should == [:avg.sql_function(:total.qualify(:sales)).as("sales.total.avg".to_sym)]
     end
 
     it "selects an explicit maximum of a column" do
-      @q.select("sales.total.max")
+      @q.select({:column => "sales.total", :op => "max"})
       @q.dataset.opts[:select].
         should == [:max.sql_function(:total.qualify(:sales)).as("sales.total.max".to_sym)]
     end
 
     it "selects an explicit minimum of a column" do
-      @q.select("sales.total.min")
+      @q.select({:column => "sales.total", :op => "min"})
       @q.dataset.opts[:select].
         should == [:min.sql_function(:total.qualify(:sales)).as("sales.total.min".to_sym)]
     end
 
     it "selects an explicit sample variance of a column" do
-      @q.select("sales.total.variance")
+      @q.select({:column => "sales.total", :op => "variance"})
       @q.dataset.opts[:select].
         should == [:var_samp.sql_function(:total.qualify(:sales)).as("sales.total.variance".to_sym)]
     end
 
     it "selects an explicit sample standard deviation of a column" do
-      @q.select("sales.total.stddev")
+      @q.select({:column => "sales.total", :op => "stddev"})
       @q.dataset.opts[:select].
         should == [:stddev_samp.sql_function(:total.qualify(:sales)).as("sales.total.stddev".to_sym)]
     end
 
     it "selects an explicit distinct count, via a dimension reference" do
-      @q.select("sales.product.type.count")
+      @q.select({:column => "sales.product.type", :op => "count"})
       @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`type`\)/i
     end
 
@@ -185,13 +185,15 @@ describe Chicago::Query do
     end
 
     it "selects the count of a dimension" do
-      @q.select("sales.product.count")
+      @q.select({:column => "sales.product", :op => "count"})
       @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`original_id`\)/i
     end
 
     describe "pivoting columns" do
       it "should generate SQL pivots, via IF, for a measure, by a boolean column" do
-        @q.select 'sales.total.sum ~ sales.product.flag'
+        @q.select({ :column => "sales.total",
+                    :op => "sum",
+                    :pivot => "sales.product.flag"})
         @q.dataset.opts[:select].
           should == [:sum.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), 0)).as("sales.total.0.sum".to_sym),
                      :sum.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), 0)).as("sales.total.1.sum".to_sym)
@@ -199,13 +201,17 @@ describe Chicago::Query do
       end
 
       it "should have labels of the underlying column and the value" do
-        @q.select 'sales.total.sum ~ sales.product.flag'
+        @q.select({ :column => "sales.total",
+                    :op => "sum",
+                    :pivot => "sales.product.flag"})
         @q.columns.first.first.label.should == ["Total", true]
         @q.columns.first.last.label.should == ["Total", false]
       end
 
       it "should generate SQL pivots, with units of nil for averages" do
-        @q.select 'sales.total.avg ~ sales.product.flag'
+        @q.select({ :column => "sales.total",
+                    :op => "avg",
+                    :pivot => "sales.product.flag"})
         @q.dataset.opts[:select].
           should == [:avg.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), nil)).as("sales.total.0.avg".to_sym),
                      :avg.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), nil)).as("sales.total.1.avg".to_sym)
@@ -213,33 +219,45 @@ describe Chicago::Query do
       end
 
       it "should generate SQL pivots for counts" do
-        @q.select 'sales.product.count ~ sales.product.flag'
+        @q.select({ :column => "sales.product",
+                    :op => "count",
+                    :pivot => "sales.product.flag"})
         @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS TRUE\), `product`.`original_id`, NULL\)\) AS `sales.product.0.count`/
         @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS FALSE\), `product`.`original_id`, NULL\)\) AS `sales.product.1.count`/
       end
 
       it "should generate SQL pivots, via IF, for a measure, by a bounded integer" do
-        @q.select 'sales.total.sum ~ sales.product.rating'
+        @q.select({ :column => "sales.total",
+                    :op => "sum",
+                    :pivot => "sales.product.rating"})
         @q.dataset.opts[:select].size.should == 10
       end
 
       it "should generate SQL pivots, via IF, for a measure, by a string with elements" do
-        @q.select 'sales.total.sum ~ sales.product.sale'
+        @q.select({ :column => "sales.total",
+                    :op => "sum",
+                    :pivot => "sales.product.sale"})
         @q.dataset.opts[:select].size.should == 3
       end
 
       it "should join on the pivoted column's table if necessary" do
-        @q.select 'sales.total.sum ~ sales.product.sale'
+        @q.select({ :column => "sales.total",
+                    :op => "sum",
+                    :pivot => "sales.product.sale"})
         @q.dataset.sql.should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
       end
 
       it "should join on the counted table when pivoting" do
-        @q.select 'sales.product.count ~ sales.buyer.recent'
+        @q.select({ :column => "sales.product",
+                    :op => "count",
+                    :pivot => "sales.buyer.recent"})
         @q.dataset.sql.should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
       end
 
       it "should not group on pivoted columns" do
-        @q.select 'sales.total.sum ~ sales.product.sale'
+        @q.select({ :column => "sales.total",
+                    :op => "sum",
+                    :pivot => "sales.product.sale"})
         @q.dataset.opts[:group].should be_nil
       end
     end
@@ -260,12 +278,12 @@ describe Chicago::Query do
     end
 
     it "doesn't group on calculated columns" do
-      @q.select 'sales.total.sum'
+      @q.select :column =>'sales.total', :op => 'sum'
       @q.dataset.opts[:group].should be_nil
     end
 
     it "doesn't group on count columns" do
-      @q.select 'sales.product.type.count, sales.product.count'
+      @q.select({:column => 'sales.product.type', :op => 'count'}, {:column => 'sales.product', :op => 'count'})
       @q.dataset.opts[:group].should be_nil
     end
 
@@ -287,7 +305,7 @@ describe Chicago::Query do
     end
 
     it "joins when counting dimensions" do
-      @q.select("sales.product.count")
+      @q.select({:column => "sales.product", :op => "count"})
       @q.dataset.sql.
         should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
     end
@@ -303,40 +321,25 @@ describe Chicago::Query do
       @q.dataset.opts[:order].should == [:'sales.product.sku'.asc]
     end
 
-    it "can be ordered by a column not part of the select" do
-      @q.order('sales.product.sku')
-      @q.dataset.opts[:order].should == [:sku.qualify(:product).asc]
-    end
-
-    it "can be ordered by a bare dimension not part of the select" do
-      @q.order('sales.product')
-      @q.dataset.opts[:order].should == [:name.qualify(:product).asc]
-    end
-
     it "can be ordered in descending order" do
       @q.select('sales.product.sku').order({:column => 'sales.product.sku', :ascending => false})
       @q.dataset.opts[:order].should == [:'sales.product.sku'.desc]
     end
 
     it "can be ordered in descending order for a column not part of the select" do
-      @q.order({:column => 'sales.product.sku', :ascending => false})
-      @q.dataset.opts[:order].should == [:sku.qualify(:product).desc]
+      @q.select('sales.product.sku').order({:column => 'sales.product.sku', :ascending => false})
+      @q.dataset.opts[:order].should == [:"sales.product.sku".desc]
     end
 
     it "can be ordered by multiple columns" do
-      @q.order({:column => 'sales.product.sku', :ascending => false}, 'sales.product.manufacturer')
-      @q.dataset.opts[:order].should == [:sku.qualify(:product).desc, :manufacturer.qualify(:product).asc]
+      @q.select('sales.product.sku', 'sales.product.manufacturer').order({:column => 'sales.product.sku', :ascending => false}, 'sales.product.manufacturer')
+      @q.dataset.opts[:order].should == [:"sales.product.sku".desc, :"sales.product.manufacturer".asc]
     end
 
     it "can be ordered on calculated columns" do
       @q.select('sales.product.sku', 'sales.total.sum')
       @q.order('sales.total.sum')
       @q.dataset.opts[:order].should == [:'sales.total.sum'.asc]
-    end
-
-    it "can be ordered on calculated columns, not in select" do
-      @q.select('sales.product.sku').order('sales.total.sum')
-      @q.dataset.opts[:order].should == [:sum.sql_function(:total.qualify(:sales)).asc]
     end
 
     it "#filter returns the query" do
@@ -390,7 +393,7 @@ describe Chicago::Query do
       end
 
       it "returns measure columns" do
-        column = @q.select("sales.total.sum").columns.first.first
+        column = @q.select({:column => "sales.total", :op => "sum"}).columns.first.first
         column.label.should == "Total"
         column.column_alias.to_s.should == "sales.total.sum"
       end
@@ -402,7 +405,7 @@ describe Chicago::Query do
       end
 
       it "returns the main identifier for bare dimensions" do
-        column = @q.select("sales.product.count").columns.first.first
+        column = @q.select({:column => "sales.product", :op => "count"}).columns.first.first
         column.label.should == "No. of Products"
         column.column_alias.to_s.should == "sales.product.count"
       end

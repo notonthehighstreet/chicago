@@ -7,20 +7,15 @@ module Chicago
         @schema = schema
       end
       
-      # Parses a column string.
+      # Parses a column element. An element may be a string reference
+      # like "foo.bar", or more complicated like {:column =>
+      # "foo.bar", :op => "sum"}
       #
       # @return [Array<Column>] an array of columns. In most cases
       #   this will be a 1-element array, unless the column is
       #   pivoted.
-      def parse(str)
-        return parse_pivoted_column(str) if str.include?("~")
-        table, col, operation = parse_parts(str)
-        if operation.nil?
-          [QueryColumn.column(table, col, str.to_sym)]
-        else
-          ref = str.sub(/\.[^.]+$/,'').to_sym
-          [QueryColumn.column(table, col, ref).calculate(operation)]
-        end
+      def parse(elem)
+        [_parse(elem)].flatten
       end
 
       protected
@@ -42,6 +37,33 @@ module Chicago
 
       private
 
+      def _parse(elem)
+        elem.kind_of?(Hash) ? complex_column(elem) : simple_column(elem)
+      end
+
+      def complex_column(elem)
+        elem[:pivot] ? pivoted_column(elem) : calculated_column(elem)
+      end
+
+      def pivoted_column(elem)
+        pivoted_column = _parse(elem[:column])
+        pivoted_by = _parse(elem[:pivot])
+        unit = [:avg, :count].include?(elem[:op].to_sym) ? nil : 0
+        pivoted_column.pivot(pivoted_by, pivotable_elements(pivoted_by), unit).map do |c|
+          c.calculate(elem[:op].to_sym)
+        end
+      end
+
+      def simple_column(elem)
+        table, col = parse_parts(elem)
+        QueryColumn.column(table, col, elem.to_sym)
+      end
+  
+      def calculated_column(elem)
+        col = _parse(elem[:column])
+        elem[:op] ? col.calculate(elem[:op].to_sym) : col
+      end
+
       def parse_parts(str)
         parts = str.split('.').map(&:to_sym)
         root = parts.shift
@@ -51,31 +73,10 @@ module Chicago
 
         if col.kind_of?(Chicago::Schema::Dimension)
           table = col
-          new_column_name = parts.shift
-          if new_column_name.nil?
-            col = table
-          elsif new_column_name == :count
-            col = table
-            parts.unshift :count
-          else
-            col = table[new_column_name]
-          end
+          col = parts.empty? ? table : table[parts.first]
         end
 
-        [table, col, parts.last]
-      end
-
-      def parse_pivoted_column(str)
-        col, pivot = str.split(/\s*~\s*/)
-        col_parts = col.split(".")
-        operation = col_parts.pop.to_sym
-        unit = [:avg, :count].include?(operation) ? nil : 0
-        col = parse(col_parts.join(".")).first
-        pivot_col = parse(pivot).first
-        
-        col.pivot(pivot_col, pivotable_elements(pivot_col), unit).map do |c|
-          c.calculate(operation)
-        end
+        [table, col]
       end
     end
   end
