@@ -24,11 +24,9 @@ module Chicago
         filter_columns = Set.new
         @dataset = filters.inject(@dataset) do |dataset, filter|
           filter_columns << filter[:column]
-          @dataset.filter(filter[:column].select_name => filter[:value])
+          filter[:column].filter_dataset(@dataset, filter_to_sequel(filter))
         end
         add_select_joins_to_dataset(filter_columns)
-
-        self
       end
 
       def order(order)
@@ -39,6 +37,21 @@ module Chicago
       end
 
       private
+
+      def filter_to_sequel(filter)
+        case filter[:op].to_sym
+        when :eq
+          {filter[:column].select_name => filter[:value]}
+        when :lt
+          filter[:column].select_name.identifier < filter[:value]
+        when :lte
+          filter[:column].select_name.identifier <= filter[:value]
+        when :gt
+          filter[:column].select_name.identifier > filter[:value]
+        when :gte
+          filter[:column].select_name.identifier >= filter[:value]
+        end
+      end
 
       def alias_or_sql_name(c)
         @selected_columns.any? {|x| x.column_alias == c.column_alias } ? c.column_alias : c.select_name

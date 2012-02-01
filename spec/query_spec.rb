@@ -375,6 +375,11 @@ describe Chicago::Query do
         filter({:column => "sales.order_ref", :value => "123", :op => :eq}).dataset.opts[:join].should be_nil
     end
 
+    it "filters in the having clause when a calculated column is filtered" do
+      @q.filter({:column => {:column => "sales.total", :op => "sum"}, :value => 2, :op => :eq}).dataset.
+        sql.should =~ /HAVING \(sum\(`sales`\.`total`\) = 2\)/
+    end
+
     describe "#columns" do
       it "returns an empty array if no columns are selected" do
         @q.columns.should be_empty

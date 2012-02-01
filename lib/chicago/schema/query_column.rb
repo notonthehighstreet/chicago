@@ -38,6 +38,10 @@ module Chicago
           QualifiedColumn.new(owner, column, column_alias)
         end
       end
+
+      def filter_dataset(ds, filter)
+        ds.filter(filter)
+      end
     end
 
     # @abstract
@@ -110,6 +114,10 @@ module Chicago
 
       def group_name
         nil
+      end
+
+      def filter_dataset(ds, filter)
+        ds.having(filter)
       end
 
       private
