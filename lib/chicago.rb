@@ -7,6 +7,7 @@ require 'chicago/core_ext/sequel/dataset'
 require 'chicago/core_ext/sequel/sql'
 
 require 'chicago/core_ext/array'
+require 'chicago/core_ext/hash'
 require 'chicago/data/month'
 
 require 'chicago/star_schema'

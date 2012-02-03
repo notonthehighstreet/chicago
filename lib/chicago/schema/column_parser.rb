@@ -42,6 +42,7 @@ module Chicago
       end
 
       def complex_column(elem)
+        elem.symbolize_keys!
         elem[:pivot] ? pivoted_column(elem) : calculated_column(elem)
       end
 

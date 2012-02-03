@@ -38,18 +38,19 @@ module Chicago
     #
     # @api public
     def initialize(schema, ast)
-      @table_name = (ast[:table_name] || ast["table_name"]).to_sym
-      @query_type = (ast[:query_type] || ast["query_type"]).to_sym
+      ast.symbolize_keys!
+      @table_name = ast[:table_name].downcase.to_sym
+      @query_type = ast[:query_type].downcase.to_sym
       @columns = []
       @filters = []
       @order = []
       @table = schema.send(@query_type, @table_name) or
         raise MissingDefinitionError.new("#{@query_type} '#{@table_name}' is not in the schema")
-      @column_parser = Schema::ColumnParser.new(schema)
+      @column_parser = self.class.column_parser.new(schema)
 
-      select(*(ast[:columns] || ast["columns"]) || [])
-      filter(*(ast[:filters] || ast["filters"]) || [])
-      order(*(ast[:order] || ast["order"]) || [])
+      select(*(ast[:columns] || []))
+      filter(*(ast[:filters] || []))
+      order(*(ast[:order] || []))
     end
 
     # @api public
@@ -62,6 +63,7 @@ module Chicago
     def filter(*filters)
       copied_filters = filters.dup
       copied_filters.each do |filter|
+        filter.symbolize_keys!
         filter[:column] = @column_parser.parse(filter[:column]).first
       end
       @filters += copied_filters
@@ -78,9 +80,14 @@ module Chicago
         if c.kind_of?(String)
           {:column => c, :ascending => true}
         else
-          c
+          c.symbolize_keys!
         end
       end
+      self
+    end
+
+    def limit(limit)
+      @limit = limit
       self
     end
     
@@ -94,6 +101,7 @@ module Chicago
       builder.select(@columns)
       builder.filter(@filters)
       builder.order(@order)
+      builder.limit(@limit) if @limit
       builder.dataset
     end
   end

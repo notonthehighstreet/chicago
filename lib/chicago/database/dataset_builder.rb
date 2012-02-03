@@ -36,6 +36,10 @@ module Chicago
         @dataset = @dataset.order(*columns_to_order)
       end
 
+      def limit(limit)
+        @dataset = @dataset.limit(limit)
+      end
+      
       private
 
       def filter_to_sequel(filter)
