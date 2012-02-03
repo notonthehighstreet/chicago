@@ -6,7 +6,6 @@ require 'sequel/extensions/inflector'
 require 'chicago/core_ext/sequel/dataset'
 require 'chicago/core_ext/sequel/sql'
 
-require 'chicago/core_ext/array'
 require 'chicago/core_ext/hash'
 require 'chicago/data/month'
 
@@ -24,13 +23,7 @@ module Chicago
   end
   
   ### Autoloads
-
   autoload :RakeTasks, 'chicago/rake_tasks'
-  autoload :FilterStringParser, 'chicago/util/filter_string_parser'
-
-  module Data
-    autoload :PivotedDataset,         'chicago/data/pivoted_dataset'
-  end
 
   module ETL
     autoload :TableBuilder,   'chicago/etl/table_builder.rb'
