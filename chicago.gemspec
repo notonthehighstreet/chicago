@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{chicago}
-  s.version = "0.1.1"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Roland Swingler}]
-  s.date = %q{2012-01-27}
+  s.date = %q{2012-02-03}
   s.description = %q{Simple Data Warehouse toolkit}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = [
@@ -26,11 +26,13 @@ Gem::Specification.new do |s|
     "chicago.gemspec",
     "lib/chicago.rb",
     "lib/chicago/core_ext/array.rb",
+    "lib/chicago/core_ext/hash.rb",
     "lib/chicago/core_ext/sequel/dataset.rb",
     "lib/chicago/core_ext/sequel/sql.rb",
     "lib/chicago/data/month.rb",
     "lib/chicago/data/pivoted_dataset.rb",
     "lib/chicago/database/constants.rb",
+    "lib/chicago/database/dataset_builder.rb",
     "lib/chicago/database/migration_file_writer.rb",
     "lib/chicago/database/schema_generator.rb",
     "lib/chicago/database/type_converters.rb",
@@ -53,6 +55,7 @@ Gem::Specification.new do |s|
     "lib/chicago/schema/measure.rb",
     "lib/chicago/schema/named_element.rb",
     "lib/chicago/schema/named_element_collection.rb",
+    "lib/chicago/schema/query_column.rb",
     "lib/chicago/schema/table.rb",
     "lib/chicago/star_schema.rb",
     "lib/chicago/util/filter_string_parser.rb",
@@ -75,6 +78,7 @@ Gem::Specification.new do |s|
     "spec/schema/fact_spec.rb",
     "spec/schema/measure_spec.rb",
     "spec/schema/named_element_collection_spec.rb",
+    "spec/schema/query_column_spec.rb",
     "spec/spec_helper.rb",
     "spec/star_schema_spec.rb",
     "spec/support/matchers/be_one_of.rb",
