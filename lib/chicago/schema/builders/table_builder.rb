@@ -22,6 +22,10 @@ module Chicago::Schema::Builders
     
     protected
 
+    def description(str)
+      @options[:description] = str
+    end
+    
     def natural_key(*args)
       @options[:natural_key] = args
     end

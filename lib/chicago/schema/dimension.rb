@@ -37,6 +37,7 @@ module Chicago
       #   Hashes must have an :id key.
       # @option opts [Array<Symbol>] natual_key an array of symbols,
       #   representing a uniqueness constraint on the dimension.
+      # @option opts description a long text description about the dimension.
       # @raise [Chicago::UnsafeNullRecordError] 
       def initialize(name, opts={})
         super

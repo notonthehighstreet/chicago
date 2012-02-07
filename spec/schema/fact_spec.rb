@@ -19,6 +19,10 @@ describe Chicago::Schema::Fact do
     described_class.new("foo").degenerate_dimensions.should be_empty
   end
 
+  it "can have a description" do
+    described_class.new(:foo, :description => "bar").description.should == "bar"
+  end
+  
   it "can have dimensions" do
     dimension = stub(:dimension)
     described_class.new("foo", :dimensions => [dimension]).

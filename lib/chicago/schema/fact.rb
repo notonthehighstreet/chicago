@@ -32,13 +32,13 @@ module Chicago
 
       # Creates a new fact.
       #
-      # Available options:
-      #
-      # +dimensions+:: an array of Dimensions this fact is linked with
-      # +degenerate_dimensions+:: an array of Columns
-      # +measures+:: an array of Measures
-      # +natual_key+:: an array of symbols, representing a uniqueness
-      #                constraint on the fact
+      # @param name the name of this fact.
+      # @option opts dimensions an array of Dimensions this fact is linked with
+      # @option opts degenerate_dimensions an array of Columns
+      # @option opts measures an array of Measures
+      # @option opts natual_key an array of symbols, representing a uniqueness
+      #   constraint on the fact
+      # @option opts description a long text description about the fact.
       def initialize(name, opts={})
         super
         @dimensions = opts[:dimensions] || []

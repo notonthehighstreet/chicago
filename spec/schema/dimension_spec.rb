@@ -6,6 +6,10 @@ describe Chicago::Schema::Dimension do
   it "has a table name" do
     described_class.new(:foo).table_name.should == :dimension_foo
   end
+
+  it "can have a description" do
+    described_class.new(:foo, :description => "bar").description.should == "bar"
+  end
   
   it "has columns" do
     column = stub(:column)

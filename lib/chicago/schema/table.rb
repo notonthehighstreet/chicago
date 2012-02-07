@@ -12,10 +12,14 @@ module Chicago
 
       # The uniqueness constraint on the table.
       attr_reader :natural_key
-    
+
+      # Documentation or description for the table.
+      attr_reader :description
+      
       def initialize(name, opts={}) #::nodoc::
         super
         @natural_key = opts[:natural_key]
+        @description = opts[:description]
       end
     
       # Returns the name of the column, qualified by this schema
