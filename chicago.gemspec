@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{chicago}
-  s.version = "0.2.0"
+  s.version = "0.2.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Roland Swingler}]
-  s.date = %q{2012-02-03}
+  s.date = %q{2012-02-07}
   s.description = %q{Simple Data Warehouse toolkit}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = [
@@ -25,12 +25,10 @@ Gem::Specification.new do |s|
     "Rakefile",
     "chicago.gemspec",
     "lib/chicago.rb",
-    "lib/chicago/core_ext/array.rb",
     "lib/chicago/core_ext/hash.rb",
     "lib/chicago/core_ext/sequel/dataset.rb",
     "lib/chicago/core_ext/sequel/sql.rb",
     "lib/chicago/data/month.rb",
-    "lib/chicago/data/pivoted_dataset.rb",
     "lib/chicago/database/constants.rb",
     "lib/chicago/database/dataset_builder.rb",
     "lib/chicago/database/migration_file_writer.rb",
@@ -58,11 +56,8 @@ Gem::Specification.new do |s|
     "lib/chicago/schema/query_column.rb",
     "lib/chicago/schema/table.rb",
     "lib/chicago/star_schema.rb",
-    "lib/chicago/util/filter_string_parser.rb",
-    "spec/core_ext/array_spec.rb",
     "spec/core_ext/sequel_extensions_spec.rb",
     "spec/data/month_spec.rb",
-    "spec/data/pivoted_dataset_spec.rb",
     "spec/database/db_type_converter_spec.rb",
     "spec/database/migration_file_writer_spec.rb",
     "spec/database/schema_generator_spec.rb",
@@ -101,6 +96,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<sequel>, ["~> 3.0"])
       s.add_runtime_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
       s.add_runtime_dependency(%q<mysql>, ["= 2.8.1"])
+      s.add_runtime_dependency(%q<chronic>, [">= 0"])
       s.add_development_dependency(%q<yard>, [">= 0"])
       s.add_development_dependency(%q<rspec>, ["~> 2.0"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
@@ -112,6 +108,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<sequel>, ["~> 3.0"])
       s.add_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
       s.add_dependency(%q<mysql>, ["= 2.8.1"])
+      s.add_dependency(%q<chronic>, [">= 0"])
       s.add_dependency(%q<yard>, [">= 0"])
       s.add_dependency(%q<rspec>, ["~> 2.0"])
       s.add_dependency(%q<bundler>, [">= 0"])
@@ -124,6 +121,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<sequel>, ["~> 3.0"])
     s.add_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
     s.add_dependency(%q<mysql>, ["= 2.8.1"])
+    s.add_dependency(%q<chronic>, [">= 0"])
     s.add_dependency(%q<yard>, [">= 0"])
     s.add_dependency(%q<rspec>, ["~> 2.0"])
     s.add_dependency(%q<bundler>, [">= 0"])
