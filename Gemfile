@@ -4,6 +4,7 @@ source "http://rubygems.org"
 gem "sequel", "~> 3.0"
 gem "sequel_migration_builder", "~> 0.3.0"
 gem "mysql", "2.8.1"
+gem "chronic"
 
 group :development do
   gem "yard"

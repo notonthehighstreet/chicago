@@ -1,4 +1,5 @@
 # Requires go here
+require 'chronic'
 require 'sequel'
 require 'sequel/extensions/inflector'
 

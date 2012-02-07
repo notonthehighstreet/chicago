@@ -15,6 +15,7 @@ describe Chicago::Query do
         string :sku
         string :internal_code
         boolean :flag
+        date   :date
         integer :rating, :range => (1..10)
         string :sale, :elements => ["No", "Half Price", "Custom"]
       end
@@ -370,6 +371,38 @@ describe Chicago::Query do
         should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
     end
 
+    it "can filter based on greater than" do
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :gt}).dataset.sql.should =~ /WHERE \(`product`\.`rating` > 2\)/
+    end
+
+    it "can filter based on greater than or equal" do
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :gte}).dataset.sql.should =~ /WHERE \(`product`\.`rating` >= 2\)/
+    end
+
+    it "can filter based on less than" do
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :lt}).dataset.sql.should =~ /WHERE \(`product`\.`rating` < 2\)/
+    end
+
+    it "can filter based on less than or equal" do
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :lte}).dataset.sql.should =~ /WHERE \(`product`\.`rating` <= 2\)/
+    end
+
+    it "can filter multiple integers" do
+      @q.filter({:column => "sales.product.rating", :value => ["1", "2"], :op => :eq}).dataset.sql.should =~ /WHERE \(`product`\.`rating` IN \(1, 2\)\)/
+    end
+
+    it "can filter based on not equal" do
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :ne}).dataset.sql.should =~ /WHERE \(`product`\.`rating` != 2\)/
+    end
+
+    it "can filter based on 2 comparisons" do
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :gte}, {:column => "sales.product.rating", :value => "7", :op => :lt}).dataset.sql.should =~ /WHERE \(\(`product`\.`rating` >= 2\) AND \(`product`\.`rating` < 7\)\)/i
+    end
+
+    it "can filter dates" do
+      @q.filter({:column => "sales.product.date", :value => "01/02/12", :op => :eq}).dataset.sql.should =~ /WHERE \(`product`\.`date` = '2012-02-01'\)/
+    end
+    
     it "does not join the base table when filtering" do
       @q.
         filter({:column => "sales.order_ref", :value => "123", :op => :eq}).dataset.opts[:join].should be_nil
