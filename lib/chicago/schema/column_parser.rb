@@ -71,7 +71,9 @@ module Chicago
         table = @schema.fact(root) || @schema.dimension(root)
         
         col = table[parts.shift]
-
+        # To cope with bare dimension references.
+        col = table.original_key if col.nil?
+        
         if col.kind_of?(Chicago::Schema::Dimension)
           table = col
           col = parts.empty? ? table : table[parts.first]

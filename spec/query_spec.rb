@@ -91,6 +91,11 @@ describe Chicago::Query do
                    :type.qualify(:product).as("product.type".to_sym)
                   ]
     end
+
+    it "selects a count" do
+      @q.select({:column => "product", :op => "count"})
+      @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`original_id`\)/i
+    end
   end
   
   describe "generates a dataset for a fact that" do

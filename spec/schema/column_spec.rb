@@ -96,7 +96,6 @@ describe Chicago::Schema::Column do
   it "can be countable" do
     col = described_class.new(:username, :string, :countable => true)
     col.should be_countable
-    col.countable_label.should == col.label
   end
 
   it "can have a specific label when counted" do

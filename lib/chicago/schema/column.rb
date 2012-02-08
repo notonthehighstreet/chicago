@@ -35,7 +35,9 @@ module Chicago
         super name, opts
         
         @column_type = column_type
-        @countable_label = @opts[:countable].kind_of?(String) ? @opts[:countable] : @label
+        if @opts[:countable].kind_of?(String)
+          @countable_label =  @opts[:countable]
+        end
         @countable   = !! @opts[:countable]
         @min         = @opts[:min]
         @max         = @opts[:max]

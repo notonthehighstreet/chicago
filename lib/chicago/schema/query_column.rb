@@ -150,10 +150,10 @@ module Chicago
       def label
         if @column.label.kind_of?(Array)
           new_label = @column.label.dup
-          new_label[0] = "No. of #{@column.label.first.pluralize}"
+          new_label[0] = @column.countable_label || "No. of #{@column.label.first.pluralize}"
           new_label
         else
-          "No. of #{@column.label.pluralize}"
+          @column.countable_label || "No. of #{@column.label.pluralize}"
         end
       end
     end
