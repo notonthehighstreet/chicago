@@ -196,8 +196,8 @@ describe Chicago::Query do
                     :op => "sum",
                     :pivot => "sales.product.flag"})
         @q.dataset.opts[:select].
-          should == [:sum.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), 0)).as("sales.total.0.sum".to_sym),
-                     :sum.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), 0)).as("sales.total.1.sum".to_sym)
+          should == [:sum.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), 0)).as("sales.total:sales.product.flag.0.sum".to_sym),
+                     :sum.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), 0)).as("sales.total:sales.product.flag.1.sum".to_sym)
                     ]
       end
 
@@ -214,8 +214,8 @@ describe Chicago::Query do
                     :op => "avg",
                     :pivot => "sales.product.flag"})
         @q.dataset.opts[:select].
-          should == [:avg.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), nil)).as("sales.total.0.avg".to_sym),
-                     :avg.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), nil)).as("sales.total.1.avg".to_sym)
+          should == [:avg.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), nil)).as("sales.total:sales.product.flag.0.avg".to_sym),
+                     :avg.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), nil)).as("sales.total:sales.product.flag.1.avg".to_sym)
                     ]
       end
 
@@ -223,8 +223,8 @@ describe Chicago::Query do
         @q.select({ :column => "sales.product",
                     :op => "count",
                     :pivot => "sales.product.flag"})
-        @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS TRUE\), `product`.`original_id`, NULL\)\) AS `sales.product.0.count`/
-        @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS FALSE\), `product`.`original_id`, NULL\)\) AS `sales.product.1.count`/
+        @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS TRUE\), `product`.`original_id`, NULL\)\) AS `sales.product:sales.product.flag.0.count`/
+        @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS FALSE\), `product`.`original_id`, NULL\)\) AS `sales.product:sales.product.flag.1.count`/
       end
 
       it "should generate SQL pivots, via IF, for a measure, by a bounded integer" do

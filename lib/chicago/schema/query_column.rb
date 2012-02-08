@@ -180,7 +180,7 @@ module Chicago
       end
       
       def column_alias
-        "#{@column.column_alias}.#{@index}".to_sym
+        "#{@column.column_alias}:#{@pivoted_column.column_alias}.#{@index}".to_sym
       end
 
       def group_name
