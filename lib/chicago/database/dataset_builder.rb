@@ -57,12 +57,22 @@ module Chicago
         when :ne
           ~{filter[:column].select_name => filter_value(filter[:column], filter[:value])}
         when :sw
-          filter[:column].select_name.like( filter[:value] + "%" )
+          starts_with(filter)
         when :nsw
-          ~(filter[:column].select_name.like( filter[:value] + "%" ))
+          ~(starts_with(filter))
         end
       end
 
+      def starts_with(filter)
+          if filter[:value].kind_of?(Array)
+            filter[:value].inject do |a,b|
+              filter[:column].select_name.like( a + "%" ) | filter[:column].select_name.like( b + "%" )
+            end
+          else
+            filter[:column].select_name.like( filter[:value] + "%" )
+          end
+      end
+      
       # TODO: factor out.
       def filter_value(column, value)
         if value.kind_of?(Array)

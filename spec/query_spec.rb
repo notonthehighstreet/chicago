@@ -402,6 +402,22 @@ describe Chicago::Query do
     it "can filter dates" do
       @q.filter({:column => "sales.product.date", :value => "01/02/12", :op => :eq}).dataset.sql.should =~ /WHERE \(`product`\.`date` = '2012-02-01'\)/
     end
+
+    it "can filter based on starts with" do
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :sw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE BINARY '123%'\)/
+    end
+
+    it "can filter based on 'starts with' with multiple values" do
+      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :sw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE BINARY '123%'\) OR \(`product`\.`sku` LIKE BINARY 'AB%'\)\)/
+    end
+
+    it "can filter based on not starts with" do
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :nsw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE BINARY '123%'\)/
+    end
+
+    it "can filter based on 'not starts with' with multiple values" do
+      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :nsw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE BINARY '123%'\) AND \(`product`\.`sku` NOT LIKE BINARY 'AB%'\)\)/
+    end
     
     it "does not join the base table when filtering" do
       @q.
