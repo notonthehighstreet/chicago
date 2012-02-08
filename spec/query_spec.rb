@@ -404,19 +404,19 @@ describe Chicago::Query do
     end
 
     it "can filter based on starts with" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :sw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE BINARY '123%'\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :sw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE '123%'\)/
     end
 
     it "can filter based on 'starts with' with multiple values" do
-      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :sw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE BINARY '123%'\) OR \(`product`\.`sku` LIKE BINARY 'AB%'\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :sw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '123%'\) OR \(`product`\.`sku` LIKE 'AB%'\)\)/
     end
 
     it "can filter based on not starts with" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :nsw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE BINARY '123%'\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :nsw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE '123%'\)/
     end
 
     it "can filter based on 'not starts with' with multiple values" do
-      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :nsw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE BINARY '123%'\) AND \(`product`\.`sku` NOT LIKE BINARY 'AB%'\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :nsw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '123%'\) AND \(`product`\.`sku` NOT LIKE 'AB%'\)\)/
     end
     
     it "does not join the base table when filtering" do

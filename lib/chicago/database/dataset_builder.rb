@@ -66,10 +66,10 @@ module Chicago
       def starts_with(filter)
           if filter[:value].kind_of?(Array)
             filter[:value].inject do |a,b|
-              filter[:column].select_name.like( a + "%" ) | filter[:column].select_name.like( b + "%" )
+              filter[:column].select_name.ilike( a.strip + "%" ) | filter[:column].select_name.ilike( b.strip + "%" )
             end
           else
-            filter[:column].select_name.like( filter[:value] + "%" )
+            filter[:column].select_name.ilike( filter[:value].strip + "%" )
           end
       end
       
