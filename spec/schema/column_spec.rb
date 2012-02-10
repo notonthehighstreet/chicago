@@ -109,6 +109,10 @@ describe Chicago::Schema::Column do
       should be_internal
   end
 
+  it "can be qualified by a table" do
+    described_class.new(:foo, :string).qualify_by(:bar).should == :foo.qualify(:bar)
+  end
+  
   it "is visitable" do
     visitor = mock(:visitor)
     column = described_class.new(:foo, :integer)

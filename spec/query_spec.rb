@@ -47,24 +47,26 @@ describe Chicago::Query do
     Chicago::Query.default_db = TEST_DB
   end
 
-  it "raises an StandardError if the table name is missing" do
-    expect {
-      described_class.new(@schema, :query_type => "fact")
-    }.to raise_error(StandardError)
-  end
+  describe ".new" do
+    it "raises an StandardError if the table name is missing" do
+      expect {
+        described_class.new(@schema, :query_type => "fact")
+      }.to raise_error(StandardError)
+    end
 
-  it "raises an StandardError if the type is missing" do
-    expect {
-      described_class.new(@schema, :table_name => "sales")
-    }.to raise_error(StandardError)
+    it "raises an StandardError if the type is missing" do
+      expect {
+        described_class.new(@schema, :table_name => "sales")
+      }.to raise_error(StandardError)
+    end
   end
-
-  describe "table" do
+  
+  describe "#table" do
     it "returns the schema table definition" do
       described_class.new(@schema, :table_name => "sales", :query_type => "fact").table.should == @schema.fact(:sales)
     end
 
-    it "raises a MissingDefinition error if the table is not in the schema" do
+    it "raises a MissingDefinitionError if the table is not in the schema" do
       expect {
         described_class.new(@schema, :table_name => "foo", :query_type => "fact")
       }.to raise_error Chicago::MissingDefinitionError
@@ -77,14 +79,18 @@ describe Chicago::Query do
                                :table_name => "product",
                                :query_type => "dimension")
     end
+
+    it "is a Sequel::Dataset" do
+      @q.dataset.should be_kind_of(Sequel::Dataset)
+    end
     
-    it "selects the qualified columns from a dimension" do
+    it "selects a qualified column" do
       @q.select("product.name")
       @q.dataset.opts[:select].
         should == [:name.qualify(:product).as("product.name".to_sym)]
     end
     
-    it "selects multiple columns from a dimension" do
+    it "selects multiple qualified columns" do
       @q.select("product.name", "product.type")
       @q.dataset.opts[:select].
         should == [:name.qualify(:product).as("product.name".to_sym),
@@ -105,7 +111,7 @@ describe Chicago::Query do
                                :query_type => "fact")
     end
 
-    it "should return a Sequel::Dataset" do
+    it "is a Sequel::Dataset" do
       @q.dataset.should be_kind_of(Sequel::Dataset)
     end
 
@@ -117,11 +123,11 @@ describe Chicago::Query do
       @q.dataset(database).should == dataset
     end
     
-    it "should select from the right table" do
+    it "selects from the correctly aliased table" do
       @q.dataset.sql.should =~ /FROM `facts_sales` AS `sales`/
     end
 
-    it "should select a column from the fact table" do
+    it "selects a qualified column" do
       @q.select("sales.order_ref")
       @q.dataset.opts[:select].
         should == [:order_ref.qualify(:sales).as("sales.order_ref".to_sym)]
@@ -195,8 +201,16 @@ describe Chicago::Query do
       @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`original_id`\)/i
     end
 
-    describe "pivoting columns" do
-      it "should generate SQL pivots, via IF, for a measure, by a boolean column" do
+    describe "pivots columns" do
+      it "raises UnimplementedError for an unbounded pivot column" do
+        expect {
+          @q.select({ :column => "sales.total",
+                    :op => "sum",
+                    :pivot => "sales.product.type"})
+        }.to raise_error(Chicago::UnimplementedError)
+      end
+      
+      it "via IF, for a measure, by a boolean column" do
         @q.select({ :column => "sales.total",
                     :op => "sum",
                     :pivot => "sales.product.flag"})
@@ -206,7 +220,7 @@ describe Chicago::Query do
                     ]
       end
 
-      it "should have labels of the underlying column and the value" do
+      it "that have labels of the underlying column and the value" do
         @q.select({ :column => "sales.total",
                     :op => "sum",
                     :pivot => "sales.product.flag"})
@@ -214,7 +228,7 @@ describe Chicago::Query do
         @q.columns.first.last.label.should == ["Total", false]
       end
 
-      it "should generate SQL pivots, with units of nil for averages" do
+      it "that have units of nil for averages" do
         @q.select({ :column => "sales.total",
                     :op => "avg",
                     :pivot => "sales.product.flag"})
@@ -224,7 +238,7 @@ describe Chicago::Query do
                     ]
       end
 
-      it "should generate SQL pivots for counts" do
+      it "including counts" do
         @q.select({ :column => "sales.product",
                     :op => "count",
                     :pivot => "sales.product.flag"})

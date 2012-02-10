@@ -46,6 +46,13 @@ describe Chicago::StarSchema do
       dimension.natural_key.should == [:email]
     end
 
+    specify "can have a description defined" do
+      dimension = @schema.define_dimension(:user) do
+        description "Hello"
+      end
+      dimension.description.should == "Hello"
+    end
+    
     specify "can have null records defined" do
       dimension = @schema.define_dimension(:user) do
         columns { string :email }
@@ -177,6 +184,13 @@ describe Chicago::StarSchema do
       fact.measures.first.should be_null
     end
 
+    specify "can have a description defined" do
+      fact = @schema.define_fact(:foo) do
+        description "Hello"
+      end
+      fact.description.should == "Hello"
+    end
+    
     specify "can have a natural key defined" do
       dim  = @schema.define_dimension(:date)
       fact = @schema.define_fact(:foo) do
