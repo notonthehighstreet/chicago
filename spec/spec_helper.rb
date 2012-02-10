@@ -3,6 +3,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'chicago'
 require 'rspec'
 require 'yaml'
+require 'rspec/autorun'
 
 include Chicago
 

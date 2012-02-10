@@ -33,8 +33,9 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
 end
 
 RSpec::Core::RakeTask.new(:rcov) do |spec|
-  spec.pattern = 'spec/**/*_spec.rb'
+  spec.pattern = FileList['spec/**/*_spec.rb']
   spec.rcov = true
+  spec.rcov_opts = "-x spec/ -x /home"
 end
 
 task :default => :spec
