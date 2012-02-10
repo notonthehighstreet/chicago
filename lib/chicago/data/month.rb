@@ -70,14 +70,26 @@ module Chicago
         # Returns a month given a name of the month or an integer
         # between 1 and 12.
         def parse(identifier)
-          if identifier.kind_of?(Fixnum) && identifier >= 1 && identifier <= 12
+          if is_month_number?(identifier)
             ALL[identifier - 1]
           else
-            name = identifier.strip.downcase
-            ALL.find {|month| month.name.downcase == name || month.short_name.downcase == name }
+            find_month_by_name(identifier)
           end
         end
 
+        def is_month_number?(identifier)
+          identifier.kind_of?(Fixnum) && identifier >= 1 && identifier <= 12
+        end
+        private :is_month_number?
+
+        def find_month_by_name(identifier)
+          name = identifier.strip.downcase
+          ALL.find do |month|
+            month.name.downcase == name || month.short_name.downcase == name
+          end
+        end
+        private :find_month_by_name
+        
         private :new
       end
       

@@ -38,6 +38,8 @@ module Chicago
     #
     # @api public
     def initialize(schema, ast)
+      @column_parser = self.class.column_parser.new(schema)
+
       ast.symbolize_keys!
       @table_name = ast[:table_name].downcase.to_sym
       @query_type = ast[:query_type].downcase.to_sym
@@ -46,7 +48,6 @@ module Chicago
       @order = []
       @table = schema.send(@query_type, @table_name) or
         raise MissingDefinitionError.new("#{@query_type} '#{@table_name}' is not in the schema")
-      @column_parser = self.class.column_parser.new(schema)
 
       select(*(ast[:columns] || []))
       filter(*(ast[:filters] || []))

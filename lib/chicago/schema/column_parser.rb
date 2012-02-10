@@ -2,7 +2,25 @@ require 'chicago/schema/query_column'
 
 module Chicago
   module Schema
+    # Parses AST column representations, returning an Array of
+    # QueryColumns.
+    #
+    # Columns can be simple dotted references, like
+    #
+    #     "sales.product.name"
+    #
+    # calculations like:
+    #
+    #     {:column => "sales.total", :op => "sum"}
+    #
+    # or pivoted calculations like:
+    #
+    #     {:column => "sales.total",
+    #      :op => "sum"
+    #      :pivot => "sales.date.year"}
+    #
     class ColumnParser
+      # Creates a new ColumnParser for a schema.
       def initialize(schema)
         @schema = schema
       end
@@ -22,17 +40,36 @@ module Chicago
       
       # Returns an Array of values, given a column to pivot with.
       #
-      # May be overriden by subclasses
+      # May be overridden by subclasses.
+      #
+      # @raise UnimplementedError if a column with unknown or too many
+      #   elements is used as a pivot column. In future this
+      #   restriction may be lifted.
       def pivotable_elements(pivot_col)
         if pivot_col.column_type == :boolean
           [true, false]
         elsif pivot_col.elements
           pivot_col.elements
-        elsif pivot_col.column_type == :integer && pivot_col.max && pivot_col.min && (pivot_col.max - pivot_col.min <= 500)
+        elsif has_pivotable_integer_range?(pivot_col)
           (pivot_col.min..pivot_col.max).to_a
         else
           raise UnimplementedError.new("General pivoting not yet support")
         end
+      end
+
+      # Returns true if an Integer column can be used as pivot column.
+      #
+      # Default is to allow columns with a range 500 wide or less to
+      # be used as pivot columns.
+      #
+      # May be overridden by subclasses
+      #
+      # @return Boolean true if this column can be pivoted.
+      def has_pivotable_integer_range?(pivot_col)
+        pivot_col.column_type == :integer &&
+          pivot_col.max &&
+          pivot_col.min &&
+          (pivot_col.max - pivot_col.min <= 500)
       end
 
       private
@@ -66,10 +103,7 @@ module Chicago
       end
 
       def parse_parts(str)
-        parts = str.split('.').map(&:to_sym)
-        root = parts.shift
-        table = @schema.fact(root) || @schema.dimension(root)
-        
+        table, parts = parse_table(str)
         col = table[parts.shift]
         # To cope with bare dimension references.
         col = table.original_key if col.nil?
@@ -80,6 +114,13 @@ module Chicago
         end
 
         [table, col]
+      end
+
+      def parse_table(str)
+        parts = str.split('.').map(&:to_sym)
+        root = parts.shift
+        table = @schema.fact(root) || @schema.dimension(root)
+        [table, parts]
       end
     end
   end
