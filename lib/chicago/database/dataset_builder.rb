@@ -1,3 +1,5 @@
+require 'chicago/database/filter'
+
 module Chicago
   module Database
     # Builds a Sequel::Dataset from column definitions, filters etc.
@@ -24,7 +26,7 @@ module Chicago
         filter_columns = Set.new
         filters.each do |filter|
           filter_columns << filter[:column]
-          @dataset = filter[:column].filter_dataset(@dataset, filter_to_sequel(filter))
+          @dataset = Filter.from_hash(filter).filter_dataset(@dataset)
         end
         add_select_joins_to_dataset(filter_columns)
       end
@@ -41,56 +43,6 @@ module Chicago
       end
       
       private
-
-      def filter_to_sequel(filter)
-        case filter[:op].to_sym
-        when :eq
-          {filter[:column].select_name => filter_value(filter[:column], filter[:value])}
-        when :lt
-          filter[:column].select_name < filter_value(filter[:column], filter[:value])
-        when :lte
-          filter[:column].select_name <= filter_value(filter[:column], filter[:value])
-        when :gt
-          filter[:column].select_name > filter_value(filter[:column], filter[:value])
-        when :gte
-          filter[:column].select_name >= filter_value(filter[:column], filter[:value])
-        when :ne
-          ~{filter[:column].select_name => filter_value(filter[:column], filter[:value])}
-        when :sw
-          starts_with(filter)
-        when :nsw
-          ~(starts_with(filter))
-        end
-      end
-
-      def starts_with(filter)
-          if filter[:value].kind_of?(Array)
-            filter[:value].inject do |a,b|
-              filter[:column].select_name.ilike( a.strip + "%" ) | filter[:column].select_name.ilike( b.strip + "%" )
-            end
-          else
-            filter[:column].select_name.ilike( filter[:value].strip + "%" )
-          end
-      end
-      
-      # TODO: factor out.
-      def filter_value(column, value)
-        if value.kind_of?(Array)
-          return value.map {|v| filter_value(column, v) }
-        end
-        
-        case column.column_type
-        when :integer
-          value.to_i
-        when :date
-          time = Chronic.parse(value, :endian_precedence => [:little, :middle])
-          Date.new(time.year, time.month, time.day)
-        when :datetime, :timestamp
-          Chronic.parse(value, :endian_precedence => [:little, :middle])
-        else
-          value
-        end
-      end
       
       def alias_or_sql_name(c)
         @selected_columns.any? {|x| x.column_alias == c.column_alias } ? c.column_alias : c.select_name
