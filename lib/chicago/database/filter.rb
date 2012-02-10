@@ -1,20 +1,28 @@
+require 'chicago/database/value_parser'
+require 'forwardable'
+
 module Chicago
   module Database
     class Filter
       attr_reader :column, :value
+
+      class << self
+        attr_accessor :value_parser
+      end
+      self.value_parser = ValueParser
       
       def self.from_hash(hash)
         case hash[:op].to_sym
         when :eq
           EqualityFilter.new(hash[:column], hash[:value])
         when :lt
-          LessThanFilter.new(hash[:column], hash[:value])
+          ComparisonFilter.new(hash[:column], hash[:value], :<)
         when :lte
-          LessThanOrEqualFilter.new(hash[:column], hash[:value])
+          ComparisonFilter.new(hash[:column], hash[:value], :<=)
         when :gt
-          GreaterThanFilter.new(hash[:column], hash[:value])
+          ComparisonFilter.new(hash[:column], hash[:value], :>)
         when :gte
-          GreaterThanOrEqualFilter.new(hash[:column], hash[:value])
+          ComparisonFilter.new(hash[:column], hash[:value], :>=)
         when :ne
           NotFilter.new(EqualityFilter.new(hash[:column], hash[:value]))
         when :sw
@@ -25,51 +33,27 @@ module Chicago
       end
 
       def initialize(column, value)
-        @column, @value = column, value
+        @column = column
+        @value = Filter.value_parser.new.parse(column, value)
       end
 
       def filter_dataset(dataset)
         column.filter_dataset(dataset, to_sequel)
       end
-      
-      protected
-
-      def filter_value(column, value)
-        if value.kind_of?(Array)
-          return value.map {|v| filter_value(column, v) }
-        end
-        
-        case column.column_type
-        when :integer
-          value.to_i
-        when :date
-          time = Chronic.parse(value, :endian_precedence => [:little, :middle])
-          Date.new(time.year, time.month, time.day)
-        when :datetime, :timestamp
-          Chronic.parse(value, :endian_precedence => [:little, :middle])
-        else
-          value
-        end
-      end
     end
-
+    
     class EqualityFilter < Filter
       def to_sequel
-        {@column.select_name => filter_value(@column, @value)}
+        {@column.select_name => @value}
       end
     end
 
     class NotFilter < Filter
+      extend Forwardable
+      def_delegators :@filter, :column, :value
+      
       def initialize(filter)
         @filter = filter
-      end
-
-      def column
-        @filter.column
-      end
-
-      def value
-        @filter.value
       end
       
       def to_sequel
@@ -77,27 +61,14 @@ module Chicago
       end
     end
 
-    class LessThanFilter < Filter
-      def to_sequel
-        @column.select_name < filter_value(@column, @value)
+    class ComparisonFilter < Filter
+      def initialize(column, value, comparison)
+        super column, value
+        @comparison = comparison
       end
-    end
-
-    class GreaterThanFilter < Filter
+      
       def to_sequel
-        @column.select_name > filter_value(@column, @value)
-      end
-    end
-
-    class LessThanOrEqualFilter < Filter
-      def to_sequel
-        @column.select_name <= filter_value(@column, @value)
-      end
-    end
-    
-    class GreaterThanOrEqualFilter < Filter
-      def to_sequel
-        @column.select_name >= filter_value(@column, @value)
+        @column.select_name.send(@comparison, @value)
       end
     end
 
