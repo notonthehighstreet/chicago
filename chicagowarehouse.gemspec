@@ -4,12 +4,12 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{chicago}
+  s.name = %q{chicagowarehouse}
   s.version = "0.2.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Roland Swingler}]
-  s.date = %q{2012-02-08}
+  s.date = %q{2012-02-10}
   s.description = %q{Simple Data Warehouse toolkit}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = [
@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
     "lib/chicago/data/month.rb",
     "lib/chicago/database/constants.rb",
     "lib/chicago/database/dataset_builder.rb",
+    "lib/chicago/database/filter.rb",
     "lib/chicago/database/migration_file_writer.rb",
     "lib/chicago/database/schema_generator.rb",
     "lib/chicago/database/type_converters.rb",
@@ -73,6 +74,7 @@ Gem::Specification.new do |s|
     "spec/schema/fact_spec.rb",
     "spec/schema/measure_spec.rb",
     "spec/schema/named_element_collection_spec.rb",
+    "spec/schema/pivoted_column_spec.rb",
     "spec/schema/query_column_spec.rb",
     "spec/spec_helper.rb",
     "spec/star_schema_spec.rb",
