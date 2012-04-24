@@ -15,4 +15,9 @@ module Chicago
 
   # Used for edge cases which the Chicago API does not support.
   class UnimplementedError < RuntimeError ; end
+
+  module ETL
+    # Error raised when there are missing/incorrect keys.
+    class KeyError < RuntimeError ; end
+  end
 end
