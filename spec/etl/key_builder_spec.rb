@@ -89,6 +89,21 @@ describe Chicago::ETL::KeyBuilder do
       builder.key(:original_id => 40)
       builder.flush
     end
+
+    it "flushes new keys only once" do
+      dataset = stub(:dataset, :max => 1, :select_hash => {40 => 1})
+      @db.stub(:[]).with(:keys_dimension_user).and_return(dataset)
+
+      dataset.should_receive(:multi_insert).
+        with([{:original_id => 30, :dimension_id => 2}])
+      dataset.should_receive(:multi_insert).with([])
+                                              
+      builder = described_class.for_dimension(@dimension, @db)
+      builder.key(:original_id => 30)
+      builder.key(:original_id => 40)
+      builder.flush
+      builder.flush
+    end
   end
 
   describe "for non-identifiable dimensions with natural keys" do
@@ -114,7 +129,7 @@ describe Chicago::ETL::KeyBuilder do
       dataset = stub(:dataset, :max => 1).as_null_object
       @db.stub(:[]).with(:keys_dimension_address).and_return(dataset)
 
-      dataset.should_receive(:select_hash).with(:unhex.sql_function(:original_id).as(:original_id), :dimension_id).and_return({})
+      dataset.should_receive(:select_hash).with(:hex.sql_function(:original_id).as(:original_id), :dimension_id).and_return({})
       
       described_class.for_dimension(@dimension, @db).key(:line1 => "foo")
     end

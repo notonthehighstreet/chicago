@@ -57,6 +57,7 @@ module Chicago
       # Flushes any newly created keys to the key table.
       def flush
         @db[key_table].multi_insert(@new_keys)
+        @new_keys.clear
       end
       
       protected
@@ -124,7 +125,7 @@ module Chicago
       end
 
       def original_key_select_fragment
-        :unhex.sql_function(:original_id).as(:original_id)
+        :hex.sql_function(:original_id).as(:original_id)
       end
     end
   end
