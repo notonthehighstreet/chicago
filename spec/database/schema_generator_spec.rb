@@ -154,11 +154,40 @@ describe Chicago::Database::SchemaGenerator do
 
       key_table = subject.visit_dimension(@dimension)[:keys_dimension_user]
       key_table.should_not be_nil
-      key_table[:primary_key].should == [:original_id, :dimension_id]
+      key_table[:primary_key].should == [:original_id]
 
       expected = [{:name => :original_id, :column_type => :integer, :null => false, :unsigned => true},
                   {:name => :dimension_id, :column_type => :integer, :null => false, :unsigned => true}]
       key_table[:columns].should == expected
+    end
+
+    it "creates a mapping table with a binary column, for dimensions with no original_id" do
+      @dimension = @schema.define_dimension(:user) do
+        columns do
+          string :username, :max => 10
+          natural_key :username
+        end
+      end
+
+      key_table = subject.visit_dimension(@dimension)[:keys_dimension_user]
+      key_table.should_not be_nil
+      key_table[:primary_key].should == [:original_id]
+
+      expected = [{:name => :original_id, :column_type => :binary, :null => false, :size => 16},
+                  {:name => :dimension_id, :column_type => :integer, :null => false, :unsigned => true}]
+      key_table[:columns].should == expected
+    end
+
+    it "doesn't create a key table for static dimensions" do
+      @dimension = @schema.define_dimension(:currency) do
+        has_predetermined_values
+
+        columns do
+          string :currency
+        end
+      end
+
+      subject.visit_dimension(@dimension)[:keys_dimension_currency].should be_nil
     end
 
     it "should have an unsigned integer :etl_batch_id column" do
@@ -166,6 +195,5 @@ describe Chicago::Database::SchemaGenerator do
       expected = {:name => :etl_batch_id, :column_type => :integer, :unsigned => true}
       subject.visit_dimension(@dimension)[:dimension_user][:columns].should include(expected)
     end
-
   end
 end

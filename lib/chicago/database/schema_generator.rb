@@ -26,7 +26,7 @@ module Chicago
         }
         
         tables = {dimension.table_name => table}
-        tables.merge!(key_table(dimension)) if dimension.original_key
+        tables.merge!(key_table(dimension))
         tables
       end
 
@@ -55,9 +55,22 @@ module Chicago
       end
 
       def key_table(dimension)
+        return {} if dimension.has_predetermined_values?
+        
+        if dimension.original_key
+          original_key_column = visit_column(dimension.original_key)
+        else
+          original_key_column = {
+            :name => :original_id,
+            :column_type => :binary,
+            :null => false,
+            :size => 16
+          }
+        end
+        
         {"keys_#{dimension.table_name}".to_sym => {
-            :primary_key => [dimension.original_key.name, :dimension_id],
-            :columns => [visit_column(dimension.original_key),
+            :primary_key => [:original_id],
+            :columns => [original_key_column,
                          {:name => :dimension_id, :column_type => :integer, :unsigned => true, :null => false}]
           }
         }

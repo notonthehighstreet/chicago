@@ -37,6 +37,11 @@ module Chicago::Schema::Builders
       @options[identifiers] = [main_id] + opts[:and]
     end
 
+    # See Chicago::Schema::Builders::DimensionBuilder#has_predetermined_values
+    def has_predetermined_values
+      @options[:predetermined_values] = true
+    end
+    
     private
 
     def check_columns_subset_of_base_dimension(names, columns)
