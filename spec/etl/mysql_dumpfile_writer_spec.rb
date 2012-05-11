@@ -33,4 +33,12 @@ describe Chicago::ETL::MysqlDumpfileWriter do
     
     dumpfile << {:foo => false}
   end
+
+  it "will write a row only once with the same id" do
+    dumpfile = described_class.new(@csv, [:foo], :id)
+    @csv.should_receive(:<<).with(["bar"])
+    
+    dumpfile << {:id => 1, :foo => "bar"}
+    dumpfile << {:id => 1, :foo => "baz"}
+  end
 end

@@ -1,3 +1,5 @@
+require 'set'
+
 module Chicago
   module ETL
     # Wrapper around FasterCSV's output object, to convert values to a
@@ -7,16 +9,32 @@ module Chicago
       #
       # @param csv a FasterCSV output object
       # @param [Symbol] column_names columns to be output
-      def initialize(csv, column_names)
+      # @param key an optional key to ensure rows are written only once.
+      def initialize(csv, column_names, key=nil)
         @csv = csv
         @column_names = column_names
+        @written_rows = Set.new
+        @key = key
       end
 
       # Writes a row to the output csv stream.
       #
       # @param Hash row Only keys in column_names will be output.
       def <<(row)
-        @csv << @column_names.map {|name| transform_value(row[name]) }
+        unless written?(row)
+          @csv << @column_names.map {|name| transform_value(row[name]) }
+          @written_rows << row[@key]
+        end
+      end
+
+      # Returns true if this row has previously been written to the
+      # dumpfile.
+      #
+      # Always returns false if no key to determine row uniqueness has
+      # been provided.
+      def written?(row)
+        return false if @key.nil?
+        @written_rows.include?(row[@key])
       end
 
       private
