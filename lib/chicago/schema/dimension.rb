@@ -45,6 +45,7 @@ module Chicago
         @identifiers = opts[:identifiers] || []
         @null_records = opts[:null_records] || []
         @table_name = "dimension_#{@name}".to_sym
+        @predetermined_values = !! opts[:predetermined_values]
         check_null_records
       end
 
@@ -67,6 +68,15 @@ module Chicago
       # @todo change to be consistent with identifiers
       def identifiable?
         !! original_key
+      end
+
+      # Returns true if the set of values for this dimension is
+      # pretermined.
+      #
+      # Examples of this may be date dimensions, currency dimensions
+      # etc.
+      def has_predetermined_values?
+        @predetermined_values
       end
 
       # Returns the column that represents the id in the original

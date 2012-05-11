@@ -53,5 +53,16 @@ module Chicago::Schema::Builders
     def identified_by(main_id, opts={:and => []})
       @options[:identifiers] = [main_id] + opts[:and]
     end
+
+    # Defines this dimension to have predetermined values.
+    #
+    # Dimensions with predetermined values will not have key mapping
+    # tables built for them; the data is presumed to be preloaded
+    # outside of an ETL run.
+    #
+    # Examples of these may be dimensions such as date and currency.
+    def has_predetermined_values
+      @options[:predetermined_values] = true
+    end
   end
 end

@@ -82,6 +82,10 @@ describe Chicago::Schema::Dimension do
     described_class.new(:user, :columns => [column]).should be_identifiable
   end
 
+  it "can have predetermined values" do
+    described_class.new(:countries, :predetermined_values => true).should have_predetermined_values
+  end
+  
   it "is visitable" do
     visitor = mock(:visitor)
     dimension = described_class.new(:foo)
