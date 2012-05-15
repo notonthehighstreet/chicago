@@ -112,6 +112,18 @@ describe Chicago::Schema::Column do
   it "can be qualified by a table" do
     described_class.new(:foo, :string).qualify_by(:bar).should == :foo.qualify(:bar)
   end
+
+  it "is optional by default if it allows null values" do
+    described_class.new(:foo, :string, :null => false).should_not be_optional
+    described_class.new(:foo, :string, :null => true).should be_optional
+  end
+
+  it "is optional by default if it allows null values" do
+    described_class.new(:foo, :string, :null => false, :optional => true).
+      should be_optional
+    described_class.new(:foo, :string, :null => true, :optional => false).
+      should_not be_optional
+  end
   
   it "is visitable" do
     visitor = mock(:visitor)

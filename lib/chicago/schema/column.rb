@@ -29,6 +29,9 @@ module Chicago
       # default::  the default value for this column. 
       # descriptive:: whether this column is purely descriptive and
       # won't be used for grouping/filtering.
+      # internal:: the column is for internal use only, and shouldn't
+      #   be displayed/used directly in a user context
+      # optional:: the column isn't expected to be populated.
       def initialize(name, column_type, opts={})
         @opts = normalize_opts(column_type, opts)
         
@@ -46,6 +49,7 @@ module Chicago
         @default     = @opts[:default]
         @descriptive = !! @opts[:descriptive]
         @internal    = !! @opts[:internal]
+        @optional    = !! (@opts.has_key?(:optional) ? @opts[:optional] : @opts[:null])
       end
 
       # Returns the type of this column. This is an abstract type,
@@ -75,6 +79,14 @@ module Chicago
 
       def indexed?
         ! descriptive?
+      end
+
+      # Returns true if this column is optional.
+      #
+      # Will be defaulted from whether the column allows null values,
+      # can be overridden (for dates etc).
+      def optional?
+        @optional
       end
       
       # Returns true if this column should be ignored in user-facing
