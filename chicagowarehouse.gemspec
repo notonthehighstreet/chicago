@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{chicagowarehouse}
-  s.version = "0.2.5"
+  s.version = "0.2.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Roland Swingler}]
-  s.date = %q{2012-02-10}
+  s.date = %q{2012-05-22}
   s.description = %q{Simple Data Warehouse toolkit}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = [
@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
     "LICENSE",
     "README",
     "Rakefile",
-    "chicago.gemspec",
+    "chicagowarehouse.gemspec",
     "lib/chicago.rb",
     "lib/chicago/core_ext/hash.rb",
     "lib/chicago/core_ext/sequel/dataset.rb",
@@ -35,8 +35,12 @@ Gem::Specification.new do |s|
     "lib/chicago/database/migration_file_writer.rb",
     "lib/chicago/database/schema_generator.rb",
     "lib/chicago/database/type_converters.rb",
+    "lib/chicago/database/value_parser.rb",
     "lib/chicago/errors.rb",
+    "lib/chicago/etl.rb",
     "lib/chicago/etl/batch.rb",
+    "lib/chicago/etl/key_builder.rb",
+    "lib/chicago/etl/mysql_dumpfile_writer.rb",
     "lib/chicago/etl/table_builder.rb",
     "lib/chicago/etl/task_invocation.rb",
     "lib/chicago/query.rb",
@@ -64,6 +68,8 @@ Gem::Specification.new do |s|
     "spec/database/schema_generator_spec.rb",
     "spec/db_connections.yml.dist",
     "spec/etl/batch_spec.rb",
+    "spec/etl/key_builder_spec.rb",
+    "spec/etl/mysql_dumpfile_writer_spec.rb",
     "spec/etl/table_builder_spec.rb",
     "spec/etl/task_spec.rb",
     "spec/query_spec.rb",
@@ -96,7 +102,7 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<sequel>, ["~> 3.0"])
-      s.add_runtime_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
+      s.add_runtime_dependency(%q<sequel_migration_builder>, [">= 0.3.2"])
       s.add_runtime_dependency(%q<mysql>, ["= 2.8.1"])
       s.add_runtime_dependency(%q<chronic>, [">= 0"])
       s.add_development_dependency(%q<yard>, [">= 0"])
@@ -108,7 +114,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<ZenTest>, [">= 0"])
     else
       s.add_dependency(%q<sequel>, ["~> 3.0"])
-      s.add_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
+      s.add_dependency(%q<sequel_migration_builder>, [">= 0.3.2"])
       s.add_dependency(%q<mysql>, ["= 2.8.1"])
       s.add_dependency(%q<chronic>, [">= 0"])
       s.add_dependency(%q<yard>, [">= 0"])
@@ -121,7 +127,7 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<sequel>, ["~> 3.0"])
-    s.add_dependency(%q<sequel_migration_builder>, ["~> 0.3.0"])
+    s.add_dependency(%q<sequel_migration_builder>, [">= 0.3.2"])
     s.add_dependency(%q<mysql>, ["= 2.8.1"])
     s.add_dependency(%q<chronic>, [">= 0"])
     s.add_dependency(%q<yard>, [">= 0"])
