@@ -56,7 +56,7 @@ module Chicago
 
       # Flushes any newly created keys to the key table.
       def flush
-        @db[key_table].multi_insert(@new_keys)
+        @db[key_table].insert_replace.multi_insert(@new_keys)
         @new_keys.clear
       end
       

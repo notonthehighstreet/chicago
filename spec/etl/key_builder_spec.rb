@@ -79,6 +79,7 @@ describe Chicago::ETL::KeyBuilder do
 
     it "flushes new keys to a key table" do
       dataset = stub(:dataset, :max => 1, :select_hash => {40 => 1})
+      dataset.stub(:insert_replace => dataset)
       @db.stub(:[]).with(:keys_dimension_user).and_return(dataset)
 
       dataset.should_receive(:multi_insert).
@@ -92,6 +93,7 @@ describe Chicago::ETL::KeyBuilder do
 
     it "flushes new keys only once" do
       dataset = stub(:dataset, :max => 1, :select_hash => {40 => 1})
+      dataset.stub(:insert_replace => dataset)
       @db.stub(:[]).with(:keys_dimension_user).and_return(dataset)
 
       dataset.should_receive(:multi_insert).
@@ -103,6 +105,14 @@ describe Chicago::ETL::KeyBuilder do
       builder.key(:original_id => 40)
       builder.flush
       builder.flush
+    end
+
+    it "replaces old mappings with new values" do
+      dataset = stub(:dataset, :max => 1, :select_hash => {40 => 1}, :multi_insert => nil)
+      @db.stub(:[]).with(:keys_dimension_user).and_return(dataset)
+
+      dataset.should_receive(:insert_replace).and_return(dataset)
+      described_class.for_dimension(@dimension, @db).flush
     end
   end
 
