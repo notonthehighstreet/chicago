@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{chicagowarehouse}
-  s.version = "0.2.8"
+  s.version = "0.2.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Roland Swingler}]
-  s.date = %q{2012-06-12}
+  s.date = %q{2012-06-18}
   s.description = %q{Simple Data Warehouse toolkit}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = [
@@ -112,6 +112,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rcov>, [">= 0"])
       s.add_development_dependency(%q<flog>, [">= 0"])
       s.add_development_dependency(%q<ZenTest>, [">= 0"])
+      s.add_development_dependency(%q<timecop>, [">= 0"])
     else
       s.add_dependency(%q<sequel>, ["~> 3.0"])
       s.add_dependency(%q<sequel_migration_builder>, [">= 0.3.2"])
@@ -124,6 +125,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rcov>, [">= 0"])
       s.add_dependency(%q<flog>, [">= 0"])
       s.add_dependency(%q<ZenTest>, [">= 0"])
+      s.add_dependency(%q<timecop>, [">= 0"])
     end
   else
     s.add_dependency(%q<sequel>, ["~> 3.0"])
@@ -137,6 +139,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rcov>, [">= 0"])
     s.add_dependency(%q<flog>, [">= 0"])
     s.add_dependency(%q<ZenTest>, [">= 0"])
+    s.add_dependency(%q<timecop>, [">= 0"])
   end
 end
 
