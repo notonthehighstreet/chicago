@@ -42,6 +42,7 @@ module Chicago
         else
           new_key = increment_key
           @new_keys << {:original_id => key_for_insert(row_id), :dimension_id => new_key}
+          flush if reached_new_key_buffer_limit?
           @key_mapping[row_id] = new_key
         end
       end
@@ -60,6 +61,10 @@ module Chicago
       
       protected
       
+      def reached_new_key_buffer_limit?
+        @new_keys.size >= 10_000
+      end
+
       def increment_key
         @mutex.synchronize do
           @i += 1
