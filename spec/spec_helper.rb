@@ -4,6 +4,7 @@ require 'chicago'
 require 'rspec'
 require 'yaml'
 require 'rspec/autorun'
+require 'timecop'
 
 include Chicago
 

@@ -47,6 +47,10 @@ module Chicago
           "1"
         when false
           "0"
+        when Time, DateTime
+          value.strftime("%Y-%m-%d %H:%M:%S")
+        when Date
+          value.strftime("%Y-%m-%d")
         else
           value
         end
