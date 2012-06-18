@@ -2,6 +2,12 @@ require 'chicago/schema/table'
 
 module Chicago
   module Schema
+    # The conventional format for dimension table names
+    DIMENSION_TABLE_FORMAT = "dimension_%s".freeze
+
+    # The conventional format for key table names.
+    KEY_TABLE_FORMAT = "keys_%s".freeze
+
     # A dimension in the star schema.
     #
     # Dimensions contain denormalized values from various source
@@ -27,6 +33,9 @@ module Chicago
       # friendly way.
       attr_reader :identifiers
 
+      # The table used to generate/store dimension keys.
+      attr_reader :key_table_name
+
       # Creates a new Dimension, named +name+.
       #
       # @param name the name of the dimension
@@ -44,7 +53,8 @@ module Chicago
         @columns = opts[:columns] || []
         @identifiers = opts[:identifiers] || []
         @null_records = opts[:null_records] || []
-        @table_name = "dimension_#{@name}".to_sym
+        @table_name = sprintf(DIMENSION_TABLE_FORMAT, name).to_sym
+        @key_table_name = sprintf(KEY_TABLE_FORMAT, @table_name).to_sym
         @predetermined_values = !! opts[:predetermined_values]
         check_null_records
       end
@@ -54,7 +64,11 @@ module Chicago
       # This will overwrite any records that share the id with the
       # null record, so be careful.
       def create_null_records(db)
-        db[table_name].insert_replace.insert_multiple(@null_records) unless @null_records.empty?
+        unless @null_records.empty?
+          db[table_name].insert_replace.insert_multiple(@null_records)
+          ids = @null_records.map {|r| {:dimension_id => r[:id]} }
+          db[key_table_name].insert_replace.insert_multiple(ids)
+        end
       end
 
       # Returns the main identifier for this record.

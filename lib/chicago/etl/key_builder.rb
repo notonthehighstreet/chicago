@@ -3,8 +3,6 @@ require 'digest/md5'
 
 module Chicago
   module ETL
-    KEY_TABLE_FORMAT = "keys_%s".freeze
-    
     # Builds a surrogate key for a dimension record, without relying
     # on the database's AUTO_INCREMENT functionality.
     class KeyBuilder
@@ -16,7 +14,7 @@ module Chicago
         @cache_loaded = false
         @db = db
         @dimension = dimension
-        @key_table = sprintf(KEY_TABLE_FORMAT, dimension.table_name).to_sym
+        @key_table = dimension.key_table_name
         @new_keys = []
       end
 

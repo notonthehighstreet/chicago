@@ -7,6 +7,10 @@ describe Chicago::Schema::Dimension do
     described_class.new(:foo).table_name.should == :dimension_foo
   end
 
+  it "has a key table name" do
+    described_class.new(:foo).key_table_name.should == :keys_dimension_foo
+  end
+
   it "can have a description" do
     described_class.new(:foo, :description => "bar").description.should == "bar"
   end
@@ -47,9 +51,9 @@ describe Chicago::Schema::Dimension do
   it "can create null records in the database, replacing existing records" do
     db = mock(:db)
     db.stub(:[]).and_return(db)
-    db.should_receive(:insert_replace).and_return(db)
+    db.should_receive(:insert_replace).twice.and_return(db)
     db.should_receive(:insert_multiple).with([{:id => 1, :foo => :bar}])
-
+    db.should_receive(:insert_multiple).with([{:dimension_id => 1}])
     described_class.new(:user,
                            :null_records => [{ :id => 1,
                                                :foo => :bar}]).create_null_records(db)

@@ -8,7 +8,7 @@ module Chicago
     class DimensionReference < Column
       extend Forwardable
 
-      def_delegators :@dimension, :columns, :column_definitions, :identifiers, :main_identifier, :identifiable?, :original_key, :natural_key, :table_name, :[]
+      def_delegators :@dimension, :columns, :column_definitions, :identifiers, :main_identifier, :identifiable?, :original_key, :natural_key, :table_name, :[], :key_table_name
 
       attr_reader :key_name
       

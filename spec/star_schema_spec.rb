@@ -65,6 +65,8 @@ describe Chicago::StarSchema do
       db.stub_chain(:[], :insert_replace).and_return(db)
       db.should_receive(:insert_multiple).with([{:id => 1, :email => "Missing"},
                                                 {:id => 2, :email => "Not Applicable"}])
+      db.should_receive(:insert_multiple).with([{:dimension_id => 1},
+                                                {:dimension_id => 2}])
       dimension.create_null_records(db)
     end
 

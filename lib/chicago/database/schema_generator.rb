@@ -68,7 +68,7 @@ module Chicago
           }
         end
         
-        {"keys_#{dimension.table_name}".to_sym => {
+        {dimension.key_table_name => {
             :primary_key => [:original_id],
             :columns => [original_key_column,
                          {:name => :dimension_id, :column_type => :integer, :unsigned => true, :null => false}]
