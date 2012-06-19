@@ -14,7 +14,7 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   gem.name              = "chicagowarehouse"
-  gem.version           = "0.2.11"
+  gem.version           = "0.2.12"
   gem.summary           = "Chicago"
   gem.description       = "Simple Data Warehouse toolkit"
   gem.author            = "Roland Swingler"
