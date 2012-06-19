@@ -61,7 +61,7 @@ describe Chicago::StarSchema do
         null_record :id => 2, :email => "Not Applicable"
       end      
 
-      db = stub(:db)
+      db = stub(:db, :table_exists? => true)
       db.stub_chain(:[], :insert_replace).and_return(db)
       db.should_receive(:insert_multiple).with([{:id => 1, :email => "Missing"},
                                                 {:id => 2, :email => "Not Applicable"}])

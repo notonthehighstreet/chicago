@@ -66,8 +66,10 @@ module Chicago
       def create_null_records(db)
         unless @null_records.empty?
           db[table_name].insert_replace.insert_multiple(@null_records)
-          ids = @null_records.map {|r| {:dimension_id => r[:id]} }
-          db[key_table_name].insert_replace.insert_multiple(ids)
+          if db.table_exists?(key_table_name)
+            ids = @null_records.map {|r| {:dimension_id => r[:id]} }
+            db[key_table_name].insert_replace.insert_multiple(ids)
+          end
         end
       end
 

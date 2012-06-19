@@ -51,9 +51,21 @@ describe Chicago::Schema::Dimension do
   it "can create null records in the database, replacing existing records" do
     db = mock(:db)
     db.stub(:[]).and_return(db)
+    db.stub(:table_exists?).with(:keys_dimension_user).and_return(true)
     db.should_receive(:insert_replace).twice.and_return(db)
     db.should_receive(:insert_multiple).with([{:id => 1, :foo => :bar}])
     db.should_receive(:insert_multiple).with([{:dimension_id => 1}])
+    described_class.new(:user,
+                           :null_records => [{ :id => 1,
+                                               :foo => :bar}]).create_null_records(db)
+  end
+
+  it "doesn't attempt to create null rows in non-existent key table" do
+    db = mock(:db)
+    db.stub(:[]).and_return(db)
+    db.stub(:table_exists?).with(:keys_dimension_user).and_return(false)
+    db.should_receive(:insert_replace).and_return(db)
+    db.should_receive(:insert_multiple).with([{:id => 1, :foo => :bar}])
     described_class.new(:user,
                            :null_records => [{ :id => 1,
                                                :foo => :bar}]).create_null_records(db)
