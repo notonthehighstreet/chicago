@@ -48,6 +48,7 @@ describe Chicago::ETL::KeyBuilder do
 
     it "updates keys in a thread-safe fashion" do
       builder = described_class.for_dimension(@dimension, @db)
+      builder.stub(:flush)
       # These seem to need to be a fairly large number of times to see
       # errors
       t1 = Thread.new { 100000.times {|i| builder.key({:original_id => i}) } }
