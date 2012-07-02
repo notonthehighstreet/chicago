@@ -29,6 +29,8 @@ module Chicago
           StartsWithFilter.new(hash[:column], hash[:value])
         when :nsw
           NotFilter.new(StartsWithFilter.new(hash[:column], hash[:value]))
+        when :con
+          ContainsFilter.new(hash[:column], hash[:value])
         end
       end
 
@@ -72,7 +74,7 @@ module Chicago
       end
     end
 
-    class StartsWithFilter < Filter
+    class LikeFilter < Filter
       def to_sequel
         if @value.kind_of?(Array)
           @value.inject {|a,b| like_clause(a) | like_clause(b) }
@@ -84,7 +86,23 @@ module Chicago
       private
 
       def like_clause(val)
-        @column.select_name.ilike( val.strip + "%" )
+        @column.select_name.ilike( like_value(val.strip) )
+      end
+    end
+
+    class StartsWithFilter < LikeFilter
+      private
+
+      def like_value(val)
+        "#{val}%"
+      end
+    end
+
+    class ContainsFilter < LikeFilter
+      private
+
+      def like_value(val)
+        "%#{val}%"
       end
     end
   end

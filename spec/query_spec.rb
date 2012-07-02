@@ -437,6 +437,14 @@ describe Chicago::Query do
     it "can filter based on 'not starts with' with multiple values" do
       @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :nsw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '123%'\) AND \(`product`\.`sku` NOT LIKE 'AB%'\)\)/
     end
+
+    it "can filter based on contains" do
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :con}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE '%123%'\)/
+    end
+
+    it "can filter based on multiple contains" do
+      @q.filter({:column => "sales.product.sku", :value => ["123", "AB"], :op => :con}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '%123%'\) OR \(`product`\.`sku` LIKE '%AB%'\)\)/
+    end
     
     it "does not join the base table when filtering" do
       @q.
