@@ -65,8 +65,31 @@ module Chicago
       # Returns an Array of allowed elements, or nil.
       attr_reader :elements
       
-      # Returns the default value for this column, or nil.
+      # Returns the explicit default as set in the database, or nil.
       attr_reader :default
+
+      # Returns the calculated default value.
+      #
+      # This may be different from the explicit default - for example
+      # a boolean not-null column that has no explicit default will
+      # have a default of nil, and a default value of false.
+      #
+      # The distinction is important, otherwise values can end up
+      # missing in junk dimensions due to differences between what
+      # ruby and the database considers unique.
+      def default_value
+        if @default || null?
+          @default
+        elsif @column_type == :boolean
+          false
+        elsif numeric?
+          0
+        elsif textual?
+          ''
+        else
+          nil
+        end
+      end
 
       attr_reader :countable_label
 
@@ -77,6 +100,7 @@ module Chicago
         @countable
       end
 
+      # Returns true if this column should be indexed
       def indexed?
         ! descriptive?
       end
@@ -117,6 +141,11 @@ module Chicago
       # Returns true if this column stores a numeric value.
       def numeric?
         @numeric ||= [:integer, :money, :percent, :decimal, :float].include?(column_type)
+      end
+
+      # Returns true if the column stores a textual value.
+      def textual?
+        @numeric ||= [:string, :text].include?(column_type)
       end
 
       def hash #:nodoc:

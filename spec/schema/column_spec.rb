@@ -53,6 +53,18 @@ describe Chicago::Schema::Column do
     described_class.new(:username, :string, :default => 'A').default.should == 'A'
   end
 
+  it "should have a default value of false for booleans that don't allow null" do
+    described_class.new(:username, :boolean).default_value.should == false
+  end
+
+  it "should have a default value of 0 for numbers that don't allow null" do
+    described_class.new(:username, :integer).default_value.should == 0
+  end
+
+  it "should have a default value of '' for strings that don't allow null" do
+    described_class.new(:username, :string).default_value.should == ''
+  end
+
   it "should have a descriptive? method, false by default" do
     described_class.new(:username, :string).should_not be_descriptive
   end
@@ -91,6 +103,18 @@ describe Chicago::Schema::Column do
 
   it "should not be numeric if a string" do
     described_class.new(:username, :string).should_not be_numeric
+  end
+
+  it "should be textual if a string" do
+    described_class.new(:username, :string).should be_textual
+  end
+
+  it "should be textual if a text" do
+    described_class.new(:username, :text).should be_textual
+  end
+
+  it "should not be textual if an integer" do
+    described_class.new(:username, :integer).should_not be_textual
   end
 
   it "can be countable" do
