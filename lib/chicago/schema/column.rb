@@ -145,7 +145,7 @@ module Chicago
 
       # Returns true if the column stores a textual value.
       def textual?
-        @numeric ||= [:string, :text].include?(column_type)
+        @textual ||= [:string, :text].include?(column_type)
       end
 
       def hash #:nodoc:
