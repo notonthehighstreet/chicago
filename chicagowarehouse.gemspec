@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{chicagowarehouse}
-  s.version = "0.2.13"
+  s.version = "0.2.14"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Roland Swingler}]
-  s.date = %q{2012-07-02}
+  s.date = %q{2012-07-03}
   s.description = %q{Simple Data Warehouse toolkit}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = [
@@ -39,6 +39,7 @@ Gem::Specification.new do |s|
     "lib/chicago/errors.rb",
     "lib/chicago/etl.rb",
     "lib/chicago/etl/batch.rb",
+    "lib/chicago/etl/batched_dataset_filter.rb",
     "lib/chicago/etl/key_builder.rb",
     "lib/chicago/etl/mysql_dumpfile_writer.rb",
     "lib/chicago/etl/table_builder.rb",
@@ -68,6 +69,7 @@ Gem::Specification.new do |s|
     "spec/database/schema_generator_spec.rb",
     "spec/db_connections.yml.dist",
     "spec/etl/batch_spec.rb",
+    "spec/etl/batched_dataset_filter_spec.rb",
     "spec/etl/key_builder_spec.rb",
     "spec/etl/mysql_dumpfile_writer_spec.rb",
     "spec/etl/table_builder_spec.rb",
