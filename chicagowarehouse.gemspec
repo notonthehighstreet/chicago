@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{chicagowarehouse}
-  s.version = "0.2.15"
+  s.version = "0.2.16"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Roland Swingler}]
-  s.date = %q{2012-07-03}
+  s.date = %q{2012-07-16}
   s.description = %q{Simple Data Warehouse toolkit}
   s.email = %q{roland.swingler@gmail.com}
   s.extra_rdoc_files = [
