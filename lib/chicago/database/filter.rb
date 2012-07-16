@@ -77,7 +77,7 @@ module Chicago
     class LikeFilter < Filter
       def to_sequel
         if @value.kind_of?(Array)
-          @value.inject {|a,b| like_clause(a) | like_clause(b) }
+          @value.map {|v| like_clause(v) }.inject {|a,b| a | b }
         else
           like_clause(@value)
         end

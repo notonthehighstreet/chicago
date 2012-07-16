@@ -443,7 +443,7 @@ describe Chicago::Query do
     end
 
     it "can filter based on multiple contains" do
-      @q.filter({:column => "sales.product.sku", :value => ["123", "AB"], :op => :con}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '%123%'\) OR \(`product`\.`sku` LIKE '%AB%'\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :con}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '%123%'\) OR \(`product`\.`sku` LIKE '%AB%'\) OR \(`product`\.`sku` LIKE '%foo%'\)\)/
     end
     
     it "does not join the base table when filtering" do
