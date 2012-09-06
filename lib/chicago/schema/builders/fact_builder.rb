@@ -1,3 +1,4 @@
+require 'chicago/errors'
 require 'chicago/schema/builders/table_builder'
 
 module Chicago::Schema::Builders
@@ -65,7 +66,7 @@ module Chicago::Schema::Builders
     
     def _find_dimension(name)
       @schema.dimensions.detect {|d| d.name == name } or
-        raise MissingDefinitionError.new "Dimension #{name} is not defined in #{@schema}"
+        raise ::Chicago::MissingDefinitionError.new "Dimension #{name} is not defined in #{@schema}"
     end
   end
 end
