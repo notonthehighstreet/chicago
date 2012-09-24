@@ -63,9 +63,14 @@ module Chicago
       #
       # This will overwrite any records that share the id with the
       # null record, so be careful.
-      def create_null_records(db)
+      #
+      # Optionally provide an overridden table name, if you need to
+      # create null records for a temporary version of the table.
+      def create_null_records(db, overridden_table_name=nil)
+        table_to_populate = overridden_table_name || table_name
         unless @null_records.empty?
-          db[table_name].insert_replace.insert_multiple(@null_records)
+          db[table_to_populate].insert_replace.
+            insert_multiple(@null_records)
           if db.table_exists?(key_table_name)
             ids = @null_records.map {|r| {:dimension_id => r[:id]} }
             db[key_table_name].insert_replace.insert_multiple(ids)
