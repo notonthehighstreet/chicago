@@ -1,6 +1,7 @@
 require 'chicago/schema/builders/table_builder'
 
 module Chicago::Schema::Builders
+  # @api public
   class DimensionBuilder < TableBuilder
     # Builds a Dimension, given the name of the fact and a definition
     # block.

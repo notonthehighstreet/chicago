@@ -12,11 +12,15 @@ require 'chicago/schema/builders/column_builder'
 
 module Chicago
   # A collection of facts & dimensions.
+  #
+  # @api public
   class StarSchema
-    # a collection of all the facts defined in this schema.
+    # A collection of all the facts defined in this schema.
+    # @return [Chicago::Schema::Fact]
     attr_reader :facts
 
     # a collection of all the dimensions defined in this schema.
+    # @return [Chicago::Schema::Dimension]
     attr_reader :dimensions
 
     # Creates a new star schema.

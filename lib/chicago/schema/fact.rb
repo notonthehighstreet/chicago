@@ -10,6 +10,8 @@ module Chicago
     #
     # You shouldn't need to initialize a Fact yourself - they
     # should be created via StarSchema#define_fact.
+    #
+    # @api public
     class Fact < Schema::Table
       # The Dimensions associated with this fact.
       #

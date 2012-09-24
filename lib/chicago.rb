@@ -23,6 +23,10 @@ module Chicago
     attr_accessor :project_root
   end
   
+  # @api private
+  module Database
+  end
+  
   ### Autoloads
   autoload :RakeTasks, 'chicago/rake_tasks'
 

@@ -2,12 +2,15 @@ require 'chicago/schema/named_element'
 
 module Chicago
   module Schema
-    # Abstract base class for Dimensions & Facts.
+    # Base class for Dimensions & Facts.
+    #
+    # @abstract
+    # @api public
     class Table
       include NamedElement
 
-      # Returns or sets the database table name for this dimension or
-      # fact.  By default, dimension_<name> or facts_<name>.
+      # Returns the database table name for this dimension or fact.
+      # By default, dimension_<name> or facts_<name>.
       attr_reader :table_name
 
       # The uniqueness constraint on the table.
@@ -15,8 +18,9 @@ module Chicago
 
       # Documentation or description for the table.
       attr_reader :description
-      
-      def initialize(name, opts={}) #::nodoc::
+
+      # @api private
+      def initialize(name, opts={})
         super
         @natural_key = opts[:natural_key]
         @description = opts[:description]

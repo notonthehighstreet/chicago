@@ -17,6 +17,8 @@ module Chicago
   #                          and the like
   # +db:write_migrations+:: writes the auto migrations to a
   #                         "migrations" directory.
+  #
+  # @api public
   class RakeTasks < Rake::TaskLib
     def initialize(db, schema)
       @migration_dir = "migrations"
@@ -25,7 +27,9 @@ module Chicago
       define
     end
 
-    # @private
+    # Defines the rake tasks.
+    #
+    # @api private    
     def define
       namespace :db do
         desc "Write Null dimension records"

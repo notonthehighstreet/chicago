@@ -1,5 +1,7 @@
 module Chicago
   module Database
+    # A StarSchema Visitor which produces a hash similar to the hash
+    # produced by Sequel.
     class SchemaGenerator
       attr_writer :type_converter
       

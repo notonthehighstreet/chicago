@@ -11,6 +11,8 @@ module Chicago
     #
     # You shouldn't need to create a Column manually - they
     # are generally defined using the schema definition DSL.
+    #
+    # @api public
     class Column
       include Schema::NamedElement
 
@@ -32,6 +34,8 @@ module Chicago
       # internal:: the column is for internal use only, and shouldn't
       #   be displayed/used directly in a user context
       # optional:: the column isn't expected to be populated.
+      #
+      # @api private
       def initialize(name, column_type, opts={})
         @opts = normalize_opts(column_type, opts)
         

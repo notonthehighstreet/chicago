@@ -5,6 +5,8 @@ module Chicago::Schema::Builders
   # An API to build facts via a DSL-like syntax.
   #
   # You shouldn't need to initialize a FactBuilder yourself.
+  #
+  # @api public
   class FactBuilder < TableBuilder
     # Builds a Fact, given the name of the fact and a definition
     # block.

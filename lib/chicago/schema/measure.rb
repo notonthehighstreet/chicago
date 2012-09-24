@@ -2,6 +2,7 @@ require 'chicago/schema/column'
 
 module Chicago
   module Schema
+    # @api public
     class Measure < Column
       # Creates a measure.
       #
@@ -15,6 +16,7 @@ module Chicago
         @semi_additive = !! opts[:semi_additive]
       end
 
+      # Returns false. Measures do not need to be indexed.
       def indexed?
         false
       end

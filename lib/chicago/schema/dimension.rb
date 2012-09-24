@@ -16,6 +16,8 @@ module Chicago
     #
     # You shouldn't need to initialize a Dimension yourself - they
     # should be created via StarSchema#define_dimension.
+    #
+    # @api public
     class Dimension < Table
       # Returns an array of Columns defined on this dimension.
       #
