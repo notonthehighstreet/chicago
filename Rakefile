@@ -14,12 +14,11 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   gem.name              = "chicagowarehouse"
-  gem.version           = "0.2.18"
-  gem.summary           = "Chicago"
-  gem.description       = "Simple Data Warehouse toolkit"
+  gem.version           = "0.3.0"
+  gem.summary           = "Ruby Data Warehousing"
+  gem.description       = "Simple Data Warehouse toolkit for ruby"
   gem.author            = "Roland Swingler"
   gem.email             = "roland.swingler@gmail.com"
-  gem.homepage          = "http://knaveofdiamonds.com"
   gem.has_rdoc          = true
   gem.license           = "MIT"
   gem.homepage          = "http://github.com/notonthehighstreet/chicago"
