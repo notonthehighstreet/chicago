@@ -29,10 +29,4 @@ module Chicago
   
   ### Autoloads
   autoload :RakeTasks, 'chicago/rake_tasks'
-
-  module ETL
-    autoload :TableBuilder,   'chicago/etl/table_builder.rb'
-    autoload :Batch,          'chicago/etl/batch.rb'
-    autoload :TaskInvocation, 'chicago/etl/task_invocation.rb'
-  end
 end
