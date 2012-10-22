@@ -16,7 +16,7 @@ module Chicago
         super name, :integer, opts.merge(:min => 0)
         @dimension = dimension
         @table_name = "dimension_#{@name}".to_sym
-        @key_name   = "#{@name}_dimension_id".to_sym
+        @key_name   = opts[:key_name] || "#{@name}_dimension_id".to_sym
       end
 
       def to_hash

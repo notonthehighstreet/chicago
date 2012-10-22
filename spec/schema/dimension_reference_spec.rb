@@ -76,6 +76,10 @@ describe Chicago::Schema::DimensionReference do
   it "should be considered a kind of dimension" do
     described_class.new(:foo, @dimension).should be_kind_of(Chicago::Schema::Dimension)
   end
+
+  it "can override the key selected as the reference" do
+    described_class.new(:foo, @dimension, :key_name => :baz_dimension_id).key_name.should ==:baz_dimension_id
+  end
   
   it "is visitable" do
     visitor = mock(:visitor)
