@@ -38,6 +38,9 @@ module Chicago
       # The table used to generate/store dimension keys.
       attr_reader :key_table_name
 
+      # Records representing missing or not applicable dimension values.
+      attr_reader :null_records
+
       # Creates a new Dimension, named +name+.
       #
       # @param name the name of the dimension

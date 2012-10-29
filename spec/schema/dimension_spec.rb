@@ -78,6 +78,11 @@ describe Chicago::Schema::Dimension do
     end.to raise_error(Chicago::UnsafeNullRecordError)
   end
 
+  it "has null records" do
+    described_class.new(:user).null_records.should be_empty
+    described_class.new(:user, :null_records => [{:id => 1}]).null_records.should == [{:id => 1}]
+  end
+
   it "can define a natural key" do
     described_class.new(:user, :natural_key => [:foo, :bar]).
       natural_key.should == [:foo, :bar]

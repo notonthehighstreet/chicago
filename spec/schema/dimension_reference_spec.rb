@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Chicago::Schema::DimensionReference do
   before :each do
-    @dimension = Chicago::Schema::Dimension.new(:bar)
+    @dimension = Chicago::Schema::Dimension.new(:bar, :null_records => [{:id => 1}])
   end
 
   it "returns columns from the dimension" do
@@ -79,6 +79,10 @@ describe Chicago::Schema::DimensionReference do
 
   it "can override the key selected as the reference" do
     described_class.new(:foo, @dimension, :key_name => :baz_dimension_id).key_name.should ==:baz_dimension_id
+  end
+
+  it "uses the first null record id as the default value" do
+    described_class.new(:foo, @dimension).default_value.should == 1
   end
   
   it "is visitable" do

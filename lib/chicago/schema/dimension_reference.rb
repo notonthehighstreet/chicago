@@ -33,6 +33,17 @@ module Chicago
         @key_name.qualify(table)
       end
 
+      # Returns the first null record id for this dimension, or 0 if
+      # the dimension has no null records defined.
+      def default_value
+        record = @dimension.null_records.first
+        if record && record[:id]
+          record[:id]
+        else
+          super
+        end
+      end
+
       # @private
       def kind_of?(klass)
         klass == Chicago::Schema::Dimension || super
