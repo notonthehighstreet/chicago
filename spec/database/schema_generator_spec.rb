@@ -65,6 +65,11 @@ describe Chicago::Database::SchemaGenerator do
         :reference_idx => { :columns => :reference, :unique => false }
       }
     end
+
+    it "has an inserted at column" do
+      subject.visit_fact(@fact)[:facts_sales][:columns].
+        should include(:name => :_inserted_at, :column_type => :timestamp)
+    end
   end
 
   describe "#visit_dimension" do
@@ -190,10 +195,10 @@ describe Chicago::Database::SchemaGenerator do
       subject.visit_dimension(@dimension)[:keys_dimension_currency].should be_nil
     end
 
-    it "should have an unsigned integer :etl_batch_id column" do
+    it "has an inserted at column" do
       @dimension = @schema.define_dimension(:user)
-      expected = {:name => :etl_batch_id, :column_type => :integer, :unsigned => true}
-      subject.visit_dimension(@dimension)[:dimension_user][:columns].should include(expected)
+      subject.visit_dimension(@dimension)[:dimension_user][:columns].
+        should include(:name => :_inserted_at, :column_type => :timestamp)
     end
   end
 end

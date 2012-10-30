@@ -18,18 +18,8 @@ module Chicago
       end
 
       def visit_dimension(dimension)
-        table = basic_table(dimension)
-
-        # TODO: Why shouldn't facts have etl_batch_id?
-        table[:columns] << {
-          :name => :etl_batch_id,
-          :column_type => :integer,
-          :unsigned => true
-        }
-        
-        tables = {dimension.table_name => table}
-        tables.merge!(key_table(dimension))
-        tables
+        {dimension.table_name => basic_table(dimension)}.
+          merge!(key_table(dimension))
       end
 
       def visit_column(column)
@@ -52,7 +42,13 @@ module Chicago
                          :unsigned => true
                        }]
         }
+
         t[:columns] += table.columns.map {|c| c.visit(self) }
+        t[:columns] << {
+          :name => :_inserted_at,
+          :column_type => :timestamp,
+        }
+        
         t
       end
 
