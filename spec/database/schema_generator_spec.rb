@@ -68,7 +68,7 @@ describe Chicago::Database::SchemaGenerator do
 
     it "has an inserted at column" do
       subject.visit_fact(@fact)[:facts_sales][:columns].
-        should include(:name => :_inserted_at, :column_type => :timestamp)
+        should include(:name => :_inserted_at, :column_type => :timestamp, :null => true)
     end
   end
 
@@ -198,7 +198,7 @@ describe Chicago::Database::SchemaGenerator do
     it "has an inserted at column" do
       @dimension = @schema.define_dimension(:user)
       subject.visit_dimension(@dimension)[:dimension_user][:columns].
-        should include(:name => :_inserted_at, :column_type => :timestamp)
+        should include(:name => :_inserted_at, :column_type => :timestamp, :null => true)
     end
   end
 end

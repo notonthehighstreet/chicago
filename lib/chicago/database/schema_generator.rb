@@ -47,6 +47,7 @@ module Chicago
         t[:columns] << {
           :name => :_inserted_at,
           :column_type => :timestamp,
+          :null => true
         }
         
         t
