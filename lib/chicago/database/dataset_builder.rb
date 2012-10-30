@@ -66,7 +66,7 @@ module Chicago
         
         unless to_join.empty?
           @dataset = to_join.inject(@dataset) do |dataset, t|
-            dataset.join(t.table_name.as(t.name), :id => t.key_name.qualify(@base_table.name))
+            dataset.join(t.table_name.as(t.name), :id => t.database_name.qualify(@base_table.name))
           end
         end
       end

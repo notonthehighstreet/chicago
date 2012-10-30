@@ -91,7 +91,7 @@ module Chicago
       def indexes
         indexes = @table.columns.select(&:indexed?).inject({}) do |hsh, d|
           hsh.merge("#{d.name}_idx".to_sym => {
-                      :columns => d.key_name,
+                      :columns => d.database_name,
                       :unique => false})
         end
         indexes.merge!(natural_key_index) if @table.natural_key
@@ -109,7 +109,7 @@ module Chicago
 
       def natural_key_index_columns
         @table.natural_key.map do |name|
-          @table[name].key_name rescue raise MissingDefinitionError.new("Column #{name} is not defined in #{@table.name}")
+          @table[name].database_name rescue raise MissingDefinitionError.new("Column #{name} is not defined in #{@table.name}")
         end
       end
     end

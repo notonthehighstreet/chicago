@@ -9,8 +9,6 @@ module Chicago
       extend Forwardable
 
       def_delegators :@dimension, :columns, :column_definitions, :identifiers, :main_identifier, :identifiable?, :original_key, :natural_key, :table_name, :[], :key_table_name
-
-      attr_reader :key_name
       
       def initialize(name, dimension, opts={})
         super name, :integer, opts.merge(:min => 0)
@@ -19,9 +17,14 @@ module Chicago
         @key_name   = opts[:key_name] || "#{@name}_dimension_id".to_sym
       end
 
+      # Returns the key name of this dimension.
+      def database_name
+        @key_name
+      end
+
       def to_hash
         hsh = super
-        hsh[:name] = @key_name
+        hsh[:name] = database_name
         hsh
       end
       
@@ -30,7 +33,7 @@ module Chicago
       end
 
       def qualify_by(table)
-        @key_name.qualify(table)
+        database_name.qualify(table)
       end
 
       # Returns the first null record id for this dimension, or 0 if

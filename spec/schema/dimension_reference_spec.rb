@@ -59,8 +59,9 @@ describe Chicago::Schema::DimensionReference do
     described_class.new(:foo, @dimension).column_type.should == :integer
   end
 
-  it "should have a key name" do
-    described_class.new(:foo, @dimension).key_name.should == :foo_dimension_id
+  it "has the key column as the database name" do
+    described_class.new(:foo, @dimension).database_name.
+      should == :foo_dimension_id
   end
 
   it "qualfies a column based on the column name" do
@@ -70,7 +71,8 @@ describe Chicago::Schema::DimensionReference do
   end
 
   it "can be qualified, and qualifies the key name" do
-    described_class.new(:foo, @dimension).qualify_by(:facts_bar).should == :foo_dimension_id.qualify(:facts_bar)
+    described_class.new(:foo, @dimension).qualify_by(:facts_bar).
+      should == :foo_dimension_id.qualify(:facts_bar)
   end
 
   it "should be considered a kind of dimension" do
@@ -78,7 +80,8 @@ describe Chicago::Schema::DimensionReference do
   end
 
   it "can override the key selected as the reference" do
-    described_class.new(:foo, @dimension, :key_name => :baz_dimension_id).key_name.should ==:baz_dimension_id
+    described_class.new(:foo, @dimension, :key_name => :baz_dimension_id).
+      database_name.should ==:baz_dimension_id
   end
 
   it "uses the first null record id as the default value" do

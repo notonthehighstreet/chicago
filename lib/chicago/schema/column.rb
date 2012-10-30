@@ -97,7 +97,7 @@ module Chicago
 
       attr_reader :countable_label
 
-      alias :key_name :name
+      alias :database_name :name
       
       # Returns true if this column can be counted.
       def countable?
