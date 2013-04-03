@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{chicagowarehouse}
-  s.version = "0.4.0"
+  s.name = "chicagowarehouse"
+  s.version = "0.4.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = [%q{Roland Swingler}]
-  s.date = %q{2012-10-30}
-  s.description = %q{Simple Data Warehouse toolkit for ruby}
-  s.email = %q{roland.swingler@gmail.com}
+  s.authors = ["Roland Swingler"]
+  s.date = "2013-04-03"
+  s.description = "Simple Data Warehouse toolkit for ruby"
+  s.email = "roland.swingler@gmail.com"
   s.extra_rdoc_files = [
     "LICENSE",
     "README"
@@ -80,11 +80,11 @@ Gem::Specification.new do |s|
     "spec/support/shared_examples/schema_visitor.rb",
     "tasks/stats.rake"
   ]
-  s.homepage = %q{http://github.com/notonthehighstreet/chicago}
-  s.licenses = [%q{MIT}]
-  s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.6}
-  s.summary = %q{Ruby Data Warehousing}
+  s.homepage = "http://github.com/notonthehighstreet/chicago"
+  s.licenses = ["MIT"]
+  s.require_paths = ["lib"]
+  s.rubygems_version = "1.8.25"
+  s.summary = "Ruby Data Warehousing"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
