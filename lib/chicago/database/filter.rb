@@ -31,6 +31,8 @@ module Chicago
           NotFilter.new(StartsWithFilter.new(hash[:column], hash[:value]))
         when :con
           ContainsFilter.new(hash[:column], hash[:value])
+        when :ncon
+          NotFilter.new(ContainsFilter.new(hash[:column], hash[:value]))
         end
       end
 

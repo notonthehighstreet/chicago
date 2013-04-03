@@ -442,8 +442,16 @@ describe Chicago::Query do
       @q.filter({:column => "sales.product.sku", :value => "123", :op => :con}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE '%123%'\)/
     end
 
+    it "can filter based on not contains" do
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :ncon}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE '%123%'\)/
+    end
+
     it "can filter based on multiple contains" do
       @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :con}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '%123%'\) OR \(`product`\.`sku` LIKE '%AB%'\) OR \(`product`\.`sku` LIKE '%foo%'\)\)/
+    end
+
+    it "can filter based on multiple contains" do
+      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :ncon}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '%123%'\) AND \(`product`\.`sku` NOT LIKE '%AB%'\) AND \(`product`\.`sku` NOT LIKE '%foo%'\)\)/
     end
     
     it "does not join the base table when filtering" do
