@@ -423,35 +423,35 @@ describe Chicago::Query do
     end
 
     it "can filter based on starts with" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :sw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE '123%'\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :sw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE '123%'( ESCAPE '.+')?\)/
     end
 
     it "can filter based on 'starts with' with multiple values" do
-      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :sw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '123%'\) OR \(`product`\.`sku` LIKE 'AB%'\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :sw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '123%'( ESCAPE '.+')?\) OR \(`product`\.`sku` LIKE 'AB%'( ESCAPE '.+')?\)\)/
     end
 
     it "can filter based on not starts with" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :nsw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE '123%'\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :nsw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE '123%'( ESCAPE '.+')?\)/
     end
 
     it "can filter based on 'not starts with' with multiple values" do
-      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :nsw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '123%'\) AND \(`product`\.`sku` NOT LIKE 'AB%'\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :nsw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '123%'( ESCAPE '.+')?\) AND \(`product`\.`sku` NOT LIKE 'AB%'( ESCAPE '.+')?\)\)/
     end
 
     it "can filter based on contains" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :con}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE '%123%'\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :con}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE '%123%'( ESCAPE '.+')?\)/
     end
 
     it "can filter based on not contains" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :ncon}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE '%123%'\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :ncon}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE '%123%'( ESCAPE '.+')?\)/
     end
 
     it "can filter based on multiple contains" do
-      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :con}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '%123%'\) OR \(`product`\.`sku` LIKE '%AB%'\) OR \(`product`\.`sku` LIKE '%foo%'\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :con}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '%123%'( ESCAPE '.+')?\) OR \(`product`\.`sku` LIKE '%AB%'( ESCAPE '.+')?\) OR \(`product`\.`sku` LIKE '%foo%'( ESCAPE '.+')?\)\)/
     end
 
     it "can filter based on multiple contains" do
-      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :ncon}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '%123%'\) AND \(`product`\.`sku` NOT LIKE '%AB%'\) AND \(`product`\.`sku` NOT LIKE '%foo%'\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :ncon}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '%123%'( ESCAPE '.+')?\) AND \(`product`\.`sku` NOT LIKE '%AB%'( ESCAPE '.+')?\) AND \(`product`\.`sku` NOT LIKE '%foo%'( ESCAPE '.+')?\)\)/
     end
     
     it "does not join the base table when filtering" do
