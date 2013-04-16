@@ -148,7 +148,27 @@ describe Chicago::Schema::Column do
     described_class.new(:foo, :string, :null => true, :optional => false).
       should_not be_optional
   end
+
+  it "can be unique" do
+    described_class.new(:foo, :string, :unique => true).
+      should be_unique
+
+    described_class.new(:foo, :string).
+      should_not be_unique
+  end
   
+  it "is binary if a hash" do
+    described_class.new(:foo, :hash).should be_binary
+  end
+
+  it "is nullable by default if a hash" do
+    described_class.new(:foo, :hash).should be_null
+  end
+
+  it "is internal by default if a hash" do
+    described_class.new(:foo, :hash).should be_internal
+  end
+
   it "is visitable" do
     visitor = mock(:visitor)
     column = described_class.new(:foo, :integer)
@@ -157,7 +177,7 @@ describe Chicago::Schema::Column do
   end
 end
 
-describe "Chicago::Schema::Column#hash" do
+describe "Chicago::Schema::Column#to_hash" do
   it "should have a :name entry" do
     Chicago::Schema::Column.new(:username, :string, :max => 8).to_hash[:name].should == :username
   end
@@ -192,6 +212,10 @@ describe "Chicago::Schema::Column#hash" do
 
   it "should have a default :size of [12,2] for money types" do
     Chicago::Schema::Column.new(:some_value, :money).to_hash[:size].should == [12,2]
+  end
+
+  it "should have a default :size of 16 for hash types" do
+    Chicago::Schema::Column.new(:some_value, :hash).to_hash[:size].should == 16
   end
 
   it "should be unsigned by default if a percentage" do

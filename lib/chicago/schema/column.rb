@@ -52,8 +52,11 @@ module Chicago
         @elements    = @opts[:elements]
         @default     = @opts[:default]
         @descriptive = !! @opts[:descriptive]
-        @internal    = !! @opts[:internal]
-        @optional    = !! (@opts.has_key?(:optional) ? @opts[:optional] : @opts[:null])
+        @internal    = @opts.has_key?(:internal) ? !! @opts[:internal] : 
+          column_type == :hash
+        @unique      = !! @opts[:unique]
+        @optional    = !! (@opts.has_key?(:optional) ? @opts[:optional] : 
+                           @opts[:null])
       end
 
       # Returns the type of this column. This is an abstract type,
@@ -134,6 +137,10 @@ module Chicago
         @descriptive
       end
 
+      def unique?
+        @unique
+      end
+
       # Returns true if both definition's attributes are equal.
       def ==(other)
         other.kind_of?(self.class) && 
@@ -150,6 +157,11 @@ module Chicago
       # Returns true if the column stores a textual value.
       def textual?
         @textual ||= [:string, :text].include?(column_type)
+      end
+
+      # Returns true if the column stores a binary value.
+      def binary?
+        @binary ||= [:binary, :hash].include?(column_type)
       end
 
       def hash #:nodoc:
@@ -196,6 +208,8 @@ module Chicago
                     [12,2]
                   elsif column_type == :percent
                     [6,3]
+                  elsif column_type == :hash
+                    16
                   end
       end
       
@@ -210,7 +224,7 @@ module Chicago
       end
 
       def default_null(type)
-        [:date, :timestamp, :datetime].include?(type)
+        [:date, :timestamp, :datetime, :hash, :binary].include?(type)
       end
 
       def default_min(type)

@@ -28,6 +28,7 @@ module Chicago
           when :string  then string_type(column.min, column.max)
           when :money   then :decimal
           when :percent then :decimal
+          when :hash    then :binary
           else
             column.column_type
           end
@@ -71,7 +72,7 @@ module Chicago
       class MysqlTypeConverter < DbTypeConverter
         def db_type(column)
           return :enum if column.elements && column.elements.size < 65_536
-          super
+          super(column)
         end
 
         # Returns table options for a dimension or fact table.
