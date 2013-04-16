@@ -120,13 +120,13 @@ describe Chicago::Database::SchemaGenerator do
         columns do
           string :foo, :descriptive => true
           string :bar
-          string :baz
+          string :baz, :unique => true
         end
       end
 
       expected = {
         :bar_idx => {:columns => :bar, :unique => false},
-        :baz_idx => {:columns => :baz, :unique => false}
+        :baz_idx => {:columns => :baz, :unique => true}
       }
       subject.visit_dimension(@dimension)[:dimension_user][:indexes].should == expected
     end

@@ -89,7 +89,7 @@ module Chicago
         indexes = @table.columns.select(&:indexed?).inject({}) do |hsh, d|
           hsh.merge("#{d.name}_idx".to_sym => {
                       :columns => d.database_name,
-                      :unique => false})
+                      :unique => d.unique?})
         end
         indexes.merge!(natural_key_index) if @table.natural_key
         indexes
