@@ -158,15 +158,15 @@ describe Chicago::Schema::Column do
   end
   
   it "is binary if a hash" do
-    described_class.new(:foo, :hash).should be_binary
+    described_class.new(:foo, :binary).should be_binary
   end
 
-  it "is nullable by default if a hash" do
-    described_class.new(:foo, :hash).should be_null
+  it "is nullable by default if binary" do
+    described_class.new(:foo, :binary).should be_null
   end
 
-  it "is internal by default if a hash" do
-    described_class.new(:foo, :hash).should be_internal
+  it "is internal by default if binary" do
+    described_class.new(:foo, :binary).should be_internal
   end
 
   it "is visitable" do
@@ -214,8 +214,9 @@ describe "Chicago::Schema::Column#to_hash" do
     Chicago::Schema::Column.new(:some_value, :money).to_hash[:size].should == [12,2]
   end
 
-  it "should have a default :size of 16 for hash types" do
-    Chicago::Schema::Column.new(:some_value, :hash).to_hash[:size].should == 16
+  it "should have a default :size of 16 for binary types" do
+    Chicago::Schema::Column.new(:some_value, :binary).
+      to_hash[:size].should == 16
   end
 
   it "should be unsigned by default if a percentage" do

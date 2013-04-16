@@ -31,11 +31,6 @@ shared_examples_for "All DB type converters" do
       @tc.db_type(column).should == :decimal
     end
 
-    it "should return :binary for a hash column type" do
-      column = Schema::Column.new(:id, :hash)
-      @tc.db_type(column).should == :binary
-    end
-
     it "should assume any other type is a database type and return it" do
       column = Schema::Column.new(:id, :foo)
       @tc.db_type(column).should == :foo

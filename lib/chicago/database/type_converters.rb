@@ -28,7 +28,6 @@ module Chicago
           when :string  then string_type(column.min, column.max)
           when :money   then :decimal
           when :percent then :decimal
-          when :hash    then :binary
           else
             column.column_type
           end

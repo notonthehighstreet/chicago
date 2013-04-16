@@ -53,8 +53,9 @@ module Chicago
         @default     = @opts[:default]
         @descriptive = !! @opts[:descriptive]
         @internal    = @opts.has_key?(:internal) ? !! @opts[:internal] : 
-          column_type == :hash
-        @unique      = !! @opts[:unique]
+          column_type == :binary
+        @unique      = @opts.has_key?(:unique) ? !! @opts[:unique] :
+          column_type == :binary
         @optional    = !! (@opts.has_key?(:optional) ? @opts[:optional] : 
                            @opts[:null])
       end
@@ -161,7 +162,7 @@ module Chicago
 
       # Returns true if the column stores a binary value.
       def binary?
-        @binary ||= [:binary, :hash].include?(column_type)
+        @binary ||= :binary == column_type
       end
 
       def hash #:nodoc:
@@ -208,7 +209,7 @@ module Chicago
                     [12,2]
                   elsif column_type == :percent
                     [6,3]
-                  elsif column_type == :hash
+                  elsif column_type == :binary
                     16
                   end
       end
