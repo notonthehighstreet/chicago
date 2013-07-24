@@ -14,7 +14,10 @@ describe Chicago::Database::SchemaGenerator do
       @fact = schema.define_fact(:sales) do
         dimensions :customer, :product
         degenerate_dimensions { string :reference }
-        measures { integer :quantity }
+        measures { 
+          integer :quantity 
+          integer :calculated, :calculation => 1 + 1
+        }
         natural_key :customer, :reference
       end
     end
@@ -56,6 +59,10 @@ describe Chicago::Database::SchemaGenerator do
 
     it "should output the measure columns" do
       subject.visit_fact(@fact)[:facts_sales][:columns].should include({:name => :quantity, :column_type => :integer, :null => true, :unsigned => false})
+    end
+
+    it "should not output calculated columns" do
+      subject.visit_fact(@fact)[:facts_sales][:columns].any? {|c| c[:name] == :calculated }.should_not be_true
     end
 
     it "should define non-unique indexes for every dimension" do

@@ -33,7 +33,9 @@ module Chicago
         if column.kind_of?(Chicago::Schema::Dimension)
           DimensionAsColumn.new(owner, column, column_alias)
         elsif owner.kind_of?(Chicago::Schema::Dimension) && owner.identifiable? && owner.identifiers.include?(column.name)
-          DimensionIdentifierColumn.new(owner, column, column_alias)          
+          DimensionIdentifierColumn.new(owner, column, column_alias)
+        elsif column.calculated?
+          VirtualColumn.new(owner, column, column_alias)
         else
           QualifiedColumn.new(owner, column, column_alias)
         end
@@ -88,6 +90,19 @@ module Chicago
         @select_name = @column.name.qualify(@owner.name)
         @count_name = @select_name
         @group_name = column_alias.to_sym
+      end
+    end
+
+    # Allows querying a column that doesn't exist in the database, but
+    # is defined as a calculation in the column definition.
+    class VirtualColumn < QualifiedColumn
+      def initialize(owner, column, column_alias)
+        super(owner, column, column_alias)
+        @select_name = @column.calculation
+      end
+
+      def group_name
+        nil
       end
     end
 

@@ -41,6 +41,7 @@ describe Chicago::Query do
       measures do
         integer :total
         decimal :vat_rate
+        decimal :vat, :calculation => :sum.sql_function(:total) * :vat_rate
       end
     end
 
@@ -183,6 +184,12 @@ describe Chicago::Query do
       @q.select({:column => "sales.total", :op => "stddev"})
       @q.dataset.opts[:select].
         should == [:stddev_samp.sql_function(:total.qualify(:sales)).as("sales.total.stddev".to_sym)]
+    end
+
+    it "selects an explicit sum of a column" do
+      @q.select({:column => "sales.vat"})
+      @q.dataset.opts[:select].
+        should == [(:sum.sql_function(:total) * :vat_rate).as("sales.vat".to_sym)]
     end
 
     it "selects an explicit distinct count, via a dimension reference" do

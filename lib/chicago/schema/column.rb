@@ -34,6 +34,8 @@ module Chicago
       # internal:: the column is for internal use only, and shouldn't
       #   be displayed/used directly in a user context
       # optional:: the column isn't expected to be populated.
+      # calculation:: the column is not stored in the database, but
+      #   calculated on demand
       #
       # @api private
       def initialize(name, column_type, opts={})
@@ -58,6 +60,7 @@ module Chicago
           column_type == :binary
         @optional    = !! (@opts.has_key?(:optional) ? @opts[:optional] : 
                            @opts[:null])
+        @calculation = @opts[:calculation]
       end
 
       # Returns the type of this column. This is an abstract type,
@@ -75,6 +78,9 @@ module Chicago
       
       # Returns the explicit default as set in the database, or nil.
       attr_reader :default
+
+      # Returns the Sequel calculation for this column.
+      attr_reader :calculation
 
       # Returns the calculated default value.
       #
@@ -99,6 +105,7 @@ module Chicago
         end
       end
 
+      # The human-friendly label for counting items in this column.
       attr_reader :countable_label
 
       alias :database_name :name
@@ -110,7 +117,7 @@ module Chicago
 
       # Returns true if this column should be indexed
       def indexed?
-        ! descriptive?
+        ! (descriptive? || calculated?)
       end
 
       # Returns true if this column is optional.
@@ -138,8 +145,14 @@ module Chicago
         @descriptive
       end
 
+      # Returns true if this column is unique.
       def unique?
         @unique
+      end
+
+      # Returns true if this column is calculated.
+      def calculated?
+        !! @calculation
       end
 
       # Returns true if both definition's attributes are equal.

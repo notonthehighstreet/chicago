@@ -81,6 +81,10 @@ describe Chicago::Schema::Column do
     described_class.new(:username, :string, :descriptive => true).should_not be_indexed
   end
 
+  it "should not be indexed if calculated" do
+    described_class.new(:username, :string, :calculation => 1).should_not be_indexed
+  end
+
   it "should be numeric if an integer" do
     described_class.new(:username, :integer).should be_numeric
   end
@@ -174,6 +178,12 @@ describe Chicago::Schema::Column do
     column = described_class.new(:foo, :integer)
     visitor.should_receive(:visit_column).with(column)
     column.visit(visitor)
+  end
+
+  it "may be calculated" do
+    column = described_class.new(:foo, :integer, :calculation => 1 + 1)
+    column.should be_calculated
+    column.calculation.should_not be_nil
   end
 end
 

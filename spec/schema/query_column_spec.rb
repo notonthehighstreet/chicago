@@ -4,7 +4,7 @@ require 'chicago/schema/query_column'
 describe Chicago::Schema::QueryColumn do
   describe "a standard column" do
     let(:owner) { stub(:owner).as_null_object }
-    let(:column) { stub(:column).as_null_object }
+    let(:column) { stub(:column, :calculated? => false).as_null_object }
     subject { described_class.column(owner, column, "foo.bar") }
     
     it "should have a column alias" do
@@ -29,6 +29,36 @@ describe Chicago::Schema::QueryColumn do
 
     it "uses the alias in GROUP BY" do
       subject.group_name.should == :"foo.bar"
+    end
+
+    it "delegates label to the decorated column" do
+      column.should_receive(:label).and_return("Bar")
+      subject.label.should == "Bar"
+    end
+  end
+
+  describe "a virtual column generated from calculation" do
+    let(:calculation) { stub(:calculation).as_null_object }
+    let(:owner) { stub(:owner).as_null_object }
+    let(:column) { stub(:column, :calculated? => true, :calculation => calculation).as_null_object }
+    subject { described_class.column(owner, column, "foo.bar") }
+
+    it "should have a column alias" do
+      subject.column_alias.should == "foo.bar"
+    end
+
+    it "has an owner" do
+      subject.owner.should == owner
+    end
+
+    it "has a sequel qualified name for use in SELECT statements" do
+      owner.stub(:name).and_return(:foo)
+      column.stub(:name).and_return(:bar)
+      subject.select_name.should == calculation
+    end
+
+    it "not be grouped" do
+      subject.group_name.should be_nil
     end
 
     it "delegates label to the decorated column" do

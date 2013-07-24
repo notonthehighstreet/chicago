@@ -43,7 +43,8 @@ module Chicago
                        }]
         }
 
-        t[:columns] += table.columns.map {|c| c.visit(self) }
+        t[:columns] += table.columns.reject(&:calculated?).
+          map {|c| c.visit(self) }
         t[:columns] << {
           :name => :_inserted_at,
           :column_type => :timestamp,
