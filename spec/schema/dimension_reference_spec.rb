@@ -36,6 +36,16 @@ describe Chicago::Schema::DimensionReference do
     described_class.new(:foo, @dimension).original_key.should == :result
   end
 
+  it "returns countable from the dimension" do
+    @dimension.should_receive(:countable?).and_return(true)
+    described_class.new(:foo, @dimension).should be_countable
+  end
+
+  it "has a countable label" do
+    described_class.new(:foo, @dimension).countable_label.
+      should == "No. of Foos"
+  end
+
   it "returns natural_key from the dimension" do
     @dimension.should_receive(:natural_key).and_return(:result)
     described_class.new(:foo, @dimension).natural_key.should == :result

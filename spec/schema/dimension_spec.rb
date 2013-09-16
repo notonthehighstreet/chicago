@@ -103,6 +103,18 @@ describe Chicago::Schema::Dimension do
     described_class.new(:user, :columns => [column]).should be_identifiable
   end
 
+  it "is considered countable if it has an original key [DEPRECATED]" do
+    column = stub(:c, :name => :original_id)
+    described_class.new(:user, :columns => [column]).should be_countable
+    described_class.new(:user, :columns => []).should_not be_countable
+  end
+
+  it "can be marked as uncountable" do
+    column = stub(:c, :name => :original_id)
+    described_class.new(:user, :columns => [column],
+                        :uncountable => true).should_not be_countable
+  end
+
   it "can have predetermined values" do
     described_class.new(:countries, :predetermined_values => true).should have_predetermined_values
   end

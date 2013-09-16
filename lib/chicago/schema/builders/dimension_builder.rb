@@ -65,5 +65,15 @@ module Chicago::Schema::Builders
     def has_predetermined_values
       @options[:predetermined_values] = true
     end
+
+    # Defines this dimension as uncountable.
+    #
+    # By default, dimensions are considered countable entities if they
+    # have an original_id column. In some cases, a dimension may be
+    # identifiable by this column, but still not semantically be a
+    # countable entity.
+    def uncountable
+      @options[:uncountable] = true
+    end
   end
 end

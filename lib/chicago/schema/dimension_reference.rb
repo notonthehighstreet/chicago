@@ -8,7 +8,7 @@ module Chicago
     class DimensionReference < Column
       extend Forwardable
 
-      def_delegators :@dimension, :columns, :column_definitions, :identifiers, :main_identifier, :identifiable?, :original_key, :natural_key, :table_name, :[], :key_table_name
+      def_delegators :@dimension, :columns, :column_definitions, :identifiers, :main_identifier, :identifiable?, :original_key, :natural_key, :table_name, :[], :key_table_name, :countable?
       
       def initialize(name, dimension, opts={})
         super name, :integer, opts.merge(:min => 0)
@@ -17,6 +17,10 @@ module Chicago
         @key_name   = opts[:key_name] || "#{@name}_dimension_id".to_sym
       end
 
+      def countable_label
+        "No. of #{label.pluralize}"
+      end
+      
       # Returns the key name of this dimension.
       def database_name
         @key_name

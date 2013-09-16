@@ -61,6 +61,7 @@ module Chicago
         @table_name = sprintf(DIMENSION_TABLE_FORMAT, name).to_sym
         @key_table_name = sprintf(KEY_TABLE_FORMAT, @table_name).to_sym
         @predetermined_values = !! opts[:predetermined_values]
+        @countable = !opts[:uncountable]
         check_null_records
       end
 
@@ -94,6 +95,11 @@ module Chicago
       # @todo change to be consistent with identifiers
       def identifiable?
         !! original_key
+      end
+
+      # Returns true if these dimension entries can be counted.
+      def countable?
+        @countable && identifiable?
       end
 
       # Returns true if the set of values for this dimension is
