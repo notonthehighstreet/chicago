@@ -24,6 +24,6 @@ describe Sequel::SQL::DistinctExpression do
   end
 
   it "is rendered as 'DISTINCT expression'" do
-    described_class.new(:foo).to_s(TEST_DB[:foo]).should == "DISTINCT `foo`"
+    described_class.new(:foo).sql_literal(TEST_DB[:foo]).should == "DISTINCT `foo`"
   end
 end

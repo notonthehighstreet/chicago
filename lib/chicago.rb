@@ -2,6 +2,7 @@
 require 'chronic'
 require 'sequel'
 require 'sequel/extensions/inflector'
+Sequel.extension(:core_extensions)
 
 # TODO: move this back to the Sequel MySQL adapter
 require 'chicago/core_ext/sequel/dataset'
