@@ -11,7 +11,8 @@ group :development do
   gem "rspec", "~> 2.0"
   gem "bundler"
   gem "jeweler"
-  gem "rcov"
+  gem "rcov", :platform => :ruby_18
+  gem "simplecov", :platform => :ruby_19
   gem "flog"
   gem "ZenTest"
   gem "timecop"
