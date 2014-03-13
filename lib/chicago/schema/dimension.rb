@@ -58,6 +58,10 @@ module Chicago
         @columns = opts[:columns] || []
         @identifiers = opts[:identifiers] || []
         @null_records = opts[:null_records] || []
+        @null_records.product(columns).each do |record, column|
+          record[column.name] = column.default_value unless record.has_key?(column.name)
+        end
+
         @table_name = sprintf(DIMENSION_TABLE_FORMAT, name).to_sym
         @key_table_name = sprintf(KEY_TABLE_FORMAT, @table_name).to_sym
         @predetermined_values = !! opts[:predetermined_values]
@@ -74,12 +78,22 @@ module Chicago
       # create null records for a temporary version of the table.
       def create_null_records(db, overridden_table_name=nil)
         table_to_populate = overridden_table_name || table_name
+        
         unless @null_records.empty?
-          db[table_to_populate].insert_replace.
-            insert_multiple(@null_records)
-          if db.table_exists?(key_table_name)
-            ids = @null_records.map {|r| {:dimension_id => r[:id]} }
-            db[key_table_name].insert_replace.insert_multiple(ids)
+          begin
+            db[table_to_populate].insert_replace.
+              insert_multiple(@null_records)
+          rescue Exception => e
+            raise "Cannot populate null records for dimension #{name} (table #{table_to_populate})\n #{e.message}"
+          end
+
+          begin
+            if db.table_exists?(key_table_name)
+              ids = @null_records.map {|r| {:dimension_id => r[:id], :original_id => r[:original_id] || 0} }
+              db[key_table_name].insert_replace.insert_multiple(ids)
+            end
+          rescue Exception => e
+            raise "Cannot populate key table records for dimension #{name} (table #{table_to_populate})\n #{e.message}"
           end
         end
       end

@@ -14,7 +14,7 @@ describe Chicago::Schema::Dimension do
   it "can have a description" do
     described_class.new(:foo, :description => "bar").description.should == "bar"
   end
-  
+
   it "has columns" do
     column = stub(:column)
     described_class.new(:foo, :columns => [column]).
@@ -41,20 +41,32 @@ describe Chicago::Schema::Dimension do
     described_class.new(:user, :identifiers => identifiers).
       identifiers.should == identifiers
   end
-  
+
   it "can have a main identifier" do
     identifiers = [stub(:i), stub(:j)]
     described_class.new(:user, :identifiers => identifiers).
       main_identifier.should == identifiers.first
   end
 
+  it "has null records" do
+    column = stub(:column, :name => :bar, :default_value => '')
+
+    options = {
+      :columns => [column], 
+      :null_records => [{:id => 1}, {:id => 2, :bar => nil}]
+    }
+    
+    described_class.new(:user, options).
+      null_records.should == [{:id => 1, :bar => ''}, {:id => 2, :bar => nil}]
+  end
+
   it "can create null records in the database, replacing existing records" do
-    db = mock(:db)
+    db = mock(:db) 
     db.stub(:[]).and_return(db)
     db.stub(:table_exists?).with(:keys_dimension_user).and_return(true)
     db.should_receive(:insert_replace).twice.and_return(db)
     db.should_receive(:insert_multiple).with([{:id => 1, :foo => :bar}])
-    db.should_receive(:insert_multiple).with([{:dimension_id => 1}])
+    db.should_receive(:insert_multiple).with([{:dimension_id => 1, :original_id => 0}])
     described_class.new(:user,
                            :null_records => [{ :id => 1,
                                                :foo => :bar}]).create_null_records(db)
@@ -118,7 +130,7 @@ describe Chicago::Schema::Dimension do
   it "can have predetermined values" do
     described_class.new(:countries, :predetermined_values => true).should have_predetermined_values
   end
-  
+
   it "is visitable" do
     visitor = mock(:visitor)
     dimension = described_class.new(:foo)

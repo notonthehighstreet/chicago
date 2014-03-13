@@ -24,15 +24,15 @@ describe Chicago::StarSchema do
     specify "can be defined with columns" do
       dimension = @schema.define_dimension(:user) do
         columns { string :email }
-      end      
+      end
       dimension.should have_column_named(:email)
     end
 
     specify "can define columns in multiple blocks" do
       dimension = @schema.define_dimension(:user) do
         columns { string :email }
-        columns { string :name }        
-      end      
+        columns { string :name }
+      end
       dimension.should have_column_named(:name)
     end
 
@@ -41,7 +41,7 @@ describe Chicago::StarSchema do
         columns { string :email }
 
         natural_key :email
-      end      
+      end
 
       dimension.natural_key.should == [:email]
     end
@@ -52,21 +52,21 @@ describe Chicago::StarSchema do
       end
       dimension.description.should == "Hello"
     end
-    
+
     specify "can have null records defined" do
       dimension = @schema.define_dimension(:user) do
         columns { string :email }
 
         null_record :id => 1, :email => "Missing"
-        null_record :id => 2, :email => "Not Applicable"
-      end      
+        null_record :id => 2, :email => "Not Applicable", :original_id => -1
+      end
 
       db = stub(:db, :table_exists? => true)
       db.stub_chain(:[], :insert_replace).and_return(db)
       db.should_receive(:insert_multiple).with([{:id => 1, :email => "Missing"},
-                                                {:id => 2, :email => "Not Applicable"}])
-      db.should_receive(:insert_multiple).with([{:dimension_id => 1},
-                                                {:dimension_id => 2}])
+                                                {:id => 2, :email => "Not Applicable", :original_id => -1}])
+      db.should_receive(:insert_multiple).with([{:dimension_id => 1, :original_id => 0},
+                                                {:dimension_id => 2, :original_id => -1}])
       dimension.create_null_records(db)
     end
 
@@ -110,7 +110,7 @@ describe Chicago::StarSchema do
       }.to raise_error(Chicago::MissingDefinitionError)
     end
   end
-  
+
   describe "facts" do
     specify "are not defined initially" do
       @schema.facts.should be_empty
@@ -192,7 +192,7 @@ describe Chicago::StarSchema do
       end
       fact.description.should == "Hello"
     end
-    
+
     specify "can have a natural key defined" do
       dim  = @schema.define_dimension(:date)
       fact = @schema.define_fact(:foo) do
@@ -200,11 +200,11 @@ describe Chicago::StarSchema do
 
         natural_key :date
       end
-      
+
       fact.natural_key.should == [:date]
     end
   end
-  
+
   it "allows definition of a fact and a dimension with the same name" do
     @schema.define_fact(:user)
     expect { @schema.define_dimension(:user) }.
