@@ -26,7 +26,7 @@ module Chicago
 
       # @deprecated Use columns instead.
       alias :column_definitions :columns
-      
+
       # Returns all the human-friendly identifying columns for this
       # dimension.
       #
@@ -52,7 +52,7 @@ module Chicago
       # @option opts [Array<Symbol>] natual_key an array of symbols,
       #   representing a uniqueness constraint on the dimension.
       # @option opts description a long text description about the dimension.
-      # @raise [Chicago::UnsafeNullRecordError] 
+      # @raise [Chicago::UnsafeNullRecordError]
       def initialize(name, opts={})
         super
         @columns = opts[:columns] || []
@@ -78,11 +78,11 @@ module Chicago
       # create null records for a temporary version of the table.
       def create_null_records(db, overridden_table_name=nil)
         table_to_populate = overridden_table_name || table_name
-        
+
         unless @null_records.empty?
           begin
             db[table_to_populate].insert_replace.
-              insert_multiple(@null_records)
+              multi_insert(@null_records)
           rescue Exception => e
             raise "Cannot populate null records for dimension #{name} (table #{table_to_populate})\n #{e.message}"
           end
@@ -90,7 +90,7 @@ module Chicago
           begin
             if db.table_exists?(key_table_name)
               ids = @null_records.map {|r| {:dimension_id => r[:id], :original_id => r[:original_id] || 0} }
-              db[key_table_name].insert_replace.insert_multiple(ids)
+              db[key_table_name].insert_replace.multi_insert(ids)
             end
           rescue Exception => e
             raise "Cannot populate key table records for dimension #{name} (table #{table_to_populate})\n #{e.message}"
@@ -105,7 +105,7 @@ module Chicago
 
       # Returns true if this dimension can be identified as a concrete
       # entity, with an original_id from a source system.
-      # 
+      #
       # @todo change to be consistent with identifiers
       def identifiable?
         !! original_key
@@ -139,7 +139,7 @@ module Chicago
       def visit(visitor)
         visitor.visit_dimension(self)
       end
-      
+
       private
 
       def check_null_records

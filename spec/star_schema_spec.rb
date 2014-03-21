@@ -63,10 +63,10 @@ describe Chicago::StarSchema do
 
       db = stub(:db, :table_exists? => true)
       db.stub_chain(:[], :insert_replace).and_return(db)
-      db.should_receive(:insert_multiple).with([{:id => 1, :email => "Missing"},
-                                                {:id => 2, :email => "Not Applicable", :original_id => -1}])
-      db.should_receive(:insert_multiple).with([{:dimension_id => 1, :original_id => 0},
-                                                {:dimension_id => 2, :original_id => -1}])
+      db.should_receive(:multi_insert).with([{:id => 1, :email => "Missing"},
+                                             {:id => 2, :email => "Not Applicable", :original_id => -1}])
+      db.should_receive(:multi_insert).with([{:dimension_id => 1, :original_id => 0},
+                                             {:dimension_id => 2, :original_id => -1}])
       dimension.create_null_records(db)
     end
 

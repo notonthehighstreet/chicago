@@ -52,21 +52,21 @@ describe Chicago::Schema::Dimension do
     column = stub(:column, :name => :bar, :default_value => '')
 
     options = {
-      :columns => [column], 
+      :columns => [column],
       :null_records => [{:id => 1}, {:id => 2, :bar => nil}]
     }
-    
+
     described_class.new(:user, options).
       null_records.should == [{:id => 1, :bar => ''}, {:id => 2, :bar => nil}]
   end
 
   it "can create null records in the database, replacing existing records" do
-    db = mock(:db) 
+    db = mock(:db)
     db.stub(:[]).and_return(db)
     db.stub(:table_exists?).with(:keys_dimension_user).and_return(true)
     db.should_receive(:insert_replace).twice.and_return(db)
-    db.should_receive(:insert_multiple).with([{:id => 1, :foo => :bar}])
-    db.should_receive(:insert_multiple).with([{:dimension_id => 1, :original_id => 0}])
+    db.should_receive(:multi_insert).with([{:id => 1, :foo => :bar}])
+    db.should_receive(:multi_insert).with([{:dimension_id => 1, :original_id => 0}])
     described_class.new(:user,
                            :null_records => [{ :id => 1,
                                                :foo => :bar}]).create_null_records(db)
@@ -77,7 +77,7 @@ describe Chicago::Schema::Dimension do
     db.stub(:[]).and_return(db)
     db.stub(:table_exists?).with(:keys_dimension_user).and_return(false)
     db.should_receive(:insert_replace).and_return(db)
-    db.should_receive(:insert_multiple).with([{:id => 1, :foo => :bar}])
+    db.should_receive(:multi_insert).with([{:id => 1, :foo => :bar}])
     described_class.new(:user,
                            :null_records => [{ :id => 1,
                                                :foo => :bar}]).create_null_records(db)
