@@ -3,9 +3,9 @@ require "spec_helper"
 shared_examples_for "All DB type converters" do
   context "#db_type" do
     before(:each) do
-      @dimension = stub(:dimension)
+      @dimension = double(:dimension)
     end
-    
+
     it "should return :varchar for a string column" do
       column = Schema::Column.new(:id, :string)
       @tc.db_type(column).should == :varchar
@@ -40,7 +40,7 @@ end
 
 describe "DbTypeConverter.for_db" do
   before :each do
-    @mock_db = mock()
+    @mock_db = double()
   end
 
   it "should return a type converter specific to MySQL if the database type is :mysql" do
@@ -61,7 +61,7 @@ end
 describe "Generic DbTypeConverter" do
   it_behaves_like "All DB type converters"
 
-  before :each do 
+  before :each do
     @tc = Database::TypeConverters::DbTypeConverter.new
   end
 
@@ -96,7 +96,7 @@ describe Chicago::Database::TypeConverters::MysqlTypeConverter do
       :bigint    => [0, 18446744073709551615]
 
     }.each do |expected_db_type, range|
-      
+
       it "should return #{expected_db_type} if the maximum column value < #{range.max} and min is >= #{range.min}" do
         column = Schema::Column.new(:id, :integer, :max => range.max, :min => range.min)
         @tc.db_type(column).should == expected_db_type
@@ -104,11 +104,11 @@ describe Chicago::Database::TypeConverters::MysqlTypeConverter do
     end
 
     it "should raise an ArgumentError if either of the min/max values are out of bounds" do
-      column = Schema::Column.new(:id, 
-                                    :integer, 
-                                    :min => 0, 
+      column = Schema::Column.new(:id,
+                                    :integer,
+                                    :min => 0,
                                     :max => 18_446_744_073_709_551_616)
-      
+
       lambda { @tc.db_type(column) }.should raise_error(ArgumentError)
     end
 
@@ -118,7 +118,7 @@ describe Chicago::Database::TypeConverters::MysqlTypeConverter do
     end
 
     it "should return :varchar if the column definition has a large number of elements" do
-      column = Schema::Column.new(:id, :string, :elements => stub(:size => 70_000))
+      column = Schema::Column.new(:id, :string, :elements => double(:size => 70_000))
       @tc.db_type(column).should == :varchar
     end
   end

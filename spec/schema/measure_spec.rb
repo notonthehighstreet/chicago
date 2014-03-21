@@ -8,7 +8,7 @@ describe Chicago::Schema::Measure do
   it "should not be semi_additive by default" do
     described_class.new(:rate, :integer).should_not be_semi_additive
   end
-  
+
   it "can be defined as semi_additive" do
     described_class.new(:rate, :integer, :semi_additive => true).
       should be_semi_additive
@@ -17,9 +17,9 @@ describe Chicago::Schema::Measure do
   it "is not indexed" do
     described_class.new(:rate, :integer).should_not be_indexed
   end
-  
+
   it "is visitable" do
-    visitor = mock(:visitor)
+    visitor = double(:visitor)
     measure = described_class.new(:foo, :integer)
     visitor.should_receive(:visit_measure).with(measure)
     measure.visit(visitor)

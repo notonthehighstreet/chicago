@@ -2,22 +2,22 @@ require 'spec_helper'
 
 describe Chicago::Schema::Builders::DimensionBuilder do
   before :each do
-    @builder = described_class.new(stub())
+    @builder = described_class.new(double())
   end
 
   it "builds a dimension" do
     @builder.build("foo").should be_kind_of(Chicago::Schema::Dimension)
   end
-  
+
   it "builds a dimension with a name" do
     @builder.build("foo").name.should == :foo
   end
 
-  it "can have a column builder specified" do    
+  it "can have a column builder specified" do
     @builder.column_builder = Class.new do
       def initialize(klass)
       end
-      
+
       def build
         [:column] if block_given?
       end

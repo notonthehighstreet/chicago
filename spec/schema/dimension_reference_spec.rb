@@ -75,7 +75,7 @@ describe Chicago::Schema::DimensionReference do
   end
 
   it "qualfies a column based on the column name" do
-    column = stub(:column, :name => :baz)
+    column = double(:column, :name => :baz)
     column.should_receive(:qualify_by).with(:dimension_foo)
     described_class.new(:foo, @dimension).qualify(column)
   end
@@ -97,9 +97,9 @@ describe Chicago::Schema::DimensionReference do
   it "uses the first null record id as the default value" do
     described_class.new(:foo, @dimension).default_value.should == 1
   end
-  
+
   it "is visitable" do
-    visitor = mock(:visitor)
+    visitor = double(:visitor)
     column = described_class.new(:foo, @dimension)
     visitor.should_receive(:visit_dimension_reference).with(column)
     column.visit(visitor)

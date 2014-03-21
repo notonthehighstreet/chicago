@@ -2,9 +2,9 @@ require 'spec_helper'
 
 describe Chicago::Schema::NamedElementCollection do
   before :each do
-    @e = stub(:element, :name => :foo)
+    @e = double(:element, :name => :foo)
   end
-  
+
   it "supports adding an element via add" do
     subject.add(@e)
     subject.to_a.should == [@e]
@@ -35,8 +35,8 @@ describe Chicago::Schema::NamedElementCollection do
 
   it "returns true from contains? if the collection contains the same-named element" do
     subject.add @e
-    subject.contain?(stub(:element, :name => :foo)).should be_true
-    subject.contain?(stub(:element, :name => :bar)).should be_false    
+    subject.contain?(double(:element, :name => :foo)).should be_true
+    subject.contain?(double(:element, :name => :bar)).should be_false
   end
 
   it "returns the number of elements in a collection from size" do
@@ -61,7 +61,7 @@ describe Chicago::Schema::NamedElementCollection do
 
   it "has elements that are unique by name" do
     subject.add(@e)
-    subject.add(stub(:element, :name => :foo))
+    subject.add(double(:element, :name => :foo))
     subject.size.should == 1
   end
 end

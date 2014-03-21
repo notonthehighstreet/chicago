@@ -16,7 +16,7 @@ describe Chicago::Schema::Dimension do
   end
 
   it "has columns" do
-    column = stub(:column)
+    column = double(:column)
     described_class.new(:foo, :columns => [column]).
       columns.should == [column]
   end
@@ -26,30 +26,30 @@ describe Chicago::Schema::Dimension do
   end
 
   it "can qualify a column" do
-    described_class.new(:foo).qualify(stub(:column, :name => :bar)).
+    described_class.new(:foo).qualify(double(:column, :name => :bar)).
       should == :bar.qualify(:dimension_foo)
   end
 
   it "provides a hash-like accessor syntax for columns" do
-    column = stub(:column, :name => :bar)
+    column = double(:column, :name => :bar)
     dimension = described_class.new(:foo, :columns => [column])
     dimension[:bar].should == column
   end
 
   it "can have identifiers" do
-    identifiers = [stub(:i), stub(:j)]
+    identifiers = [double(:i), double(:j)]
     described_class.new(:user, :identifiers => identifiers).
       identifiers.should == identifiers
   end
 
   it "can have a main identifier" do
-    identifiers = [stub(:i), stub(:j)]
+    identifiers = [double(:i), double(:j)]
     described_class.new(:user, :identifiers => identifiers).
       main_identifier.should == identifiers.first
   end
 
   it "has null records" do
-    column = stub(:column, :name => :bar, :default_value => '')
+    column = double(:column, :name => :bar, :default_value => '')
 
     options = {
       :columns => [column],
@@ -61,7 +61,7 @@ describe Chicago::Schema::Dimension do
   end
 
   it "can create null records in the database, replacing existing records" do
-    db = mock(:db)
+    db = double(:db)
     db.stub(:[]).and_return(db)
     db.stub(:table_exists?).with(:keys_dimension_user).and_return(true)
     db.should_receive(:insert_replace).twice.and_return(db)
@@ -73,7 +73,7 @@ describe Chicago::Schema::Dimension do
   end
 
   it "doesn't attempt to create null rows in non-existent key table" do
-    db = mock(:db)
+    db = double(:db)
     db.stub(:[]).and_return(db)
     db.stub(:table_exists?).with(:keys_dimension_user).and_return(false)
     db.should_receive(:insert_replace).and_return(db)
@@ -106,23 +106,23 @@ describe Chicago::Schema::Dimension do
   end
 
   it "supports original_key if it has an original_id column [DEPRECATED]" do
-    column = stub(:c, :name => :original_id)
+    column = double(:c, :name => :original_id)
     described_class.new(:user, :columns => [column]).original_key.should == column
   end
 
   it "is considered identifiable if it has an original key [DEPRECATED]" do
-    column = stub(:c, :name => :original_id)
+    column = double(:c, :name => :original_id)
     described_class.new(:user, :columns => [column]).should be_identifiable
   end
 
   it "is considered countable if it has an original key [DEPRECATED]" do
-    column = stub(:c, :name => :original_id)
+    column = double(:c, :name => :original_id)
     described_class.new(:user, :columns => [column]).should be_countable
     described_class.new(:user, :columns => []).should_not be_countable
   end
 
   it "can be marked as uncountable" do
-    column = stub(:c, :name => :original_id)
+    column = double(:c, :name => :original_id)
     described_class.new(:user, :columns => [column],
                         :uncountable => true).should_not be_countable
   end
@@ -132,7 +132,7 @@ describe Chicago::Schema::Dimension do
   end
 
   it "is visitable" do
-    visitor = mock(:visitor)
+    visitor = double(:visitor)
     dimension = described_class.new(:foo)
     visitor.should_receive(:visit_dimension).with(dimension)
     dimension.visit(visitor)

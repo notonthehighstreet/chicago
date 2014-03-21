@@ -30,7 +30,7 @@ describe Chicago::Query do
         boolean :recent
       end
     end
-    
+
     @schema.define_fact(:sales) do
       dimensions :product, :customer.as(:buyer), :customer.as(:seller)
 
@@ -61,7 +61,7 @@ describe Chicago::Query do
       }.to raise_error(StandardError)
     end
   end
-  
+
   describe "#table" do
     it "returns the schema table definition" do
       described_class.new(@schema, :table_name => "sales", :query_type => "fact").table.should == @schema.fact(:sales)
@@ -84,13 +84,13 @@ describe Chicago::Query do
     it "is a Sequel::Dataset" do
       @q.dataset.should be_kind_of(Sequel::Dataset)
     end
-    
+
     it "selects a qualified column" do
       @q.select("product.name")
       @q.dataset.opts[:select].
         should == [:name.qualify(:product).as("product.name".to_sym)]
     end
-    
+
     it "selects multiple qualified columns" do
       @q.select("product.name", "product.type")
       @q.dataset.opts[:select].
@@ -104,7 +104,7 @@ describe Chicago::Query do
       @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`original_id`\)/i
     end
   end
-  
+
   describe "generates a dataset for a fact that" do
     before :each do
       @q = described_class.new(@schema,
@@ -117,13 +117,13 @@ describe Chicago::Query do
     end
 
     it "can be generated for a specific database" do
-      dataset  = stub(:dataset).as_null_object
-      database = stub(:database).as_null_object
+      dataset  = double(:dataset).as_null_object
+      database = double(:database).as_null_object
       database.stub(:[]).and_return(dataset)
-      
+
       @q.dataset(database).should == dataset
     end
-    
+
     it "selects from the correctly aliased table" do
       @q.dataset.sql.should =~ /FROM `facts_sales` AS `sales`/
     end
@@ -216,7 +216,7 @@ describe Chicago::Query do
                     :pivot => "sales.product.type"})
         }.to raise_error(Chicago::UnimplementedError)
       end
-      
+
       it "via IF, for a measure, by a boolean column" do
         @q.select({ :column => "sales.total",
                     :op => "sum",
@@ -288,7 +288,7 @@ describe Chicago::Query do
         @q.dataset.opts[:group].should be_nil
       end
     end
-    
+
     it "groups on a degenerate dimension column" do
       @q.select 'sales.order_ref'
       @q.dataset.opts[:group].should == ['sales.order_ref'.to_sym]
@@ -336,7 +336,7 @@ describe Chicago::Query do
       @q.dataset.sql.
         should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
     end
-    
+
     it "joins on multiple tables" do
       @q.select("sales.buyer.name", "sales.seller.name")
       @q.dataset.opts[:join].map(&:table_alias).
@@ -460,7 +460,7 @@ describe Chicago::Query do
     it "can filter based on multiple contains" do
       @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :ncon}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '%123%'( ESCAPE '.+')?\) AND \(`product`\.`sku` NOT LIKE '%AB%'( ESCAPE '.+')?\) AND \(`product`\.`sku` NOT LIKE '%foo%'( ESCAPE '.+')?\)\)/
     end
-    
+
     it "does not join the base table when filtering" do
       @q.
         filter({:column => "sales.order_ref", :value => "123", :op => :eq}).dataset.opts[:join].should be_nil

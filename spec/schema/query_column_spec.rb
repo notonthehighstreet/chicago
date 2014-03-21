@@ -3,10 +3,10 @@ require 'chicago/schema/query_column'
 
 describe Chicago::Schema::QueryColumn do
   describe "a standard column" do
-    let(:owner) { stub(:owner).as_null_object }
-    let(:column) { stub(:column, :calculated? => false).as_null_object }
+    let(:owner) { double(:owner).as_null_object }
+    let(:column) { double(:column, :calculated? => false).as_null_object }
     subject { described_class.column(owner, column, "foo.bar") }
-    
+
     it "should have a column alias" do
       subject.column_alias.should == "foo.bar"
     end
@@ -38,9 +38,9 @@ describe Chicago::Schema::QueryColumn do
   end
 
   describe "a virtual column generated from calculation" do
-    let(:calculation) { stub(:calculation).as_null_object }
-    let(:owner) { stub(:owner).as_null_object }
-    let(:column) { stub(:column, :calculated? => true, :calculation => calculation).as_null_object }
+    let(:calculation) { double(:calculation).as_null_object }
+    let(:owner) { double(:owner).as_null_object }
+    let(:column) { double(:column, :calculated? => true, :calculation => calculation).as_null_object }
     subject { described_class.column(owner, column, "foo.bar") }
 
     it "should have a column alias" do
@@ -68,16 +68,16 @@ describe Chicago::Schema::QueryColumn do
   end
 
   describe "a dimension column" do
-    let(:owner) { stub(:owner).as_null_object }
-    let(:column) { stub(:column).as_null_object }
+    let(:owner) { double(:owner).as_null_object }
+    let(:column) { double(:column).as_null_object }
     subject { described_class.column(owner, column, "foo.bar") }
 
     before :each do
       column.stub(:main_identifier).and_return(:name)
-      column.stub(:original_key).and_return(stub(:name => :original_id))
+      column.stub(:original_key).and_return(double(:name => :original_id))
       column.stub(:kind_of?).with(Chicago::Schema::Dimension).and_return(true)
     end
-    
+
     it "should have a column alias" do
       subject.column_alias.should == "foo.bar"
     end
@@ -108,20 +108,20 @@ describe Chicago::Schema::QueryColumn do
   end
 
   describe "a dimension identifier column" do
-    let(:owner) { stub(:owner).as_null_object }
-    let(:column) { stub(:column).as_null_object }
+    let(:owner) { double(:owner).as_null_object }
+    let(:column) { double(:column).as_null_object }
     subject { described_class.column(owner, column, "foo.bar") }
 
     before :each do
       column.stub(:name).and_return(:bar)
 
       owner.stub(:name).and_return(:foo)
-      owner.stub(:original_key).and_return(stub(:name => :original_id))
+      owner.stub(:original_key).and_return(double(:name => :original_id))
       owner.stub(:kind_of?).with(Chicago::Schema::Dimension).and_return(true)
       owner.stub(:identifiable?).and_return(true)
       owner.stub(:identifiers).and_return([:bar])
     end
-    
+
     it "should have a column alias" do
       subject.column_alias.should == "foo.bar"
     end

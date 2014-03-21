@@ -4,7 +4,7 @@ describe Chicago::Schema::Column do
   subject { described_class.new(:user_name, :string) }
 
   it_behaves_like "a column"
-  
+
   it "should be equal to another column definition with the same attributes" do
     described_class.new(:username, :string).should == described_class.new(:username, :string)
   end
@@ -160,7 +160,7 @@ describe Chicago::Schema::Column do
     described_class.new(:foo, :string).
       should_not be_unique
   end
-  
+
   it "is binary if a hash" do
     described_class.new(:foo, :binary).should be_binary
   end
@@ -174,7 +174,7 @@ describe Chicago::Schema::Column do
   end
 
   it "is visitable" do
-    visitor = mock(:visitor)
+    visitor = double(:visitor)
     column = described_class.new(:foo, :integer)
     visitor.should_receive(:visit_column).with(column)
     column.visit(visitor)

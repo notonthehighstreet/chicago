@@ -61,7 +61,7 @@ describe Chicago::StarSchema do
         null_record :id => 2, :email => "Not Applicable", :original_id => -1
       end
 
-      db = stub(:db, :table_exists? => true)
+      db = double(:db, :table_exists? => true)
       db.stub_chain(:[], :insert_replace).and_return(db)
       db.should_receive(:multi_insert).with([{:id => 1, :email => "Missing"},
                                              {:id => 2, :email => "Not Applicable", :original_id => -1}])
@@ -208,7 +208,7 @@ describe Chicago::StarSchema do
   it "allows definition of a fact and a dimension with the same name" do
     @schema.define_fact(:user)
     expect { @schema.define_dimension(:user) }.
-      to_not raise_error(Chicago::DuplicateTableError)
+      to_not raise_error
   end
 
   it "returns all dimensions and facts from #tables" do
