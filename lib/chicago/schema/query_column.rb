@@ -159,7 +159,7 @@ module Chicago
       end
       
       def select_name
-        :count.sql_function(@column.count_name.distinct)
+        :count.sql_function(@column.count_name).distinct
       end
       
       def label
