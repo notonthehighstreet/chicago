@@ -67,6 +67,7 @@ describe Chicago::Database::SchemaGenerator do
 
     it "should define non-unique indexes for every dimension" do
       subject.visit_fact(@fact)[:facts_sales][:indexes].should == {
+        :_inserted_at_idx => { :columns => :_inserted_at, :unique => false },
         :product_idx => { :columns => :product_dimension_id, :unique => false },
         :customer_idx => { :columns => [:customer_dimension_id, :reference], :unique => true },
         :reference_idx => { :columns => :reference, :unique => false }
@@ -132,6 +133,7 @@ describe Chicago::Database::SchemaGenerator do
       end
 
       expected = {
+        :_inserted_at_idx => { :columns => :_inserted_at, :unique => false },
         :bar_idx => {:columns => :bar, :unique => false},
         :baz_idx => {:columns => :baz, :unique => true}
       }
@@ -149,6 +151,7 @@ describe Chicago::Database::SchemaGenerator do
       end
 
       expected = {
+        :_inserted_at_idx => { :columns => :_inserted_at, :unique => false },
         :bar_idx => {:columns => [:bar, :baz], :unique => true}, 
         :baz_idx => {:columns => :baz, :unique => false}
       }

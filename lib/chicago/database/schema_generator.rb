@@ -93,6 +93,7 @@ module Chicago
                       :unique => d.unique?})
         end
         indexes.merge!(natural_key_index) if @table.natural_key
+        indexes.merge!(:_inserted_at_idx => {:columns => :_inserted_at, :unique => false})
         indexes
       end
 
