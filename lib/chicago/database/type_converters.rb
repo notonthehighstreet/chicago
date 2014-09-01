@@ -24,6 +24,10 @@ module Chicago
           end
         end
 
+        def migration_options
+          {}
+        end
+
         def column_hash(column)
           hsh = column.to_hash.merge(:column_type => db_type(column))
           hsh.delete(:elements) if hsh.has_key?(:elements)
@@ -90,6 +94,10 @@ module Chicago
       end
 
       class RedshiftTypeConverter < DbTypeConverter
+        def migration_options
+          {:separate_alter_table_statements => true, :immutable_columns => true}
+        end
+
         def column_hash(column)
           hsh = super(column)
 

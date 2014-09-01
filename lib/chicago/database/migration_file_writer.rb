@@ -11,7 +11,7 @@ module Chicago
         tables = SchemaGenerator.new(type_converter, generate_key_tables).traverse(schema)
 
         File.open(migration_file(directory), "w") do |fh|
-          fh.write Sequel::MigrationBuilder.new(db).generate_migration(tables)
+          fh.write Sequel::MigrationBuilder.new(db, type_converter.migration_options).generate_migration(tables)
         end
       end
 
