@@ -46,22 +46,22 @@ describe "DbTypeConverter.for_db" do
   it "should return a type converter specific to MySQL if the database type is :mysql" do
     @mock_db.should_receive(:database_type).and_return(:mysql)
 
-    converter = Database::TypeConverters::DbTypeConverter.for_db(@mock_db)
-    converter.should be_kind_of(Database::TypeConverters::MysqlTypeConverter)
+    converter = Database::ConcreteSchemaStrategy.for_db(@mock_db)
+    converter.should be_kind_of(Database::MysqlStrategy)
   end
 
   it "should return a type converter specific to Redshift if the database type is :mysql" do
     @mock_db.stub(:database_type => :postgres, :opts => {:adapter => 'redshift'})
 
-    converter = Database::TypeConverters::DbTypeConverter.for_db(@mock_db)
-    converter.should be_kind_of(Database::TypeConverters::RedshiftTypeConverter)
+    converter = Database::ConcreteSchemaStrategy.for_db(@mock_db)
+    converter.should be_kind_of(Database::RedshiftStrategy)
   end
 
   it "should return a generic type converter for an unknown database type" do
     @mock_db.stub(:database_type => :foodb)
 
-    converter = Database::TypeConverters::DbTypeConverter.for_db(@mock_db)
-    converter.should be_kind_of(Database::TypeConverters::DbTypeConverter)
+    converter = Database::ConcreteSchemaStrategy.for_db(@mock_db)
+    converter.should be_kind_of(Database::ConcreteSchemaStrategy)
   end
 end
 
@@ -69,7 +69,7 @@ describe "Generic DbTypeConverter" do
   it_behaves_like "All DB type converters"
 
   before :each do
-    @tc = Database::TypeConverters::DbTypeConverter.new
+    @tc = Database::ConcreteSchemaStrategy.new
   end
 
   { :smallint  => [-32768, 32767],
@@ -83,11 +83,11 @@ describe "Generic DbTypeConverter" do
   end
 end
 
-describe Chicago::Database::TypeConverters::MysqlTypeConverter do
+describe Chicago::Database::MysqlStrategy do
   it_behaves_like "All DB type converters"
 
   before :each do
-    @tc = Database::TypeConverters::MysqlTypeConverter.new
+    @tc = Database::MysqlStrategy.new
   end
 
   context "#db_type" do

@@ -7,11 +7,12 @@ module Chicago
       # Writes the migration file necessary for all defined facts and
       # dimensions.
       def write_migration_file(db, schema, directory, generate_key_tables=true)
-        type_converter = TypeConverters::DbTypeConverter.for_db(db)
-        tables = SchemaGenerator.new(type_converter, generate_key_tables).traverse(schema)
+        schema_strategy = ConcreteSchemaStrategy.for_db(db)
+        tables = SchemaGenerator.new(schema_strategy, generate_key_tables).traverse(schema)
 
         File.open(migration_file(directory), "w") do |fh|
-          fh.write Sequel::MigrationBuilder.new(db, type_converter.migration_options).generate_migration(tables)
+          fh.write Sequel::MigrationBuilder.new(db, schema_strategy.migration_options).
+            generate_migration(tables)
         end
       end
 

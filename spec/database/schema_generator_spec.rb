@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'chicago/database/schema_generator'
 
 describe Chicago::Database::SchemaGenerator do
-  subject { described_class.new(Chicago::Database::TypeConverters::DbTypeConverter.new) }
+  subject { described_class.new(Chicago::Database::ConcreteSchemaStrategy.new) }
   
   it_behaves_like "a schema visitor"
   
@@ -41,7 +41,7 @@ describe Chicago::Database::SchemaGenerator do
     end
 
     it "should have a table type of MyISAM for mysql" do
-      subject.type_converter = Chicago::Database::TypeConverters::MysqlTypeConverter.new
+      subject.type_converter = Chicago::Database::MysqlStrategy.new
       subject.visit_fact(@fact)[:facts_sales][:table_options].should == {:engine => "myisam"}
     end
 
@@ -108,7 +108,7 @@ describe Chicago::Database::SchemaGenerator do
 
     it "should have a table type of MyISAM for mysql" do
       @dimension = @schema.define_dimension(:user)
-      subject.type_converter = Chicago::Database::TypeConverters::MysqlTypeConverter.new
+      subject.type_converter = Chicago::Database::MysqlStrategy.new
       subject.visit_dimension(@dimension)[:dimension_user][:table_options].should == {:engine => "myisam"}
     end
 
