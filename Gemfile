@@ -1,7 +1,7 @@
 source "http://rubygems.org"
 
 gem "sequel", ">= 4.7"
-gem "sequel_migration_builder", ">= 0.3.2"
+gem "sequel_migration_builder", ">= 0.4.0"
 gem "chronic"
 
 group :development do
@@ -10,7 +10,6 @@ group :development do
   gem "rspec", "~> 2.0"
   gem "bundler"
   gem "jeweler"
-  gem "rcov", :platform => :ruby_18
   gem "simplecov", :platform => :ruby_19
   gem "flog"
   gem "timecop"
