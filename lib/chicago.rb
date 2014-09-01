@@ -12,6 +12,7 @@ require 'chicago/data/month'
 
 require 'chicago/star_schema'
 require 'chicago/database/constants'
+require 'chicago/database/index_generator'
 require 'chicago/database/type_converters'
 require 'chicago/database/migration_file_writer'
 require 'chicago/database/schema_generator'

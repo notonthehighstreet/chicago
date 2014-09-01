@@ -50,8 +50,15 @@ describe "DbTypeConverter.for_db" do
     converter.should be_kind_of(Database::TypeConverters::MysqlTypeConverter)
   end
 
+  it "should return a type converter specific to Redshift if the database type is :mysql" do
+    @mock_db.stub(:database_type => :postgres, :opts => {:adapter => 'redshift'})
+
+    converter = Database::TypeConverters::DbTypeConverter.for_db(@mock_db)
+    converter.should be_kind_of(Database::TypeConverters::RedshiftTypeConverter)
+  end
+
   it "should return a generic type converter for an unknown database type" do
-    @mock_db.should_receive(:database_type).and_return(:foodb)
+    @mock_db.stub(:database_type => :foodb)
 
     converter = Database::TypeConverters::DbTypeConverter.for_db(@mock_db)
     converter.should be_kind_of(Database::TypeConverters::DbTypeConverter)

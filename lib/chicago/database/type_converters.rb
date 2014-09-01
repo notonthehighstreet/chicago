@@ -15,8 +15,24 @@ module Chicago
         #
         # @return [DbTypeConverter]
         def self.for_db(db)
-          return MysqlTypeConverter.new if db.database_type == :mysql
-          self.new
+          if db.database_type == :mysql
+            MysqlTypeConverter.new
+          elsif db.database_type == :postgres && db.opts[:adapter] == "redshift"
+            RedshiftTypeConverter.new
+          else
+            self.new
+          end
+        end
+
+        def column_hash(column)
+          hsh = column.to_hash.merge(:column_type => db_type(column))
+          hsh.delete(:elements) if hsh.has_key?(:elements)
+          hsh
+        end
+
+        # Returns the indexes for the given table.
+        def indexes(table)
+          IndexGenerator.new(table).indexes
         end
 
         # Returns a db type given a column definition
@@ -58,17 +74,46 @@ module Chicago
         # @raise an ArgumentError if min or max is too large for a
         #   single database column.
         def integer_type(min, max)
-          signed_limit = (SMALL_INT_MAX + 1) / 2
-          if min && max && ((min >= -signed_limit && max <= signed_limit - 1) || (min >= 0 && max <= SMALL_INT_MAX))
+          if min && max && in_numeric_range?(min, max, SMALL_INT_MAX)
             :smallint
           else
             :integer
           end
         end
+
+        protected
+
+        def in_numeric_range?(min, max, unsigned_limit)
+          signed_limit = (unsigned_limit + 1) / 2
+          (min >= -signed_limit && max <= signed_limit - 1)  ||  (min >= 0 && max <= unsigned_limit)
+        end
+      end
+
+      class RedshiftTypeConverter < DbTypeConverter
+        def column_hash(column)
+          hsh = super(column)
+
+          if column.column_type == :string && hsh[:size]
+            # Redshift column sizes are in bytes, not characters, so
+            # increase to 4 bytes per-char for UTF-8 reasons.
+            hsh[:size] *= 4
+          end
+
+          hsh
+        end
+
+        # Redshift does not support indexes, so do not output any.
+        def indexes(table)
+          []
+        end
       end
 
       # MySql-specific type conversion strategy
       class MysqlTypeConverter < DbTypeConverter
+        def column_hash(column)
+          column.to_hash.merge :column_type => db_type(column)
+        end
+
         def db_type(column)
           return :enum if column.elements && column.elements.size < 65_536
           super(column)
@@ -93,13 +138,6 @@ module Chicago
           else
             raise ArgumentError.new("#{min} is too small or #{max} is too large for a single column")
           end
-        end
-
-        private
-
-        def in_numeric_range?(min, max, unsigned_limit)
-          signed_limit = (unsigned_limit + 1) / 2
-          (min >= -signed_limit && max <= signed_limit - 1)  ||  (min >= 0 && max <= unsigned_limit)
         end
       end
     end
