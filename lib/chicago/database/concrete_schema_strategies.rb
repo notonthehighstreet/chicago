@@ -16,17 +16,33 @@ module Chicago
       def self.for_db(db)
         if db.database_type == :mysql
           MysqlStrategy.new
-        elsif db.database_type == :postgres && db.opts[:adapter] == "redshift"
+        elsif db.database_type == :postgres && 
+            db.opts[:adapter] == "redshift"
           RedshiftStrategy.new
         else
           self.new
         end
       end
 
+      # Returns the definition of the column which should be used as
+      # the primary id column.
+      def id_column
+        {
+          :name => :id,
+          :column_type => :integer,
+          :unsigned => true
+        }
+      end
+
+      # Returns options to be passed to the Migration Builder.
+      #
+      # Empty by default, may be overridden by subclasses for specific
+      # databases.
       def migration_options
         {}
       end
 
+      # Returns the hash of the column.
       def column_hash(column)
         hsh = column.to_hash.merge(:column_type => db_type(column))
         hsh.delete(:elements) if hsh.has_key?(:elements)
@@ -98,9 +114,17 @@ module Chicago
         {:separate_alter_table_statements => true, :immutable_columns => true}
       end
 
+      def id_column
+        {
+          :name => :id,
+          :column_type => :integer,
+          :unsigned => false
+        }
+      end
+
       def column_hash(column)
         hsh = super(column)
-
+        hsh.delete(:unsigned)
         if column.column_type == :string && hsh[:size]
           # Redshift column sizes are in bytes, not characters, so
           # increase to 4 bytes per-char for UTF-8 reasons.
@@ -108,6 +132,17 @@ module Chicago
         end
 
         hsh
+      end
+
+      def db_type(column)
+        t = super(column)
+
+        case t
+        when :year then :smallint
+        when :binary then :varchar
+        else
+          t
+        end
       end
 
       # Redshift does not support indexes, so do not output any.

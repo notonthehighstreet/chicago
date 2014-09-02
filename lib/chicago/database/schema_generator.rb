@@ -42,11 +42,7 @@ module Chicago
           :primary_key => [:id],
           :table_options => @type_converter.table_options,
           :indexes => @type_converter.indexes(table),
-          :columns => [{
-                         :name => :id,
-                         :column_type => :integer,
-                         :unsigned => true
-                       }]
+          :columns => [@type_converter.id_column]
         }
 
         t[:columns] += table.columns.reject(&:calculated?).

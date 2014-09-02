@@ -81,6 +81,28 @@ describe "Generic DbTypeConverter" do
       @tc.db_type(column).should == expected_db_type
     end
   end
+
+  it "should have an unsigned integer id column" do
+    @tc.id_column.should == {
+      :name => :id,
+      :column_type => :integer
+      :unsigned => true
+    }
+  end
+end
+
+describe Chicago::Database::RedshiftStrategy do
+  before :each do
+    @tc = Database::RedshiftStrategy.new
+  end
+
+  it "should have an integer id column (not unsigned)" do
+    @tc.id_column.should == {
+      :name => :id,
+      :column_type => :integer
+      :unsigned => false
+    }
+  end
 end
 
 describe Chicago::Database::MysqlStrategy do
