@@ -103,8 +103,13 @@ module Chicago
       protected
 
       def in_numeric_range?(min, max, unsigned_limit)
+        in_signed_limit?(min, max, unsigned_limit) || 
+          (min >= 0 && max <= unsigned_limit)
+      end
+
+      def in_signed_limit?(min, max, unsigned_limit)
         signed_limit = (unsigned_limit + 1) / 2
-        (min >= -signed_limit && max <= signed_limit - 1)  ||  (min >= 0 && max <= unsigned_limit)
+        (min >= -signed_limit && max <= signed_limit - 1)
       end
     end
 
@@ -148,6 +153,11 @@ module Chicago
       # Redshift does not support indexes, so do not output any.
       def indexes(table)
         []
+      end
+
+      # Redshift does not support unsigned Integers
+      def in_numeric_range?(min, max, unsigned_limit)
+        in_signed_limit?(min, max, unsigned_limit)
       end
     end
 

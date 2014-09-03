@@ -85,7 +85,7 @@ describe "Generic DbTypeConverter" do
   it "should have an unsigned integer id column" do
     @tc.id_column.should == {
       :name => :id,
-      :column_type => :integer
+      :column_type => :integer,
       :unsigned => true
     }
   end
@@ -99,9 +99,14 @@ describe Chicago::Database::RedshiftStrategy do
   it "should have an integer id column (not unsigned)" do
     @tc.id_column.should == {
       :name => :id,
-      :column_type => :integer
+      :column_type => :integer,
       :unsigned => false
     }
+  end
+
+  it "creates an integer column for an unsigned small int" do
+    column = Schema::Column.new(:id, :integer, :max => 65535, :min => 0)
+    @tc.db_type(column).should == :integer
   end
 end
 
