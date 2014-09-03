@@ -1,7 +1,7 @@
 source "http://rubygems.org"
 
 gem "sequel", ">= 4.7"
-gem "sequel_migration_builder", ">= 0.4.1"
+gem "sequel_migration_builder", ">= 0.4.2"
 gem "chronic"
 
 group :development do
