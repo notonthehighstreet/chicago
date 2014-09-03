@@ -108,6 +108,11 @@ describe Chicago::Database::RedshiftStrategy do
     column = Schema::Column.new(:id, :integer, :max => 65535, :min => 0)
     @tc.db_type(column).should == :integer
   end
+
+  it "multiplies the space requirements for string columns by 4" do
+    column = Schema::Column.new(:id, :string, :max => 25)
+    expect(@tc.column_hash(column)[:size]).to eql(100)
+  end
 end
 
 describe Chicago::Database::MysqlStrategy do
