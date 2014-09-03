@@ -39,7 +39,7 @@ module Chicago
           # TODO: replace this with proper logging.
           warn "Loading NULL records."
           @schema.dimensions.each do |dimension| 
-            dimension.create_null_records(@db) 
+            dimension.create_null_records(@staging_db) 
           end
         end
 
