@@ -155,6 +155,7 @@ module Chicago
         []
       end
 
+      # Always integer for Redshift
       def integer_type(min, max)
         :integer
       end
