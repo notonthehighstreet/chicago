@@ -155,11 +155,6 @@ module Chicago
         []
       end
 
-      # Always integer for Redshift
-      def integer_type(min, max)
-        :integer
-      end
-
       # Redshift does not support unsigned Integers
       def in_numeric_range?(min, max, unsigned_limit)
         in_signed_limit?(min, max, unsigned_limit)
