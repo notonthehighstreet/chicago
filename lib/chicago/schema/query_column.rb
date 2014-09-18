@@ -95,6 +95,10 @@ module Chicago
 
     # Allows querying a column that doesn't exist in the database, but
     # is defined as a calculation in the column definition.
+    #
+    # Virtual columns are currently assumed to be calculated measures
+    # - filters will appear in the HAVING clause, not the WHERE clause
+    # of the SQL statement.
     class VirtualColumn < QualifiedColumn
       def initialize(owner, column, column_alias)
         super(owner, column, column_alias)
@@ -103,6 +107,10 @@ module Chicago
 
       def group_name
         nil
+      end
+
+      def filter_dataset(ds, filter)
+        ds.having(filter)
       end
     end
 

@@ -471,6 +471,11 @@ describe Chicago::Query do
         sql.should =~ /HAVING \(sum\(`sales`\.`total`\) = 2\)/
     end
 
+    it "filters in the having clause when a virtual calculated column is filtered" do
+      @q.filter({:column => "sales.vat", :value => 2, :op => :gte}).dataset.
+        sql.should =~ /HAVING \(\(sum\(`total`\) \* `vat_rate`\) >= 2\)/
+    end
+
     describe "#columns" do
       it "returns an empty array if no columns are selected" do
         @q.columns.should be_empty
