@@ -93,8 +93,8 @@ module Chicago
       end
 
       def simple_column(elem)
-        table, col = parse_parts(elem)
-        QueryColumn.column(table, col, elem.to_sym)
+        table, col, table_qualifier = parse_parts(elem)
+        QueryColumn.column(table, col, elem.to_sym, table_qualifier)
       end
   
       def calculated_column(elem)
@@ -111,9 +111,10 @@ module Chicago
         if col.kind_of?(Chicago::Schema::Dimension)
           table = col
           col = parts.empty? ? table : table[parts.first]
+          table_qualifier = table.label if table.roleplayed?
         end
 
-        [table, col]
+        [table, col, table_qualifier]
       end
 
       def parse_table(str)

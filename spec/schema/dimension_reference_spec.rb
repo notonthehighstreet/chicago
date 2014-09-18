@@ -98,6 +98,11 @@ describe Chicago::Schema::DimensionReference do
     described_class.new(:foo, @dimension).default_value.should == 1
   end
 
+  it "knows whether it is a roleplayed dimension or not" do
+    expect(described_class.new(:bar, @dimension)).to_not be_roleplayed
+    expect(described_class.new(:foo, @dimension)).to be_roleplayed
+  end
+
   it "is visitable" do
     visitor = double(:visitor)
     column = described_class.new(:foo, @dimension)

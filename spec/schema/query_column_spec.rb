@@ -5,7 +5,7 @@ describe Chicago::Schema::QueryColumn do
   describe "a standard column" do
     let(:owner) { double(:owner).as_null_object }
     let(:column) { double(:column, :calculated? => false).as_null_object }
-    subject { described_class.column(owner, column, "foo.bar") }
+    subject { described_class.column(owner, column, "foo.bar", nil) }
 
     it "should have a column alias" do
       subject.column_alias.should == "foo.bar"
@@ -41,7 +41,7 @@ describe Chicago::Schema::QueryColumn do
     let(:calculation) { double(:calculation).as_null_object }
     let(:owner) { double(:owner).as_null_object }
     let(:column) { double(:column, :calculated? => true, :calculation => calculation).as_null_object }
-    subject { described_class.column(owner, column, "foo.bar") }
+    subject { described_class.column(owner, column, "foo.bar", nil) }
 
     it "should have a column alias" do
       subject.column_alias.should == "foo.bar"
@@ -70,7 +70,7 @@ describe Chicago::Schema::QueryColumn do
   describe "a dimension column" do
     let(:owner) { double(:owner).as_null_object }
     let(:column) { double(:column).as_null_object }
-    subject { described_class.column(owner, column, "foo.bar") }
+    subject { described_class.column(owner, column, "foo.bar", nil) }
 
     before :each do
       column.stub(:main_identifier).and_return(:name)
@@ -110,7 +110,7 @@ describe Chicago::Schema::QueryColumn do
   describe "a dimension identifier column" do
     let(:owner) { double(:owner).as_null_object }
     let(:column) { double(:column).as_null_object }
-    subject { described_class.column(owner, column, "foo.bar") }
+    subject { described_class.column(owner, column, "foo.bar", nil) }
 
     before :each do
       column.stub(:name).and_return(:bar)

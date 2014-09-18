@@ -14,13 +14,23 @@ module Chicago
       end
 
       # @private
-      def initialize(column)
+      def initialize(column, table_label=nil)
         @column = column
+        @table_label = table_label
       end
 
       # @private
       def method_missing(*args, &block)
         @column.send(*args, &block)
+      end
+
+      # Returns the label for this column.
+      #
+      # The label is qualified by the table name if neccessary
+      # (i.e. if the column comes from a dimension which features
+      # multiple times in the same fact table).
+      def qualified_label
+        @table_label ? "#{label} (#{@table_label})" : label
       end
 
       # Factory method that returns a query column.
@@ -29,15 +39,17 @@ module Chicago
       # @param column the wrapped column
       # @param column_alias the reference to this column as used by
       #   the column parser.
-      def self.column(owner, column, column_alias)
+      # @param table_label a table name to distinguish this column
+      #   from and identically named one. May be nil.
+      def self.column(owner, column, column_alias, table_label)
         if column.kind_of?(Chicago::Schema::Dimension)
           DimensionAsColumn.new(owner, column, column_alias)
         elsif owner.kind_of?(Chicago::Schema::Dimension) && owner.identifiable? && owner.identifiers.include?(column.name)
           DimensionIdentifierColumn.new(owner, column, column_alias)
         elsif column.calculated?
-          VirtualColumn.new(owner, column, column_alias)
+          VirtualColumn.new(owner, column, column_alias, table_label)
         else
-          QualifiedColumn.new(owner, column, column_alias)
+          QualifiedColumn.new(owner, column, column_alias, table_label)
         end
       end
 
@@ -48,8 +60,8 @@ module Chicago
 
     # @abstract
     class AbstractQualifiedColumn < QueryColumn
-      def initialize(owner, column, column_alias)
-        super column
+      def initialize(owner, column, column_alias, table_label=nil)
+        super column, table_label
         @owner = owner
         @column_alias = column_alias
       end
@@ -85,7 +97,7 @@ module Chicago
     end
     
     class QualifiedColumn < AbstractQualifiedColumn
-      def initialize(owner, column, column_alias)
+      def initialize(owner, column, column_alias, table_label)
         super
         @select_name = @column.name.qualify(@owner.name)
         @count_name = @select_name
@@ -100,8 +112,8 @@ module Chicago
     # - filters will appear in the HAVING clause, not the WHERE clause
     # of the SQL statement.
     class VirtualColumn < QualifiedColumn
-      def initialize(owner, column, column_alias)
-        super(owner, column, column_alias)
+      def initialize(owner, column, column_alias, table_label)
+        super
         @select_name = @column.calculation
       end
 

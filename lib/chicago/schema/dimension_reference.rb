@@ -40,6 +40,14 @@ module Chicago
         database_name.qualify(table)
       end
 
+      # Returns true if this dimension reference is roleplayed -
+      # i.e. it has a different name from the underlying dimension so
+      # that, for example, multiple date dimensions can be assigned to
+      # the same fact table.
+      def roleplayed?
+        name != @dimension.name
+      end
+
       # Returns the first null record id for this dimension, or 0 if
       # the dimension has no null records defined.
       def default_value
