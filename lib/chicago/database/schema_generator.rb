@@ -3,10 +3,10 @@ module Chicago
     # A StarSchema Visitor which produces a hash similar to the hash
     # produced by Sequel.
     class SchemaGenerator
-      attr_writer :type_converter
+      attr_writer :database_strategy
       
-      def initialize(type_converter, generate_key_tables=true)
-        @type_converter = type_converter
+      def initialize(database_strategy, generate_key_tables=true)
+        @database_strategy = database_strategy
         @generate_key_tables = generate_key_tables
       end
       
@@ -29,7 +29,7 @@ module Chicago
       end
 
       def visit_column(column)
-        @type_converter.column_hash(column)
+        @database_strategy.column_hash(column)
       end
 
       alias :visit_measure :visit_column
@@ -40,9 +40,9 @@ module Chicago
       def basic_table(table)
         t = {
           :primary_key => [:id],
-          :table_options => @type_converter.table_options,
-          :indexes => @type_converter.indexes(table),
-          :columns => [@type_converter.id_column]
+          :table_options => @database_strategy.table_options,
+          :indexes => @database_strategy.indexes(table),
+          :columns => [@database_strategy.id_column]
         }
 
         t[:columns] += table.columns.reject(&:calculated?).
