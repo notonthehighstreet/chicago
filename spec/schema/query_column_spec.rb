@@ -134,12 +134,12 @@ describe Chicago::Schema::QueryColumn do
       subject.select_name.should == :bar.qualify(:foo)
     end
 
-    it "uses the original id in COUNT" do
+    it "uses the original_id in COUNT" do
       subject.count_name.should == :original_id.qualify(:foo)
     end
 
-    it "uses the original id in GROUP BY" do
-      subject.group_name.should == :original_id.qualify(:foo)
+    it "uses the column name in GROUP BY" do
+      subject.group_name.should == :bar.qualify(:foo)
     end
 
     it "delegates label to the decorated column" do
