@@ -91,10 +91,11 @@ Gem::Specification.new do |s|
     s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<sequel>, [">= 4.7"])
+      s.add_runtime_dependency(%q<sequel>, [">= 4.11"])
       s.add_runtime_dependency(%q<sequel_migration_builder>, [">= 0.4.3"])
       s.add_runtime_dependency(%q<chronic>, [">= 0"])
       s.add_development_dependency(%q<mysql2>, [">= 0"])
+      s.add_development_dependency(%q<pg>, [">= 0"])
       s.add_development_dependency(%q<yard>, [">= 0"])
       s.add_development_dependency(%q<rspec>, ["~> 2.0"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
@@ -103,10 +104,11 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<flog>, [">= 0"])
       s.add_development_dependency(%q<timecop>, [">= 0"])
     else
-      s.add_dependency(%q<sequel>, [">= 4.7"])
+      s.add_dependency(%q<sequel>, [">= 4.11"])
       s.add_dependency(%q<sequel_migration_builder>, [">= 0.4.3"])
       s.add_dependency(%q<chronic>, [">= 0"])
       s.add_dependency(%q<mysql2>, [">= 0"])
+      s.add_dependency(%q<pg>, [">= 0"])
       s.add_dependency(%q<yard>, [">= 0"])
       s.add_dependency(%q<rspec>, ["~> 2.0"])
       s.add_dependency(%q<bundler>, [">= 0"])
@@ -116,10 +118,11 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<timecop>, [">= 0"])
     end
   else
-    s.add_dependency(%q<sequel>, [">= 4.7"])
+    s.add_dependency(%q<sequel>, [">= 4.11"])
     s.add_dependency(%q<sequel_migration_builder>, [">= 0.4.3"])
     s.add_dependency(%q<chronic>, [">= 0"])
     s.add_dependency(%q<mysql2>, [">= 0"])
+    s.add_dependency(%q<pg>, [">= 0"])
     s.add_dependency(%q<yard>, [">= 0"])
     s.add_dependency(%q<rspec>, ["~> 2.0"])
     s.add_dependency(%q<bundler>, [">= 0"])
