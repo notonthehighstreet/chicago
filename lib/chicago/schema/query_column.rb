@@ -92,7 +92,7 @@ module Chicago
         super
         @select_name = @column.name.qualify(@owner.name)
         @count_name  = @owner.original_key.name.qualify(@owner.name)
-        @group_name  = @owner.original_key.name.qualify(@owner.name)
+        @group_name  = @column.name.qualify(@owner.name)
       end
     end
     
@@ -223,11 +223,11 @@ module Chicago
       end
 
       def select_name
-        :if.sql_function({@pivoted_column.select_name => @value}, @column.select_name, @unit)
+        Sequel.case([[{@pivoted_column.select_name => @value}, @column.select_name]], @unit)
       end
 
       def count_name
-        :if.sql_function({@pivoted_column.select_name => @value}, @column.count_name, @unit)
+        Sequel.case([[{@pivoted_column.select_name => @value}, @column.count_name]], @unit)
       end
     end
   end

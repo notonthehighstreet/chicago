@@ -101,7 +101,8 @@ describe Chicago::Query do
 
     it "selects a count" do
       @q.select({:column => "product", :op => "count"})
-      @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`original_id`\)/i
+      @q.dataset.opts[:select].
+        should == [:count.sql_function(:original_id.qualify(:product)).distinct.as("product.count".to_sym)] 
     end
   end
 
@@ -125,7 +126,7 @@ describe Chicago::Query do
     end
 
     it "selects from the correctly aliased table" do
-      @q.dataset.sql.should =~ /FROM `facts_sales` AS `sales`/
+      @q.dataset.sql.should == TEST_DB[:facts_sales.as(:sales)].sql
     end
 
     it "selects a qualified column" do
@@ -194,7 +195,8 @@ describe Chicago::Query do
 
     it "selects an explicit distinct count, via a dimension reference" do
       @q.select({:column => "sales.product.type", :op => "count"})
-      @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`type`\)/i
+      @q.dataset.opts[:select].
+        should == [:count.sql_function(:type.qualify(:product)).distinct.as("sales.product.type.count".to_sym)] 
     end
 
     it "selects the main identifier for a bare dimension" do
@@ -205,7 +207,8 @@ describe Chicago::Query do
 
     it "selects the count of a dimension" do
       @q.select({:column => "sales.product", :op => "count"})
-      @q.dataset.sql.should =~ /COUNT\(DISTINCT `product`\.`original_id`\)/i
+      @q.dataset.opts[:select].
+        should == [:count.sql_function(:original_id.qualify(:product)).distinct.as("sales.product.count".to_sym)] 
     end
 
     describe "pivots columns" do
@@ -217,13 +220,13 @@ describe Chicago::Query do
         }.to raise_error(Chicago::UnimplementedError)
       end
 
-      it "via IF, for a measure, by a boolean column" do
+      it "via CASE, for a measure, by a boolean column" do
         @q.select({ :column => "sales.total",
                     :op => "sum",
                     :pivot => "sales.product.flag"})
         @q.dataset.opts[:select].
-          should == [:sum.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), 0)).as("sales.total:sales.product.flag.0.sum".to_sym),
-                     :sum.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), 0)).as("sales.total:sales.product.flag.1.sum".to_sym)
+          should == [:sum.sql_function(Sequel.case([[{:flag.qualify(:product) => true}, :total.qualify(:sales)]], 0)).as("sales.total:sales.product.flag.0.sum".to_sym),
+                     :sum.sql_function(Sequel.case([[{:flag.qualify(:product) => false}, :total.qualify(:sales)]], 0)).as("sales.total:sales.product.flag.1.sum".to_sym)
                     ]
       end
 
@@ -240,8 +243,8 @@ describe Chicago::Query do
                     :op => "avg",
                     :pivot => "sales.product.flag"})
         @q.dataset.opts[:select].
-          should == [:avg.sql_function(:if.sql_function({:flag.qualify(:product) => true}, :total.qualify(:sales), nil)).as("sales.total:sales.product.flag.0.avg".to_sym),
-                     :avg.sql_function(:if.sql_function({:flag.qualify(:product) => false}, :total.qualify(:sales), nil)).as("sales.total:sales.product.flag.1.avg".to_sym)
+          should == [:avg.sql_function(Sequel.case([[{:flag.qualify(:product) => true}, :total.qualify(:sales)]], nil)).as("sales.total:sales.product.flag.0.avg".to_sym),
+                     :avg.sql_function(Sequel.case([[{:flag.qualify(:product) => false}, :total.qualify(:sales)]], nil)).as("sales.total:sales.product.flag.1.avg".to_sym)
                     ]
       end
 
@@ -249,18 +252,20 @@ describe Chicago::Query do
         @q.select({ :column => "sales.product",
                     :op => "count",
                     :pivot => "sales.product.flag"})
-        @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS TRUE\), `product`.`original_id`, NULL\)\) AS `sales.product:sales.product.flag.0.count`/
-        @q.dataset.sql.should =~ /count\(DISTINCT if\(\(`product`.`flag` IS FALSE\), `product`.`original_id`, NULL\)\) AS `sales.product:sales.product.flag.1.count`/
+        @q.dataset.opts[:select].
+          should == [:count.sql_function(Sequel.case([[{:flag.qualify(:product) => true}, :original_id.qualify(:product)]], nil)).distinct.as("sales.product:sales.product.flag.0.count".to_sym),
+                     :count.sql_function(Sequel.case([[{:flag.qualify(:product) => false}, :original_id.qualify(:product)]], nil)).distinct.as("sales.product:sales.product.flag.1.count".to_sym)
+                    ]
       end
 
-      it "should generate SQL pivots, via IF, for a measure, by a bounded integer" do
+      it "should generate SQL pivots, via CASE, for a measure, by a bounded integer" do
         @q.select({ :column => "sales.total",
                     :op => "sum",
                     :pivot => "sales.product.rating"})
         @q.dataset.opts[:select].size.should == 10
       end
 
-      it "should generate SQL pivots, via IF, for a measure, by a string with elements" do
+      it "should generate SQL pivots, via CASE, for a measure, by a string with elements" do
         @q.select({ :column => "sales.total",
                     :op => "sum",
                     :pivot => "sales.product.sale"})
@@ -271,14 +276,28 @@ describe Chicago::Query do
         @q.select({ :column => "sales.total",
                     :op => "sum",
                     :pivot => "sales.product.sale"})
-        @q.dataset.sql.should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
+        @q.dataset.opts[:join].
+          should == [Sequel::SQL::JoinOnClause.new(
+                Sequel.expr(Sequel.qualify("product","id") => :product_dimension_id.qualify(:sales)),
+                :inner,
+                :dimension_product.as(:product))]
       end
 
       it "should join on the counted table when pivoting" do
         @q.select({ :column => "sales.product",
                     :op => "count",
                     :pivot => "sales.buyer.recent"})
-        @q.dataset.sql.should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
+
+        @q.dataset.opts[:join].
+          should == [
+            Sequel::SQL::JoinOnClause.new(
+                Sequel.expr(Sequel.qualify("buyer","id") => :buyer_dimension_id.qualify(:sales)),
+                :inner,
+                :dimension_customer.as(:buyer)),
+            Sequel::SQL::JoinOnClause.new(
+                Sequel.expr(Sequel.qualify("product","id") => :product_dimension_id.qualify(:sales)),
+                :inner,
+                :dimension_product.as(:product))]
       end
 
       it "should not group on pivoted columns" do
@@ -299,11 +318,6 @@ describe Chicago::Query do
       @q.dataset.opts[:group].should == ['sales.product.manufacturer'.to_sym]
     end
 
-    it "groups on the original key instead of a main identifier column" do
-      @q.select 'sales.product.name'
-      @q.dataset.opts[:group].should == [:original_id.qualify(:product)]
-    end
-
     it "doesn't group on calculated columns" do
       @q.select :column =>'sales.total', :op => 'sum'
       @q.dataset.opts[:group].should be_nil
@@ -321,20 +335,29 @@ describe Chicago::Query do
 
     it "joins on the dimension table if selecting from the dimension" do
       @q.select("sales.order_ref", "sales.product.name")
-      @q.dataset.sql.
-        should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
+      @q.dataset.opts[:join].
+        should == [Sequel::SQL::JoinOnClause.new(
+                Sequel.expr(Sequel.qualify("product","id") => :product_dimension_id.qualify(:sales)),
+                :inner,
+                :dimension_product.as(:product))]
     end
 
     it "joins on a roleplayed dimension table if selecting from the dimension" do
       @q.select("sales.order_ref", "sales.seller.name")
-      @q.dataset.sql.
-        should =~ /INNER JOIN `dimension_customer` AS `seller` ON \(`seller`.`id` = `sales`.`seller_dimension_id`\)/
+      @q.dataset.opts[:join].
+        should == [Sequel::SQL::JoinOnClause.new(
+                Sequel.expr(Sequel.qualify("seller","id") => :seller_dimension_id.qualify(:sales)),
+                :inner,
+                :dimension_customer.as(:seller))]
     end
 
     it "joins when counting dimensions" do
       @q.select({:column => "sales.product", :op => "count"})
-      @q.dataset.sql.
-        should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
+      @q.dataset.opts[:join].
+        should == [Sequel::SQL::JoinOnClause.new(
+                Sequel.expr(Sequel.qualify("product","id") => :product_dimension_id.qualify(:sales)),
+                :inner,
+                :dimension_product.as(:product))]
     end
 
     it "joins on multiple tables" do
@@ -393,72 +416,92 @@ describe Chicago::Query do
     end
 
     it "joins a filter dimension" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :eq}).dataset.sql.
-        should =~ /INNER JOIN `dimension_product` AS `product` ON \(`product`.`id` = `sales`.`product_dimension_id`\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :eq}).dataset.opts[:join].
+        should == [Sequel::SQL::JoinOnClause.new(
+                Sequel.expr(Sequel.qualify("product","id") => :product_dimension_id.qualify(:sales)),
+                :inner,
+                :dimension_product.as(:product))]
     end
 
     it "can filter based on greater than" do
-      @q.filter({:column => "sales.product.rating", :value => "2", :op => :gt}).dataset.sql.should =~ /WHERE \(`product`\.`rating` > 2\)/
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :gt}).dataset.opts[:where].
+        should == Sequel.expr(:rating.qualify(:product) > 2)
     end
 
     it "can filter based on greater than or equal" do
-      @q.filter({:column => "sales.product.rating", :value => "2", :op => :gte}).dataset.sql.should =~ /WHERE \(`product`\.`rating` >= 2\)/
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :gte}).dataset.opts[:where].
+        should == Sequel.expr(:rating.qualify(:product) >= 2)
     end
 
     it "can filter based on less than" do
-      @q.filter({:column => "sales.product.rating", :value => "2", :op => :lt}).dataset.sql.should =~ /WHERE \(`product`\.`rating` < 2\)/
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :lt}).dataset.opts[:where].
+        should == Sequel.expr(:rating.qualify(:product) < 2)
     end
 
     it "can filter based on less than or equal" do
-      @q.filter({:column => "sales.product.rating", :value => "2", :op => :lte}).dataset.sql.should =~ /WHERE \(`product`\.`rating` <= 2\)/
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :lte}).dataset.opts[:where].
+        should == Sequel.expr(:rating.qualify(:product) <= 2)
     end
 
     it "can filter multiple integers" do
-      @q.filter({:column => "sales.product.rating", :value => ["1", "2"], :op => :eq}).dataset.sql.should =~ /WHERE \(`product`\.`rating` IN \(1, 2\)\)/
+      @q.filter({:column => "sales.product.rating", :value => ["1", "2"], :op => :eq}).dataset.opts[:where].
+        should == Sequel.expr(:rating.qualify(:product) => [1, 2])
     end
 
     it "can filter based on not equal" do
-      @q.filter({:column => "sales.product.rating", :value => "2", :op => :ne}).dataset.sql.should =~ /WHERE \(`product`\.`rating` != 2\)/
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :ne}).dataset.opts[:where].
+        should == Sequel.~(Sequel.expr(:rating.qualify(:product) => 2))
     end
 
     it "can filter based on 2 comparisons" do
-      @q.filter({:column => "sales.product.rating", :value => "2", :op => :gte}, {:column => "sales.product.rating", :value => "7", :op => :lt}).dataset.sql.should =~ /WHERE \(\(`product`\.`rating` >= 2\) AND \(`product`\.`rating` < 7\)\)/i
+      @q.filter({:column => "sales.product.rating", :value => "2", :op => :gte}, {:column => "sales.product.rating", :value => "7", :op => :lt}).dataset.opts[:where].
+        should == Sequel.&(Sequel.expr(:rating.qualify(:product) >= 2),Sequel.expr(:rating.qualify(:product) < 7))
     end
 
     it "can filter dates" do
-      @q.filter({:column => "sales.product.date", :value => "01/02/12", :op => :eq}).dataset.sql.should =~ /WHERE \(`product`\.`date` = '2012-02-01'\)/
+      @q.filter({:column => "sales.product.date", :value => "01/02/12", :op => :eq}).dataset.opts[:where].
+        should == Sequel.expr(:date.qualify(:product) => Date.new(year=2012,month=2,day=1))
     end
 
     it "can filter based on starts with" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :sw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE '123%'( ESCAPE '.+')?\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :sw}).dataset.opts[:where].
+        should == Sequel.ilike(:sku.qualify(:product), "123%")
     end
 
     it "can filter based on 'starts with' with multiple values" do
-      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :sw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '123%'( ESCAPE '.+')?\) OR \(`product`\.`sku` LIKE 'AB%'( ESCAPE '.+')?\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :sw}).dataset.opts[:where].
+        should == Sequel.|(Sequel.ilike(:sku.qualify(:product), "123%"), Sequel.ilike(:sku.qualify(:product), "AB%"))
+
     end
 
     it "can filter based on not starts with" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :nsw}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE '123%'( ESCAPE '.+')?\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :nsw}).dataset.opts[:where].
+        should == Sequel.~(Sequel.ilike(:sku.qualify(:product), "123%"))
     end
 
     it "can filter based on 'not starts with' with multiple values" do
-      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :nsw}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '123%'( ESCAPE '.+')?\) AND \(`product`\.`sku` NOT LIKE 'AB%'( ESCAPE '.+')?\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123","AB"], :op => :nsw}).dataset.opts[:where].
+        should == Sequel.&(Sequel.~(Sequel.ilike(:sku.qualify(:product), "123%")), Sequel.~(Sequel.ilike(:sku.qualify(:product), "AB%")))
     end
 
     it "can filter based on contains" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :con}).dataset.sql.should =~ /WHERE \(`product`\.`sku` LIKE '%123%'( ESCAPE '.+')?\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :con}).dataset.opts[:where].
+        should == Sequel.ilike(:sku.qualify(:product), "%123%")
     end
 
     it "can filter based on not contains" do
-      @q.filter({:column => "sales.product.sku", :value => "123", :op => :ncon}).dataset.sql.should =~ /WHERE \(`product`\.`sku` NOT LIKE '%123%'( ESCAPE '.+')?\)/
+      @q.filter({:column => "sales.product.sku", :value => "123", :op => :ncon}).dataset.opts[:where].
+        should == Sequel.~(Sequel.ilike(:sku.qualify(:product), "%123%"))
     end
 
     it "can filter based on multiple contains" do
-      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :con}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` LIKE '%123%'( ESCAPE '.+')?\) OR \(`product`\.`sku` LIKE '%AB%'( ESCAPE '.+')?\) OR \(`product`\.`sku` LIKE '%foo%'( ESCAPE '.+')?\)\)/
+      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :con}).dataset.opts[:where].
+        should == Sequel.|(Sequel.ilike(:sku.qualify(:product), "%123%"), Sequel.ilike(:sku.qualify(:product), "%AB%"), Sequel.ilike(:sku.qualify(:product), "%foo%"))
     end
 
-    it "can filter based on multiple contains" do
-      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :ncon}).dataset.sql.should =~ /WHERE \(\(`product`\.`sku` NOT LIKE '%123%'( ESCAPE '.+')?\) AND \(`product`\.`sku` NOT LIKE '%AB%'( ESCAPE '.+')?\) AND \(`product`\.`sku` NOT LIKE '%foo%'( ESCAPE '.+')?\)\)/
+    it "can filter based on multiple not contains" do
+      @q.filter({:column => "sales.product.sku", :value => ["123", "AB", "foo"], :op => :ncon}).dataset.opts[:where].
+        should == Sequel.&(Sequel.~(Sequel.ilike(:sku.qualify(:product), "%123%")), Sequel.~(Sequel.ilike(:sku.qualify(:product), "%AB%")), Sequel.~(Sequel.ilike(:sku.qualify(:product), "%foo%")))
     end
 
     it "does not join the base table when filtering" do
@@ -467,13 +510,13 @@ describe Chicago::Query do
     end
 
     it "filters in the having clause when a calculated column is filtered" do
-      @q.filter({:column => {:column => "sales.total", :op => "sum"}, :value => 2, :op => :eq}).dataset.
-        sql.should =~ /HAVING \(sum\(`sales`\.`total`\) = 2\)/
+      @q.filter({:column => {:column => "sales.total", :op => "sum"}, :value => 2, :op => :eq}).dataset.opts[:having].
+        should == Sequel.expr(:sum.sql_function(:total.qualify(:sales)) => 2)
     end
 
     it "filters in the having clause when a virtual calculated column is filtered" do
-      @q.filter({:column => "sales.vat", :value => 2, :op => :gte}).dataset.
-        sql.should =~ /HAVING \(\(sum\(`total`\) \* `vat_rate`\) >= 2\)/
+      @q.filter({:column => "sales.vat", :value => 2, :op => :gte}).dataset.opts[:having].
+        should == Sequel.expr(Sequel.*(:sum.sql_function(:total),:vat_rate) >= 2)
     end
 
     describe "#columns" do
