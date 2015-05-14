@@ -95,6 +95,41 @@ SCHEMA.define_fact(:sales) do
 end
 ```
 
+Once you have a schema defined, you can use the inbuilt tasks to
+create the underlying database schema in your Rakefile:
+
+```ruby
+DB = Sequel.connect() # with your db connection parameters
+Chicago::RakeTasks.new(SCHEMA, :staging_db => DB)
+```
+
+Which gives the following tasks:
+
+* `db:write_migrations` - creates migration files in a migrations
+  directory - use the standard Sequel migration tool to run them;
+* `db:create_null_records` - creates null records in the database.
+
+After you have some data, you can query your schema like so:
+
+```ruby
+query = {
+  :table_name => "sales",
+  :query_type => "fact",
+  :columns => ["sales.product.name",
+               {:column => "sales.total", :op => "sum"}]
+}
+
+sequel_dataset = Chicago::Query.new(SCHEMA, query).dataset
+
+# Do whatever you like with this dataset, for example just returning
+# all records:
+sequel_dataset.all
+```
+
+The query hash is intended to be easy to represent in JSON. Notice how
+unlike just using base Sequel, you didn't have to define any `JOIN` or
+`GROUP BY` parts to the query - these are inferred from the model.
+
 Contributing
 ------------
 
