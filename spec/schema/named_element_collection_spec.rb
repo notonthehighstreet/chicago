@@ -35,8 +35,8 @@ describe Chicago::Schema::NamedElementCollection do
 
   it "returns true from contains? if the collection contains the same-named element" do
     subject.add @e
-    subject.contain?(double(:element, :name => :foo)).should be_true
-    subject.contain?(double(:element, :name => :bar)).should be_false
+    subject.contain?(double(:element, :name => :foo)).should eql(true)
+    subject.contain?(double(:element, :name => :bar)).should eql(false)
   end
 
   it "returns the number of elements in a collection from size" do
@@ -56,7 +56,7 @@ describe Chicago::Schema::NamedElementCollection do
   end
 
   it "can be constructed with a list of elements" do
-    described_class.new(@e).contain?(@e).should be_true
+    described_class.new(@e).contain?(@e).should eql(true)
   end
 
   it "has elements that are unique by name" do

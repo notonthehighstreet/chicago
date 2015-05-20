@@ -205,7 +205,7 @@ describe "Chicago::Schema::Column#to_hash" do
   end
 
   it "should have an :unsigned entry if relevant" do
-    Chicago::Schema::Column.new(:id, :integer, :min => 0).to_hash[:unsigned].should be_true
+    Chicago::Schema::Column.new(:id, :integer, :min => 0).to_hash[:unsigned].should eql(true)
   end
 
   it "should have an :entries entry if relevant" do
@@ -230,7 +230,7 @@ describe "Chicago::Schema::Column#to_hash" do
   end
 
   it "should be unsigned by default if a percentage" do
-    Chicago::Schema::Column.new(:some_value, :percent).to_hash[:unsigned].should be_true
+    Chicago::Schema::Column.new(:some_value, :percent).to_hash[:unsigned].should eql(true)
   end
 
   it "should have a default :size of [6,3] for percent types" do
@@ -242,7 +242,7 @@ describe "Chicago::Schema::Column#to_hash" do
   end
 
   it "should explicitly set the default to nil for timestamp columns" do
-    Chicago::Schema::Column.new(:username, :timestamp).to_hash.has_key?(:default).should be_true
+    Chicago::Schema::Column.new(:username, :timestamp).to_hash.has_key?(:default).should eql(true)
     Chicago::Schema::Column.new(:username, :timestamp).to_hash[:default].should be_nil
   end
 end

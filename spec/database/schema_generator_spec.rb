@@ -62,7 +62,7 @@ describe Chicago::Database::SchemaGenerator do
     end
 
     it "should not output calculated columns" do
-      subject.visit_fact(@fact)[:facts_sales][:columns].any? {|c| c[:name] == :calculated }.should_not be_true
+      subject.visit_fact(@fact)[:facts_sales][:columns].any? {|c| c[:name] == :calculated }.should_not eql(true)
     end
 
     it "should define non-unique indexes for every dimension" do
